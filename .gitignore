@@ -3,7 +3,8 @@ subjects/*/raw_dicom/
 subjects/*/preprocessed/
 subjects/*/prepared/
 subjects/*/roi/
-runs/
+!runs/
+!runs/.gitkeep
 runtime/model_assets/*.pth
 runtime/model_assets/*.pt
 *.mat
