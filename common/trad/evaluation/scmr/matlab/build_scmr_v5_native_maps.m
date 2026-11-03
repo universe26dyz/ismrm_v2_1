@@ -1,12 +1,14 @@
-function build_scmr_v5_native_maps(source_mat_path, output_mat_path)
+function build_scmr_v5_native_maps(source_mat_path, output_mat_path, fit_fa_deg, fit_ti_ms, fit_t2prep_ms)
 %BUILD_SCMR_V5_NATIVE_MAPS Match current cropped observations with SCMR-v5.
-%   This deliberately overrides the current HHZ metadata TI=[50,150] with
-%   the experimentally reproduced SCMR-v5 dictionary contract TI=[10,100].
+%   The current YAML contract is supplied explicitly by the Python caller.
 %   The input pixels are never resampled or otherwise changed.
 
     arguments
         source_mat_path (1, :) char
         output_mat_path (1, :) char
+        fit_fa_deg (1, 3) double
+        fit_ti_ms (1, 2) double
+        fit_t2prep_ms (1, 3) double
     end
     assert(isfile(source_mat_path), 'build_scmr_v5_native_maps:SourceMissing', ...
         'Source MAT is missing: %s', source_mat_path);
@@ -37,9 +39,9 @@ function build_scmr_v5_native_maps(source_mat_path, output_mat_path)
     fprintf('SCMR-v5 matcher: %s\n', which('function_T1T2_10HB_bssfp_qc'));
     fprintf('SCMR-v5 simulator: %s\n', which('sim_T1T2_10HB_bssfp'));
 
-    S = load(source_mat_path, 'Mag_crop', 'Acq_time', 'FA', 'TI', 'T2_prep', ...
+    S = load(source_mat_path, 'Mag_crop', 'Acq_time', ...
         'Info_by_slice', 'final_data_semantics');
-    fields = {'Mag_crop', 'Acq_time', 'FA', 'TI', 'T2_prep', 'Info_by_slice', 'final_data_semantics'};
+    fields = {'Mag_crop', 'Acq_time', 'Info_by_slice', 'final_data_semantics'};
     for field_index = 1:numel(fields)
         assert(isfield(S, fields{field_index}), 'build_scmr_v5_native_maps:MissingField', ...
             'Source MAT lacks %s: %s', fields{field_index}, source_mat_path);
@@ -48,14 +50,10 @@ function build_scmr_v5_native_maps(source_mat_path, output_mat_path)
         'build_scmr_v5_native_maps:Semantics', 'Source final_data_semantics is not MP-PCA(MIND_mag_reg).');
     assert(size(S.Mag_crop, 3) == 10 && size(S.Acq_time, 1) == 10, ...
         'build_scmr_v5_native_maps:Shape', 'Expected Mag_crop [row,col,10,group] and Acq_time [10,group].');
-    assert(isequal(double(S.FA(:))', [45, 45, 45]), ...
-        'build_scmr_v5_native_maps:SourceProtocol', 'Current cropped source FA must be [45,45,45].');
-    assert(isequal(double(S.TI(:))', [50, 150]), ...
-        'build_scmr_v5_native_maps:SourceProtocol', 'Current cropped source TI must be [50,150].');
-    assert(isequal(double(S.T2_prep(:))', [35, 45, 55]), ...
-        'build_scmr_v5_native_maps:SourceProtocol', 'Current cropped source T2prep must be [35,45,55].');
+    assert(all(isfinite([fit_fa_deg, fit_ti_ms, fit_t2prep_ms])), ...
+        'build_scmr_v5_native_maps:Protocol', 'Explicit SCMR-v5 protocol values must be finite.');
 
-    % Exact production grid and SCMR-v5 protocol proven against retained HHZ maps.
+    % Exact production grid. Protocol timing is supplied by the current YAML caller.
     T1_list = [20:20:500, 505:5:1500, 1520:20:2500];
     T2_list = [5:5:100, 110:10:200];
     B1_list = 0.1:0.05:1.2;
@@ -73,9 +71,6 @@ function build_scmr_v5_native_maps(source_mat_path, output_mat_path)
     end
     Tlist(all(Tlist == 0, 2), :) = [];
     Tlist = unique(Tlist, 'rows');
-    fit_fa_deg = [45, 45, 45];
-    fit_ti_ms = [10, 100];
-    fit_t2prep_ms = [35, 45, 55];
 
     rows = size(S.Mag_crop, 1); cols = size(S.Mag_crop, 2); groups = size(S.Mag_crop, 4);
     t1_ms = nan(groups, rows, cols, 'single');
@@ -103,8 +98,6 @@ function build_scmr_v5_native_maps(source_mat_path, output_mat_path)
     end
     assert(any(valid_mask, 'all'), 'build_scmr_v5_native_maps:Empty', 'No valid SCMR-v5 pixels were matched.');
     group_idx = int32((0:groups-1)');
-    source_protocol = struct('FA_deg', double(S.FA(:))', 'TI_ms', double(S.TI(:))', ...
-        'T2_prep_ms', double(S.T2_prep(:))');
     fit_protocol = struct('FA_deg', fit_fa_deg, 'TI_ms', fit_ti_ms, ...
         'T2_prep_ms', fit_t2prep_ms, 'timing_formula', ...
         'delta_AcquisitionTime-TR*(EchoTrainLength+10)-preparation_delay', ...
@@ -112,6 +105,6 @@ function build_scmr_v5_native_maps(source_mat_path, output_mat_path)
         'refinement', false, 'qc_score_threshold', 0.90);
     source_final_data_semantics = char(S.final_data_semantics);
     save(output_mat_path, 't1_ms', 't2_ms', 'b1', 'valid_mask', 'match_score', ...
-        'fitting_nrmse', 'group_idx', 'source_mat_path', 'source_protocol', ...
+        'fitting_nrmse', 'group_idx', 'source_mat_path', ...
         'fit_protocol', 'source_final_data_semantics', '-v7');
 end

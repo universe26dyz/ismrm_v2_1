@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import yaml
 
 from .contracts import sha256, write_immutable_json
 from .fit_first import SCMR_V5_DICTIONARY_CONTRACT, SCMR_V5_NATIVE_FIT_METHOD
@@ -22,6 +23,25 @@ STACKS = ("sax", "2ch", "4ch")
 
 def _matlab_quote(path: str | Path) -> str:
     return str(path).replace("'", "''")
+
+
+def _protocol_vectors(protocol_path: str | Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    path = Path(protocol_path)
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"SCMR-v5 protocol must be a YAML mapping: {path}")
+    keys = ("flip_angle_degrees", "inversion_times_ms", "t2prep_ms")
+    missing = [key for key in keys if key not in payload]
+    if missing:
+        raise ValueError(f"SCMR-v5 protocol lacks required fields: {missing}")
+    vectors = tuple(np.asarray(payload[key], dtype=np.float64).reshape(-1) for key in keys)
+    if tuple(vector.size for vector in vectors) != (3, 2, 3) or any(not np.all(np.isfinite(vector)) for vector in vectors):
+        raise ValueError("SCMR-v5 protocol requires finite FA[3], TI[2], and T2prep[3].")
+    return vectors  # type: ignore[return-value]
+
+
+def _matlab_vector(values: np.ndarray) -> str:
+    return "[" + " ".join(format(float(value), ".17g") for value in values) + "]"
 
 
 def _prepared_subject_root(prepared_root: str | Path, subject: str) -> Path:
@@ -35,13 +55,14 @@ def _require_empty_target(path: Path) -> None:
     path.mkdir(parents=True)
 
 
-def run_matlab_mapping(*, subject: str, preprocessed_root: str | Path, mapping_root: str | Path, matlab_executable: str = "matlab") -> None:
+def run_matlab_mapping(*, subject: str, preprocessed_root: str | Path, mapping_root: str | Path, protocol_path: str | Path, matlab_executable: str = "matlab") -> None:
     """Call the exact SCMR-v5 MATLAB matcher once for each current stack."""
     source_root, target = Path(preprocessed_root).resolve(), Path(mapping_root).resolve()
     if target.exists():
         raise FileExistsError(f"refusing to overwrite MATLAB mapping root: {target}")
     target.mkdir(parents=True)
     matlab_dir = Path(__file__).resolve().parents[3] / "trad" / "evaluation" / "scmr" / "matlab"
+    fit_fa_deg, fit_ti_ms, fit_t2prep_ms = _protocol_vectors(protocol_path)
     for stack in STACKS:
         source = source_root / subject / stack / "preprocessed.mat"
         if not source.is_file():
@@ -49,7 +70,8 @@ def run_matlab_mapping(*, subject: str, preprocessed_root: str | Path, mapping_r
         destination = target / f"{stack}_mapping.mat"
         command = (
             f"addpath('{_matlab_quote(matlab_dir)}'); "
-            f"build_scmr_v5_native_maps('{_matlab_quote(source)}','{_matlab_quote(destination)}');"
+            f"build_scmr_v5_native_maps('{_matlab_quote(source)}','{_matlab_quote(destination)}',"
+            f"{_matlab_vector(fit_fa_deg)},{_matlab_vector(fit_ti_ms)},{_matlab_vector(fit_t2prep_ms)});"
         )
         subprocess.run([matlab_executable, "-batch", command], check=True)
         if not destination.is_file():
@@ -144,11 +166,12 @@ def main() -> None:
     parser.add_argument("--preprocessed-root", required=True)
     parser.add_argument("--mapping-root", required=True)
     parser.add_argument("--output", required=True)
+    parser.add_argument("--protocol", required=True)
     parser.add_argument("--matlab-executable", default="matlab")
     parser.add_argument("--skip-matlab", action="store_true")
     args = parser.parse_args()
     if not args.skip_matlab:
-        run_matlab_mapping(subject=args.subject, preprocessed_root=args.preprocessed_root, mapping_root=args.mapping_root, matlab_executable=args.matlab_executable)
+        run_matlab_mapping(subject=args.subject, preprocessed_root=args.preprocessed_root, mapping_root=args.mapping_root, protocol_path=args.protocol, matlab_executable=args.matlab_executable)
     result = package_native_cache(subject=args.subject, prepared_root=args.prepared_root, preprocessed_root=args.preprocessed_root, mapping_root=args.mapping_root, output=args.output)
     print(result)
 

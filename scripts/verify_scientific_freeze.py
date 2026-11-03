@@ -26,7 +26,7 @@ def _require_contains(path: Path, text: str, label: str) -> None:
 
 
 def _require_absent(path: Path, text: str, label: str) -> None:
-    if text in path.read_text(encoding="utf-8").lower():
+    if text.lower() in path.read_text(encoding="utf-8").lower():
         raise ValueError(f"{label}: forbidden active dependency {text!r} in {path}")
 
 
@@ -121,11 +121,18 @@ def verify(root: Path) -> dict[str, Any]:
     _require_contains(sparse_manifest, 'if stack == "sax"', "L100/L50/L25 SAX retention")
     _require_contains(sparse_manifest, "retained and held-out groups must form an exhaustive disjoint source partition", "sparse physical selection")
 
-    active_stages = ("01_RAW_DICOM", "02_PREPROCESS_MATLAB", "03_PREPARE_OBSERVATIONS", "04_SPARSE_PROFILES", "05_SCMR_V5_FIT_FIRST", "06_PROPOSED")
+    active_stages = ("01_RAW_DICOM", "02_PREPROCESS_MATLAB", "03_PREPARE_OBSERVATIONS", "04_SPARSE_PROFILES", "05_SCMR_V5_FIT_FIRST", "06_PROPOSED", "07_FINAL_POSE", "08_EVALUATION_AND_VISUALIZATION")
     for stage in active_stages:
         script = root / "pipeline" / stage / "run_stage.sh"
         _require_absent(script, "standardiz", "active sparse route")
-        _require_contains(script, "validate_active_subject.py", "active cohort admission")
+        _require_contains(script, "validate_subject_id.py", "generic subject validation")
+        _require_absent(script, "validate_active_subject.py", "legacy cohort admission")
+    preprocessor = root / "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m"
+    for text in ("TI = [50, 150]", "T2_prep =", "protocol_version = 'hhz_v1'"):
+        _require_absent(preprocessor, text, "preprocessing MAT legacy protocol metadata")
+    bridge = root / "common/trad/modules/module_02_data_bridge/mat_v73.py"
+    for text in ('"FA"', '"TI"', '"T2_prep"'):
+        _require_absent(bridge, text, "bridge legacy protocol metadata")
     final_pose = root / "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh"
     _require_contains(final_pose, 'PREPARED_FOR_CASE=$FIT_BASE/prepared/$SUBJECT', "L100 final-pose input")
     _require_contains(final_pose, 'PREPARED_FOR_CASE=$CASE_ROOT', "sparse final-pose input")

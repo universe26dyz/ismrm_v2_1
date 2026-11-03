@@ -15,5 +15,5 @@ if [ "$DRY_RUN" = 1 ]; then
   echo "DRY-RUN: no MATLAB, CUDA or reconstruction command launched"
   exit 0
 fi
-python "$PROJECT_ROOT/scripts/validate_active_subject.py" "$SUBJECT"
+python "$PROJECT_ROOT/scripts/validate_subject_id.py" "$SUBJECT"
 echo "Use the nine module manuals in order; full execution requires subject data and runtime assets."

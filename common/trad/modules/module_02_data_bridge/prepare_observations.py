@@ -34,8 +34,8 @@ def prepare_observations(
     dicom_dir: str | Path,
     stack: str,
     output_dir: str | Path,
+    protocol_path: str | Path,
     max_groups: int | None = None,
-    protocol_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Write prepared observations without copying raw DICOMs into the code tree."""
 
@@ -117,7 +117,7 @@ def main() -> None:
     parser.add_argument("--stack", required=True, choices=("sax", "2ch", "4ch"))
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--max-groups", type=int)
-    parser.add_argument("--protocol", dest="protocol_path", type=Path)
+    parser.add_argument("--protocol", dest="protocol_path", type=Path, required=True)
     args = parser.parse_args()
     result = prepare_observations(**vars(args))
     subject = Path(args.dicom_dir).resolve().parent.name

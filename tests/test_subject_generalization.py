@@ -1,0 +1,40 @@
+"""Data-free contract tests for generic subject admission and Stage 01."""
+
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+VALIDATOR = ROOT / "scripts" / "validate_subject_id.py"
+STAGE01 = ROOT / "pipeline" / "01_RAW_DICOM" / "run_stage.sh"
+
+
+def test_generic_subject_validator_accepts_new_subject_and_rejects_traversal() -> None:
+    accepted = subprocess.run([sys.executable, str(VALIDATOR), "NEW_SUBJECT_001"], capture_output=True, text=True)
+    rejected = subprocess.run([sys.executable, str(VALIDATOR), "../escape"], capture_output=True, text=True)
+    assert accepted.returncode == 0, accepted.stderr
+    assert rejected.returncode != 0
+
+
+def test_stage01_builds_a_subject_manifest_from_actual_raw_stack_directories(tmp_path: Path) -> None:
+    subject, raw_root, manifest_root = "NEW_SUBJECT_001", tmp_path / "raw", tmp_path / "subjects"
+    for stack in ("sax", "2ch", "4ch"):
+        stack_dir = raw_root / subject / stack
+        stack_dir.mkdir(parents=True)
+        for index in range(10):
+            (stack_dir / f"{index:02d}.dcm").touch()
+    environment = dict(os.environ, MANIFEST_ROOT=str(manifest_root))
+    result = subprocess.run(["bash", str(STAGE01), subject, str(raw_root)], env=environment, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr + result.stdout
+    payload = json.loads((manifest_root / subject / "manifest.json").read_text(encoding="utf-8"))
+    assert payload["schema_version"] == "deployment-v1.1"
+    assert payload["subjects"][0]["subject_id"] == subject
+    stacks = payload["subjects"][0]["stacks"]
+    assert [entry["stack"] for entry in stacks] == ["sax", "2ch", "4ch"]
+    assert all(Path(entry["local_dicom_dir"]).is_absolute() for entry in stacks)
+    assert all(Path(entry["server_dicom_dir"]).is_absolute() for entry in stacks)

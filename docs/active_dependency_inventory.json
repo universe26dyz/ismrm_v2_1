@@ -3,7 +3,7 @@
     "ACTIVE_ENTRYPOINT": 9,
     "ACTIVE_EXECUTED": 94,
     "COMPATIBILITY_IMPORT_ONLY": 3,
-    "CONFIG_RUNTIME_ASSET": 15,
+    "CONFIG_RUNTIME_ASSET": 14,
     "LEGACY_UNUSED_BY_PIPELINE": 9,
     "THIRD_PARTY_ACTIVE": 18,
     "UNRESOLVED_DYNAMIC": 3
@@ -2582,6 +2582,14 @@
       "from": "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
       "stage": "08",
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from validate_subject_id import",
+      "from": "scripts/build_subject_deployment_manifest.py",
+      "stage": "01",
+      "to": "scripts/validate_subject_id.py"
     }
   ],
   "entrypoints": [
@@ -2595,22 +2603,17 @@
     "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
     "pipeline/09_INTEGRITY_AND_REPORTING/run_stage.sh"
   ],
-  "generated_from_git_sha": "c92fde00ec65187b8cc172d5212dedfe6178ae1a",
+  "generated_from_git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
   "legacy_protocol_references": [
     {
       "classification": "ACTIVE_EXECUTED",
       "evidence": "legacy [50,150]/hhz_v1 reference",
-      "path": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m"
-    },
-    {
-      "classification": "ACTIVE_EXECUTED",
-      "evidence": "legacy [50,150]/hhz_v1 reference",
-      "path": "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m"
-    },
-    {
-      "classification": "ACTIVE_EXECUTED",
-      "evidence": "legacy [50,150]/hhz_v1 reference",
       "path": "common/reconstruction_core/orchestration.py"
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": "legacy [50,150]/hhz_v1 reference",
+      "path": "scripts/verify_scientific_freeze.py"
     },
     {
       "classification": "ACTIVE_EXECUTED",
@@ -2625,6 +2628,7 @@
         "from evaluation_common.myocardium.build_native_bundle import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2640,6 +2644,7 @@
         "from evaluation_common.myocardium.legacy_masks import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2655,6 +2660,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2670,6 +2676,7 @@
         "from .checkpoint_loader import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2685,6 +2692,7 @@
         "from mlp.modules.module_05_signal_decoder.decoder_factory import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2700,6 +2708,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2715,6 +2724,7 @@
         "from .mlp_model import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2730,6 +2740,7 @@
         "from .provenance import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2745,6 +2756,7 @@
         "from .trad_teacher.trad_signal_simulator import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2760,6 +2772,7 @@
         "from mlp.modules.module_07_objective_training.mlp_trainer import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2775,6 +2788,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2790,6 +2804,7 @@
         "from .cyj11_adapter import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2805,6 +2820,7 @@
         "from .cyj11_aha16 import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2820,6 +2836,7 @@
         "from .cyj11_legacy_roi import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2835,6 +2852,7 @@
         "from .cyj11_myocardial_roi_metrics import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2850,6 +2868,7 @@
         "from .cyj11_postprocess import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2865,6 +2884,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2880,6 +2900,7 @@
         "from .cyj11_r3_fit_first_final_pose_bundle import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2895,6 +2916,7 @@
         "from .cyj11_runner import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2910,6 +2932,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2925,6 +2948,7 @@
         "from .final5_adapter import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2940,6 +2964,7 @@
         "from .final5_aha16 import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2955,6 +2980,7 @@
         "from .final5_myocardial_roi_metrics import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2970,6 +2996,7 @@
         "from .legacy_aha16 import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -2985,6 +3012,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3000,6 +3028,7 @@
         "from .paired_final_pose_lv_metrics import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3015,6 +3044,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3030,6 +3060,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3045,6 +3076,7 @@
         "declared runtime directory"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -3060,6 +3092,7 @@
         "declared runtime directory"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -3075,6 +3108,7 @@
         "declared runtime directory"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -3090,6 +3124,7 @@
         "declared runtime directory"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -3105,6 +3140,7 @@
         "declared runtime directory"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -3120,6 +3156,7 @@
         "declared runtime directory"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -3135,6 +3172,7 @@
         "declared runtime directory"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -3150,6 +3188,7 @@
         "declared runtime directory"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -3165,6 +3204,7 @@
         "declared runtime directory"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -3180,6 +3220,7 @@
         "declared runtime directory"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -3195,6 +3236,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3210,6 +3252,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_08",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3225,6 +3268,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_08",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3240,6 +3284,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_08",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3255,6 +3300,7 @@
         "from .contracts import"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3273,6 +3319,7 @@
         "from .current_native_central_component_mask import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3288,6 +3335,7 @@
         "from .dictionary import"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3303,6 +3351,7 @@
         "from ..phase2_clean.direct_native_bundles import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3318,6 +3367,7 @@
         "from ..phase2_clean.direct_native_endpoint_audit import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3333,6 +3383,7 @@
         "from ..phase2_clean.evaluation import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3348,6 +3399,7 @@
         "from ..phase2_clean.final5_partitioned_native_metrics import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3363,6 +3415,7 @@
         "from .final5_publication_visualization import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3378,6 +3431,7 @@
         "from .final_cyj_reporting import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3393,6 +3447,7 @@
         "from ..phase2_clean.final_native_grid_metrics import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3408,6 +3463,7 @@
         "from .final_sparse_native_metrics import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3423,6 +3479,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3438,6 +3495,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3453,6 +3511,7 @@
         "from .fit_first_intensity_preserving import"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3468,6 +3527,7 @@
         "from .fit_first_mask_audit import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3483,6 +3543,7 @@
         "from ..phase2_clean.fit_first_native_geometry import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3498,6 +3559,7 @@
         "from .fit_first_native_pose_audit import"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3513,6 +3575,7 @@
         "from .fit_first_route_contract import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3528,6 +3591,7 @@
         "from .formal_l100_sparse_manifest import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3543,6 +3607,7 @@
         "from .frozen_native_support import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3558,6 +3623,7 @@
         "from .heldout import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3573,6 +3639,7 @@
         "from .l100_mask_paired_eval import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3588,6 +3655,7 @@
         "from .matched_output import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3603,6 +3671,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3618,6 +3687,7 @@
         "from .reuse_standardized_native_dictionary_maps import"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3633,6 +3703,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3648,6 +3719,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -3663,6 +3735,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_08",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -3678,6 +3751,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_08",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -3693,6 +3767,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -3708,6 +3783,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -3723,6 +3799,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3738,6 +3815,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3753,6 +3831,7 @@
         "from .standardize_subject_slices import"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3768,6 +3847,7 @@
         "from ..phase2_clean.visualization import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3783,6 +3863,7 @@
         "from ..simulation.simulate_hhz_signals import"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3798,6 +3879,7 @@
         "from quality_experiments.Q001_recon.config import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3813,6 +3895,7 @@
         "from .contracts import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3828,6 +3911,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3843,6 +3927,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3858,6 +3943,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3873,6 +3959,7 @@
         "from .training_curves import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3888,6 +3975,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3903,6 +3991,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3916,24 +4005,10 @@
     {
       "classification": "ACTIVE_EXECUTED",
       "evidence": [
-        "declared active stage dependency"
-      ],
-      "functional_area": "stage_01",
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/scripts/extract_subject_deployment_manifest.py",
-      "reason": "declared active stage dependency",
-      "stages": [
-        "01"
-      ]
-    },
-    {
-      "classification": "ACTIVE_EXECUTED",
-      "evidence": [
         "from trad.evaluation.profiling.summarize_timing_profile import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3949,6 +4024,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "matlab",
       "outputs": [],
@@ -3964,6 +4040,7 @@
         "from trad.evaluation.scmr.quality_control import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3979,6 +4056,7 @@
         "from .reference_2d import"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -3994,6 +4072,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_02",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "matlab",
       "outputs": [],
@@ -4009,6 +4088,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_02",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "matlab",
       "outputs": [],
@@ -4024,6 +4104,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_02",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "matlab",
       "outputs": [],
@@ -4039,6 +4120,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_02",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "matlab",
       "outputs": [],
@@ -4054,6 +4136,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4069,6 +4152,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4084,6 +4168,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4100,6 +4185,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4115,6 +4201,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4130,6 +4217,7 @@
         "from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4145,6 +4233,7 @@
         "from trad.modules.module_04_quantitative_inr.quantitative_inr import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4160,6 +4249,7 @@
         "from trad.modules.module_05_signal_decoder.decoder_factory import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4175,6 +4265,7 @@
         "from trad.modules.module_05_signal_decoder.trad_signal_simulator import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4190,6 +4281,7 @@
         "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4206,6 +4298,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4221,6 +4314,7 @@
         "from trad.modules.module_07_objective_training.experiment_infrastructure import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4236,6 +4330,7 @@
         "from trad.modules.module_07_objective_training.training_space import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4251,6 +4346,7 @@
         "from trad.modules.module_08_inference_export.export_quantitative import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4266,6 +4362,7 @@
         "from trad.modules.module_08_inference_export.reprojection import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4281,6 +4378,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_02",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "matlab",
       "outputs": [],
@@ -4296,6 +4394,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_02",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "matlab",
       "outputs": [],
@@ -4311,6 +4410,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4326,6 +4426,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_02",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4341,6 +4442,7 @@
         "from trad.third_party.nesvor.nesvor.image import"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4358,6 +4460,7 @@
         "from .image import"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4375,6 +4478,7 @@
         "from .image_utils import"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4392,6 +4496,7 @@
         "from trad.third_party.nesvor.nesvor.inr import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4407,6 +4512,7 @@
         "from ..slice_acquisition import"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4423,6 +4529,7 @@
         "from .slice_acq import"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4439,6 +4546,7 @@
         "from .slice_acq_torch import"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4455,6 +4563,7 @@
         "from trad.third_party.nesvor.nesvor.svr.registration import"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4471,6 +4580,7 @@
         "from trad.third_party.nesvor.nesvor.transform import"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4487,6 +4597,7 @@
         "from .transform import"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4503,6 +4614,7 @@
         "from .transform_convert import"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4519,6 +4631,7 @@
         "from .transform_convert_torch import"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4535,6 +4648,7 @@
         "from trad.third_party.nesvor.nesvor.utils import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4553,6 +4667,7 @@
         "from .logger import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4571,6 +4686,7 @@
         "from .loss import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4589,6 +4705,7 @@
         "from .misc import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4607,6 +4724,7 @@
         "from trad.third_party.nesvor.nesvor.utils.psf import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4622,6 +4740,7 @@
         "from .types import"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4637,6 +4756,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -4652,6 +4772,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "yaml",
       "outputs": [],
@@ -4667,6 +4788,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_09",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -4677,26 +4799,12 @@
       ]
     },
     {
-      "classification": "CONFIG_RUNTIME_ASSET",
-      "evidence": [
-        "declared active stage dependency"
-      ],
-      "functional_area": "stage_01",
-      "inputs": [],
-      "language": "json",
-      "outputs": [],
-      "path": "configs/subject_stack_manifest.example.json",
-      "reason": "declared active stage dependency",
-      "stages": [
-        "01"
-      ]
-    },
-    {
       "classification": "ACTIVE_ENTRYPOINT",
       "evidence": [
         "declared active stage dependency"
       ],
       "functional_area": "stage_01",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -4712,6 +4820,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_02",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -4727,6 +4836,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_03",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -4742,6 +4852,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_04",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -4757,6 +4868,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_05",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -4772,6 +4884,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -4787,6 +4900,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_07",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -4802,6 +4916,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_08",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -4817,6 +4932,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_09",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "shell",
       "outputs": [],
@@ -4832,6 +4948,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_06",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "json",
       "outputs": [],
@@ -4847,10 +4964,27 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_01",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
-      "path": "scripts/validate_active_subject.py",
+      "path": "scripts/build_subject_deployment_manifest.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "01"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_01",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "scripts/validate_subject_id.py",
       "reason": "declared active stage dependency",
       "stages": [
         "01"
@@ -4862,6 +4996,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_09",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4877,6 +5012,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_09",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4892,6 +5028,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_09",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4907,6 +5044,7 @@
         "declared active stage dependency"
       ],
       "functional_area": "stage_09",
+      "git_sha": "f29b090368d92548f45cfdd6e17048ad6d7e1979",
       "inputs": [],
       "language": "python",
       "outputs": [],
@@ -4920,10 +5058,9 @@
   "schema_version": "active-dependency-inventory/v1",
   "stages": {
     "01": [
-      "common/scripts/extract_subject_deployment_manifest.py",
-      "configs/subject_stack_manifest.example.json",
       "pipeline/01_RAW_DICOM/run_stage.sh",
-      "scripts/validate_active_subject.py"
+      "scripts/build_subject_deployment_manifest.py",
+      "scripts/validate_subject_id.py"
     ],
     "02": [
       "common/scripts/deployment_manifest.py",
@@ -5121,9 +5258,7 @@
       "scripts/verify_scientific_freeze.py"
     ]
   },
-  "subject_gating_references": [
-    "scripts/validate_active_subject.py"
-  ],
+  "subject_gating_references": [],
   "unresolved_dynamic_dependencies": [
     {
       "path": "external:matlab",

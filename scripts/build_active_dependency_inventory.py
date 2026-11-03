@@ -15,7 +15,7 @@ from typing import Any
 
 
 STAGES = {
-    "01": ["pipeline/01_RAW_DICOM/run_stage.sh", "scripts/validate_active_subject.py", "common/scripts/extract_subject_deployment_manifest.py", "configs/subject_stack_manifest.example.json"],
+    "01": ["pipeline/01_RAW_DICOM/run_stage.sh", "scripts/validate_subject_id.py", "scripts/build_subject_deployment_manifest.py"],
     "02": ["pipeline/02_PREPROCESS_MATLAB/run_stage.sh", "common/trad/scripts/local_preprocess_all.m", "common/trad/scripts/local_preprocess_one.m", "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m", "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m", "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m", "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/deformableReg2Dmind_adaptive.m", "common/trad/scripts/validate_transferred_preprocessed.py"],
     "03": ["pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh", "common/trad/scripts/prepare_all_observations.py", "common/scripts/deployment_manifest.py", "common/trad/modules/module_02_data_bridge/prepare_observations.py", "common/trad/modules/module_02_data_bridge/mat_v73.py", "common/trad/modules/module_02_data_bridge/build_manifest.py", "common/trad/modules/module_02_data_bridge/geometry.py", "common/trad/modules/module_02_data_bridge/timing.py", "configs/protocol_scmr_v5_10_100.yaml"],
     "04": ["pipeline/04_SPARSE_PROFILES/run_stage.sh", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh", "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py", "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py", "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles"],
@@ -61,7 +61,8 @@ def resolve_import(root: Path, module: str, source: Path, level: int = 0) -> Pat
         if path.is_file():
             return path
     direct = root / "common" / Path(*module.split("."))
-    for path in (direct.with_suffix(".py"), direct / "__init__.py"):
+    script_module = root / "scripts" / Path(*module.split("."))
+    for path in (direct.with_suffix(".py"), direct / "__init__.py", script_module.with_suffix(".py"), script_module / "__init__.py"):
         if path.is_file():
             return path
     return None
@@ -90,6 +91,7 @@ def python_imports(root: Path, path: Path) -> list[tuple[Path, str]]:
 
 
 def scan(root: Path) -> dict[str, Any]:
+    git_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
     nodes: dict[str, dict[str, Any]] = {}
     edges: list[dict[str, Any]] = []
     stage_paths: dict[str, list[str]] = defaultdict(list)
@@ -107,7 +109,7 @@ def scan(root: Path) -> dict[str, Any]:
         path = root / raw
         if raw not in nodes:
             node_classification = "UNRESOLVED_DYNAMIC" if not path.exists() else classify(raw, stage, is_entry)
-            nodes[raw] = {"path": raw, "language": language(raw), "classification": node_classification, "stages": [stage], "functional_area": f"stage_{stage}", "reason": reason, "evidence": [reason], "inputs": [], "outputs": []}
+            nodes[raw] = {"path": raw, "language": language(raw), "classification": node_classification, "stages": [stage], "functional_area": f"stage_{stage}", "reason": reason, "evidence": [reason], "inputs": [], "outputs": [], "git_sha": git_sha}
         elif stage not in nodes[raw]["stages"]:
             nodes[raw]["stages"].append(stage)
         stage_paths[stage].append(raw)
@@ -136,7 +138,7 @@ def scan(root: Path) -> dict[str, Any]:
         if frm in nodes and (root / to).exists():
             stage = nodes[frm]["stages"][0]
             if to not in nodes:
-                nodes[to] = {"path": to, "language": language(to), "classification": classify(to, stage), "stages": [stage], "functional_area": f"stage_{stage}", "reason": evidence, "evidence": [evidence], "inputs": [], "outputs": []}
+                nodes[to] = {"path": to, "language": language(to), "classification": classify(to, stage), "stages": [stage], "functional_area": f"stage_{stage}", "reason": evidence, "evidence": [evidence], "inputs": [], "outputs": [], "git_sha": git_sha}
             edges.append({"from": frm, "to": to, "edge_type": kind, "stage": stage, "condition": "active invocation", "evidence": evidence})
     protocol_hits = []
     for node in nodes.values():
@@ -153,7 +155,7 @@ def scan(root: Path) -> dict[str, Any]:
         (edge["from"], edge["to"], edge["edge_type"], edge["stage"], edge["condition"], edge["evidence"]): edge
         for edge in edges
     }
-    return {"schema_version": "active-dependency-inventory/v1", "generated_from_git_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(), "entrypoints": [f"pipeline/{n}/run_stage.sh" for n in ("01_RAW_DICOM", "02_PREPROCESS_MATLAB", "03_PREPARE_OBSERVATIONS", "04_SPARSE_PROFILES", "05_SCMR_V5_FIT_FIRST", "06_PROPOSED", "07_FINAL_POSE", "08_EVALUATION_AND_VISUALIZATION", "09_INTEGRITY_AND_REPORTING")], "nodes": sorted(nodes.values(), key=lambda item: item["path"]), "edges": sorted(unique_edges.values(), key=lambda item: (item["from"], item["to"], item["edge_type"], item["stage"])), "stages": {stage: sorted(set(paths)) for stage, paths in sorted(stage_paths.items())}, "unresolved_dynamic_dependencies": [{"path": "external:matlab", "reason": "server-only MATLAB execution"}, {"path": "external:nesvor", "reason": "server-only NeSVoR executable"}, {"path": "runtime/model_assets/*.pth", "reason": "binary assets intentionally absent locally"}], "classification_summary": dict(sorted(summary.items())), "duplicate_or_proxy_modules": PROXIES, "legacy_protocol_references": protocol_hits, "subject_gating_references": [item["path"] for item in nodes.values() if "validate_active_subject" in item["path"]]}
+    return {"schema_version": "active-dependency-inventory/v1", "generated_from_git_sha": git_sha, "entrypoints": [f"pipeline/{n}/run_stage.sh" for n in ("01_RAW_DICOM", "02_PREPROCESS_MATLAB", "03_PREPARE_OBSERVATIONS", "04_SPARSE_PROFILES", "05_SCMR_V5_FIT_FIRST", "06_PROPOSED", "07_FINAL_POSE", "08_EVALUATION_AND_VISUALIZATION", "09_INTEGRITY_AND_REPORTING")], "nodes": sorted(nodes.values(), key=lambda item: item["path"]), "edges": sorted(unique_edges.values(), key=lambda item: (item["from"], item["to"], item["edge_type"], item["stage"])), "stages": {stage: sorted(set(paths)) for stage, paths in sorted(stage_paths.items())}, "unresolved_dynamic_dependencies": [{"path": "external:matlab", "reason": "server-only MATLAB execution"}, {"path": "external:nesvor", "reason": "server-only NeSVoR executable"}, {"path": "runtime/model_assets/*.pth", "reason": "binary assets intentionally absent locally"}], "classification_summary": dict(sorted(summary.items())), "duplicate_or_proxy_modules": PROXIES, "legacy_protocol_references": protocol_hits, "subject_gating_references": [item["path"] for item in nodes.values() if "validate_active_subject" in item["path"]]}
 
 
 def markdown(inventory: dict[str, Any]) -> str:

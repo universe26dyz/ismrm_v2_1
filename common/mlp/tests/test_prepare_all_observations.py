@@ -33,7 +33,10 @@ def test_prepare_all_writes_one_explicit_output_per_manifest_entry(tmp_path, mon
     mat.parent.mkdir(parents=True); mat.touch()
 
     observed_dicom_dirs = []
-    def fake_prepare(preprocessed_mat, dicom_dir, stack, output_dir, max_groups=None):
+    protocol = tmp_path / "protocol.yaml"
+    protocol.write_text("tr_ms: 2.61\nvps: 87\ninversion_times_ms: [10, 100]\nt2prep_ms: [35, 45, 55]\n", encoding="utf-8")
+
+    def fake_prepare(preprocessed_mat, dicom_dir, stack, output_dir, max_groups=None, protocol_path=None):
         observed_dicom_dirs.append(dicom_dir)
         output = Path(output_dir); output.mkdir(parents=True)
         for name in ("observations.npz", "manifest.json", "timing.npy", "qc_summary.json"):
@@ -41,7 +44,7 @@ def test_prepare_all_writes_one_explicit_output_per_manifest_entry(tmp_path, mon
         return {"qc_summary": {"group_count": 1, "weights_per_group": [10], "timing_shape": [1, 9], "geometry_shape": [1, 4, 4]}}
 
     monkeypatch.setattr(module, "prepare_observations", fake_prepare)
-    result = module.prepare_all_observations(manifest, preprocessed_root, prepared_root)
+    result = module.prepare_all_observations(manifest, preprocessed_root, prepared_root, protocol)
     assert result["prepared_count"] == 1
     assert observed_dicom_dirs == ["/server/S01/sax"]
     assert (prepared_root / "S01" / "sax" / "observations.npz").is_file()

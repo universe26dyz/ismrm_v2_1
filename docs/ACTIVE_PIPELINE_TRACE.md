@@ -1,15 +1,14 @@
 # Active pipeline dependency trace
 
-Generated deterministically from `c92fde00ec65187b8cc172d5212dedfe6178ae1a`. This is a static, data-free trace; server MATLAB, model binaries, and NeSVoR are recorded but not executed.
+Generated deterministically from `f29b090368d92548f45cfdd6e17048ad6d7e1979`. This is a static, data-free trace; server MATLAB, model binaries, and NeSVoR are recorded but not executed.
 
 ## Stage 01
 
 Direct and discovered active paths:
 
-- `common/scripts/extract_subject_deployment_manifest.py`
-- `configs/subject_stack_manifest.example.json`
 - `pipeline/01_RAW_DICOM/run_stage.sh`
-- `scripts/validate_active_subject.py`
+- `scripts/build_subject_deployment_manifest.py`
+- `scripts/validate_subject_id.py`
 
 ## Stage 02
 

@@ -37,6 +37,7 @@ def test_inventory_generator_is_data_free_and_deterministic(tmp_path: Path) -> N
         assert edge["to"] in paths or edge["edge_type"] == "UNRESOLVED_DYNAMIC"
     assert len({tuple(sorted(edge.items())) for edge in inventory["edges"]}) == len(inventory["edges"])
     for node in inventory["nodes"]:
+        assert {"path", "language", "classification", "functional_area", "reason", "evidence", "inputs", "outputs", "git_sha"} <= node.keys()
         if node["classification"].startswith("ACTIVE_"):
             assert (ROOT / node["path"]).exists()
     assert inventory["duplicate_or_proxy_modules"]

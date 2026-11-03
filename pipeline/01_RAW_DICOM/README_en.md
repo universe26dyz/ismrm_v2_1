@@ -8,11 +8,11 @@ Inputs are three server-resident DICOM directories, with exactly ten weights per
 
 ```bash
 PROJECT_ROOT=/path/to/ismrm_v2_1
-SUBJECT=HHZ
+SUBJECT=NEW_SUBJECT_001
 RAW_ROOT=/data/.../mapping_subject_dicom
-python "$PROJECT_ROOT/common/scripts/extract_subject_deployment_manifest.py" \
-  --source "$PROJECT_ROOT/configs/subject_stack_manifest.example.json" \
-  --subject "$SUBJECT" --output "$PROJECT_ROOT/subjects/$SUBJECT/manifest.json"
+python "$PROJECT_ROOT/scripts/build_subject_deployment_manifest.py" \
+  --raw-root "$RAW_ROOT" --subject "$SUBJECT" \
+  --output "$PROJECT_ROOT/subjects/$SUBJECT/manifest.json"
 ```
 
-`local_dicom_dir` and `server_dicom_dir` must resolve to the same server path. Do not substitute NIfTI: SOP UID, acquisition timing and DICOM geometry are required downstream.
+The builder resolves both `local_dicom_dir` and `server_dicom_dir` to absolute paths from the actual stack directories. Do not substitute NIfTI: SOP UID, acquisition timing and DICOM geometry are required downstream.

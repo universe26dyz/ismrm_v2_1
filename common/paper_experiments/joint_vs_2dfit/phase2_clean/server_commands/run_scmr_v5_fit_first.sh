@@ -18,6 +18,7 @@ MATLAB=${2:-matlab}
 REPO=${REPO:-$(cd "$SCRIPT_DIR/../../../.." && pwd)}
 PY=${PY:-python}
 NESVOR=${NESVOR:-nesvor}
+PROTOCOL=${PROTOCOL:-$(cd "$REPO/.." && pwd)/configs/protocol_scmr_v5_10_100.yaml}
 CACHE=$RUN_ROOT/native_cache/${SUBJECT}_scmr_v5
 MAPPING_ROOT=$RUN_ROOT/mapping/scmr_v5/$SUBJECT
 
@@ -34,6 +35,7 @@ require_executable "$NESVOR"
 require_directory "$REPO"
 require_directory "$PREPROCESSED_ROOT/$SUBJECT"
 require_directory "$PREPARED_ROOT/$SUBJECT"
+test -f "$PROTOCOL" || die "protocol is missing: $PROTOCOL"
 require_absent "$CACHE"
 require_absent "$MAPPING_ROOT"
 echo "SCMR-v5 Fit-first inputs: subject=$SUBJECT run_root=$RUN_ROOT"
@@ -43,7 +45,7 @@ cd "$REPO"
 "$PY" -m paper_experiments.joint_vs_2dfit.phase2_clean.scmr_v5_native_cache \
   --subject "$SUBJECT" --prepared-root "$PREPARED_ROOT" \
   --preprocessed-root "$PREPROCESSED_ROOT" --mapping-root "$MAPPING_ROOT" \
-  --output "$CACHE" --matlab-executable "$MATLAB" 2>&1 | tee "$RUN_ROOT/scmr_v5_native_cache.log"
+  --output "$CACHE" --protocol "$PROTOCOL" --matlab-executable "$MATLAB" 2>&1 | tee "$RUN_ROOT/scmr_v5_native_cache.log"
 
 L100_OUTPUT=$RUN_ROOT/reconstruction/fit_first/$SUBJECT/L100_fold0
 test ! -e "$L100_OUTPUT"

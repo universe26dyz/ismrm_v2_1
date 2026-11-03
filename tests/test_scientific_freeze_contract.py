@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FREEZE_CONTRACT = ROOT / "configs" / "scientific_freeze_contract.json"
 FREEZE_CHECKER = ROOT / "scripts" / "verify_scientific_freeze.py"
-SUBJECT_CHECKER = ROOT / "scripts" / "validate_active_subject.py"
+SUBJECT_CHECKER = ROOT / "scripts" / "validate_subject_id.py"
 
 
 def test_scientific_freeze_checker_passes_for_the_active_tree():
@@ -44,13 +44,13 @@ def test_active_freeze_contract_is_the_corrected_hhz_q002s640_route():
     }
 
 
-def test_active_cohort_admits_dyl_2_and_rejects_legacy_dyl():
+def test_submission_cohort_is_reporting_metadata_not_a_runtime_admission_gate():
     contract = json.loads(FREEZE_CONTRACT.read_text(encoding="utf-8"))
     assert contract["active_submission_cohort"] == ["CYJ", "DYL_2", "DYZ", "HHZ", "HJL"]
-    allowed = subprocess.run([sys.executable, str(SUBJECT_CHECKER), "DYL_2"], capture_output=True, text=True)
-    rejected = subprocess.run([sys.executable, str(SUBJECT_CHECKER), "DYL"], capture_output=True, text=True)
+    allowed = subprocess.run([sys.executable, str(SUBJECT_CHECKER), "DYL"], capture_output=True, text=True)
+    new_subject = subprocess.run([sys.executable, str(SUBJECT_CHECKER), "NEW_SUBJECT_001"], capture_output=True, text=True)
     assert allowed.returncode == 0, allowed.stderr
-    assert rejected.returncode != 0
+    assert new_subject.returncode == 0, new_subject.stderr
 
 
 def test_active_pipeline_cannot_reconnect_slice_standardization():
