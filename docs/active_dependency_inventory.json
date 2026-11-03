@@ -1,0 +1,5141 @@
+{
+  "classification_summary": {
+    "ACTIVE_ENTRYPOINT": 9,
+    "ACTIVE_EXECUTED": 94,
+    "COMPATIBILITY_IMPORT_ONLY": 3,
+    "CONFIG_RUNTIME_ASSET": 15,
+    "LEGACY_UNUSED_BY_PIPELINE": 9,
+    "THIRD_PARTY_ACTIVE": 18,
+    "UNRESOLVED_DYNAMIC": 3
+  },
+  "duplicate_or_proxy_modules": [
+    {
+      "active_caller": "Q002 training",
+      "future_cleanup_recommendation": "retain facade until package consolidation",
+      "implementation": "common/trad/modules/module_04_quantitative_inr/quantitative_inr.py",
+      "wrapper": "common/mlp/modules/module_04_quantitative_inr/quantitative_inr.py"
+    },
+    {
+      "active_caller": "Q002 training",
+      "future_cleanup_recommendation": "record dynamic/proxy boundary before renaming",
+      "implementation": "common/trad/modules/module_05_signal_decoder",
+      "wrapper": "common/mlp/modules/module_05_signal_decoder/frozen_decoder.py"
+    }
+  ],
+  "edges": [
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .legacy_masks import",
+      "from": "common/evaluation_common/myocardium/build_native_bundle.py",
+      "stage": "07",
+      "to": "common/evaluation_common/myocardium/legacy_masks.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .frozen_decoder import",
+      "from": "common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py",
+      "stage": "06",
+      "to": "common/mlp/modules/module_05_signal_decoder/frozen_decoder.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .mlp_model import",
+      "from": "common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py",
+      "stage": "06",
+      "to": "common/mlp/modules/module_05_signal_decoder/mlp_model.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .trad_teacher.trad_signal_simulator import",
+      "from": "common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py",
+      "stage": "06",
+      "to": "common/mlp/modules/module_05_signal_decoder/trad_teacher/trad_signal_simulator.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .checkpoint_loader import",
+      "from": "common/mlp/modules/module_05_signal_decoder/decoder_factory.py",
+      "stage": "06",
+      "to": "common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .provenance import",
+      "from": "common/mlp/modules/module_05_signal_decoder/decoder_factory.py",
+      "stage": "06",
+      "to": "common/mlp/modules/module_05_signal_decoder/provenance.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .mlp_model import",
+      "from": "common/mlp/modules/module_05_signal_decoder/frozen_decoder.py",
+      "stage": "06",
+      "to": "common/mlp/modules/module_05_signal_decoder/mlp_model.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .trad_teacher.trad_signal_simulator import",
+      "from": "common/mlp/modules/module_05_signal_decoder/frozen_decoder.py",
+      "stage": "06",
+      "to": "common/mlp/modules/module_05_signal_decoder/trad_teacher/trad_signal_simulator.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from mlp.modules.module_05_signal_decoder.decoder_factory import",
+      "from": "common/mlp/modules/module_07_objective_training/mlp_trainer.py",
+      "stage": "06",
+      "to": "common/mlp/modules/module_05_signal_decoder/decoder_factory.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from reconstruction_core.orchestration import",
+      "from": "common/mlp/modules/module_07_objective_training/mlp_trainer.py",
+      "stage": "06",
+      "to": "common/reconstruction_core/orchestration.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_r3_fit_first_final_pose_bundle import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.fit_first_native_geometry import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_legacy_roi import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_runner import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .legacy_aha16 import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from evaluation_common.myocardium.build_native_bundle import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py",
+      "stage": "07",
+      "to": "common/evaluation_common/myocardium/build_native_bundle.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from evaluation_common.myocardium.legacy_masks import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py",
+      "stage": "07",
+      "to": "common/evaluation_common/myocardium/legacy_masks.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final_native_grid_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_runner import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final5_myocardial_roi_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_myocardial_roi_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_runner import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .legacy_aha16 import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.direct_native_bundles import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_bundles.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.direct_native_endpoint_audit import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.fit_first_native_geometry import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final_native_grid_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final5_partitioned_native_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final_native_grid_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final_sparse_native_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final5_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .legacy_aha16 import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final5_partitioned_native_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final_sparse_native_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final5_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final5_aha16 import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .legacy_aha16 import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final5_partitioned_native_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final_sparse_native_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.evaluation.scmr.quality_control import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py",
+      "stage": "07",
+      "to": "common/trad/evaluation/scmr/quality_control.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_postprocess import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_runner import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final5_myocardial_roi_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_aha16 import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_myocardial_roi_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .paired_final_pose_lv_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_runner import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final_native_grid_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.visualization import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first_intensity_preserving import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .reuse_standardized_native_dictionary_maps import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .sparse_profile_manifest import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final_cyj_reporting import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .formal_l100_sparse_manifest import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .frozen_native_support import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/frozen_native_support.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..simulation.simulate_hhz_signals import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_bundles.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .direct_native_endpoint_audit import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_bundles.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_08_inference_export.export_quantitative import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_bundles.py",
+      "stage": "07",
+      "to": "common/trad/modules/module_08_inference_export/export_quantitative.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.utils import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_bundles.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from mlp.modules.module_07_objective_training.mlp_trainer import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py",
+      "stage": "07",
+      "to": "common/mlp/modules/module_07_objective_training/mlp_trainer.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final_cyj_reporting import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from reconstruction_core.orchestration import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py",
+      "stage": "07",
+      "to": "common/reconstruction_core/orchestration.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py",
+      "stage": "07",
+      "to": "common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_07_objective_training.training_space import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py",
+      "stage": "07",
+      "to": "common/trad/modules/module_07_objective_training/training_space.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .current_native_central_component_mask import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final5_publication_visualization import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final_cyj_reporting import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final_native_grid_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final_sparse_native_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .matched_output import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final_cyj_reporting import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final_native_grid_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final_sparse_native_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .visualization import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.evaluation.scmr.quality_control import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py",
+      "stage": "07",
+      "to": "common/trad/evaluation/scmr/quality_control.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .current_native_central_component_mask import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .heldout import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .visualization import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .current_native_central_component_mask import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final_cyj_reporting import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .final_sparse_native_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .l100_mask_paired_eval import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .matched_output import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .current_native_central_component_mask import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first_route_contract import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_route_contract.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .heldout import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .matched_output import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .dictionary import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .sparse_profile_manifest import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first_native_pose_audit import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_pose_audit.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .reuse_standardized_native_dictionary_maps import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .sparse_profile_manifest import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_mask_audit.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_mask_audit.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_mask_audit.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .visualization import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_mask_audit.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.image import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/image/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.transform import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_pose_audit.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first_native_geometry import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_pose_audit.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_route_contract.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .sparse_profile_manifest import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .heldout import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .matched_output import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .visualization import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first_mask_audit import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_mask_audit.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first_route_contract import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_route_contract.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py",
+      "stage": "06",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .sparse import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .standardize_subject_slices import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "active invocation",
+      "edge_type": "MATLAB_FUNCTION",
+      "evidence": "subprocess MATLAB build_scmr_v5_native_maps",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py",
+      "stage": "05",
+      "to": "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
+      "stage": "04",
+      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .sparse import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .sparse import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .evaluation import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .fit_first import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.evaluation.scmr.quality_control import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py",
+      "stage": "07",
+      "to": "common/trad/evaluation/scmr/quality_control.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py",
+      "stage": "06",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from mlp.modules.module_07_objective_training.mlp_trainer import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/mlp/modules/module_07_objective_training/mlp_trainer.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from quality_experiments.Q001_recon.config import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/quality_experiments/Q001_recon/config.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .contracts import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .joint_dataset import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/joint_dataset.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .training import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .training_curves import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training_curves.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from reconstruction_core.orchestration import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/reconstruction_core/orchestration.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_08_inference_export.export_quantitative import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_08_inference_export/export_quantitative.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_08_inference_export.reprojection import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_08_inference_export/reprojection.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from mlp.modules.module_07_objective_training.mlp_trainer import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py",
+      "stage": "06",
+      "to": "common/mlp/modules/module_07_objective_training/mlp_trainer.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from reconstruction_core.orchestration import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py",
+      "stage": "06",
+      "to": "common/reconstruction_core/orchestration.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_07_objective_training.experiment_infrastructure import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_07_objective_training/experiment_infrastructure.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.evaluation.profiling.summarize_timing_profile import",
+      "from": "common/reconstruction_core/orchestration.py",
+      "stage": "06",
+      "to": "common/trad/evaluation/profiling/summarize_timing_profile.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import",
+      "from": "common/reconstruction_core/orchestration.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_04_quantitative_inr.quantitative_inr import",
+      "from": "common/reconstruction_core/orchestration.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_04_quantitative_inr/quantitative_inr.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_05_signal_decoder.decoder_factory import",
+      "from": "common/reconstruction_core/orchestration.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_05_signal_decoder/decoder_factory.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_05_signal_decoder.trad_signal_simulator import",
+      "from": "common/reconstruction_core/orchestration.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_05_signal_decoder/trad_signal_simulator.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
+      "from": "common/reconstruction_core/orchestration.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_06_rigid_psf.rigid_psf_forward import",
+      "from": "common/reconstruction_core/orchestration.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_06_rigid_psf/rigid_psf_forward.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_07_objective_training.experiment_infrastructure import",
+      "from": "common/reconstruction_core/orchestration.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_07_objective_training/experiment_infrastructure.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_07_objective_training.training_space import",
+      "from": "common/reconstruction_core/orchestration.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_07_objective_training/training_space.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .reference_2d import",
+      "from": "common/trad/evaluation/scmr/quality_control.py",
+      "stage": "07",
+      "to": "common/trad/evaluation/scmr/reference_2d.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .geometry import",
+      "from": "common/trad/modules/module_02_data_bridge/build_manifest.py",
+      "stage": "03",
+      "to": "common/trad/modules/module_02_data_bridge/geometry.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .timing import",
+      "from": "common/trad/modules/module_02_data_bridge/build_manifest.py",
+      "stage": "03",
+      "to": "common/trad/modules/module_02_data_bridge/timing.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.transform import",
+      "from": "common/trad/modules/module_02_data_bridge/geometry.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .build_manifest import",
+      "from": "common/trad/modules/module_02_data_bridge/prepare_observations.py",
+      "stage": "03",
+      "to": "common/trad/modules/module_02_data_bridge/build_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .mat_v73 import",
+      "from": "common/trad/modules/module_02_data_bridge/prepare_observations.py",
+      "stage": "03",
+      "to": "common/trad/modules/module_02_data_bridge/mat_v73.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_02_data_bridge.geometry import",
+      "from": "common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_02_data_bridge/geometry.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.transform import",
+      "from": "common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.inr import",
+      "from": "common/trad/modules/module_04_quantitative_inr/quantitative_inr.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/inr/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .trad_signal_simulator import",
+      "from": "common/trad/modules/module_05_signal_decoder/decoder_factory.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_05_signal_decoder/trad_signal_simulator.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_02_data_bridge.geometry import",
+      "from": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "stage": "04",
+      "to": "common/trad/modules/module_02_data_bridge/geometry.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_02_data_bridge.geometry import",
+      "from": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_02_data_bridge/geometry.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.image import",
+      "from": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/image/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.image import",
+      "from": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/image/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.svr.registration import",
+      "from": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/svr/registration.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.svr.registration import",
+      "from": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/svr/registration.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.transform import",
+      "from": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.transform import",
+      "from": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.transform import",
+      "from": "common/trad/modules/module_06_rigid_psf/rigid_psf_forward.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.utils.psf import",
+      "from": "common/trad/modules/module_06_rigid_psf/rigid_psf_forward.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/psf.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import",
+      "from": "common/trad/modules/module_07_objective_training/training_space.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.transform import",
+      "from": "common/trad/modules/module_07_objective_training/training_space.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_07_objective_training.training_space import",
+      "from": "common/trad/modules/module_08_inference_export/export_quantitative.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_07_objective_training/training_space.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.transform import",
+      "from": "common/trad/modules/module_08_inference_export/export_quantitative.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.third_party.nesvor.nesvor.utils import",
+      "from": "common/trad/modules/module_08_inference_export/export_quantitative.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "active invocation",
+      "edge_type": "MATLAB_FUNCTION",
+      "evidence": "local_preprocess_all loop",
+      "from": "common/trad/scripts/local_preprocess_all.m",
+      "stage": "02",
+      "to": "common/trad/scripts/local_preprocess_one.m"
+    },
+    {
+      "condition": "active invocation",
+      "edge_type": "MATLAB_FUNCTION",
+      "evidence": "addpath preprocessing_v1; preprocess_stack_v1",
+      "from": "common/trad/scripts/local_preprocess_one.m",
+      "stage": "02",
+      "to": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from scripts.deployment_manifest import",
+      "from": "common/trad/scripts/prepare_all_observations.py",
+      "stage": "03",
+      "to": "common/scripts/deployment_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_02_data_bridge.prepare_observations import",
+      "from": "common/trad/scripts/prepare_all_observations.py",
+      "stage": "03",
+      "to": "common/trad/modules/module_02_data_bridge/prepare_observations.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from scripts.deployment_manifest import",
+      "from": "common/trad/scripts/validate_transferred_preprocessed.py",
+      "stage": "02",
+      "to": "common/scripts/deployment_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_02_data_bridge.mat_v73 import",
+      "from": "common/trad/scripts/validate_transferred_preprocessed.py",
+      "stage": "02",
+      "to": "common/trad/modules/module_02_data_bridge/mat_v73.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .image import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/__init__.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/image/image.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .image import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/__init__.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/image/image.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .image import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/__init__.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/image/image.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .image_utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/image/image_utils.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .image_utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/image/image_utils.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .image_utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/image/image_utils.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .slice_acq import",
+      "from": "common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .slice_acq import",
+      "from": "common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .slice_acq_torch import",
+      "from": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .slice_acq_torch import",
+      "from": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..image import",
+      "from": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/image/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..image import",
+      "from": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/image/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..image import",
+      "from": "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/image/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..image import",
+      "from": "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/image/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..slice_acquisition import",
+      "from": "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..slice_acquisition import",
+      "from": "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/transform/__init__.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/transform.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .transform import",
+      "from": "common/trad/third_party/nesvor/nesvor/transform/__init__.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/transform.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .transform_convert import",
+      "from": "common/trad/third_party/nesvor/nesvor/transform/__init__.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .transform_convert import",
+      "from": "common/trad/third_party/nesvor/nesvor/transform/__init__.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .transform_convert import",
+      "from": "common/trad/third_party/nesvor/nesvor/transform/transform.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .transform_convert import",
+      "from": "common/trad/third_party/nesvor/nesvor/transform/transform.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/transform/transform.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..utils import",
+      "from": "common/trad/third_party/nesvor/nesvor/transform/transform.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/__init__.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .transform_convert_torch import",
+      "from": "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .transform_convert_torch import",
+      "from": "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .logger import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/logger.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .logger import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/logger.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .logger import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/logger.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .logger import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/logger.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .loss import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/loss.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .loss import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/loss.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .loss import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/loss.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .loss import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/loss.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .misc import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/misc.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .misc import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/misc.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .misc import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/misc.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .misc import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/misc.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .psf import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/psf.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .psf import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/psf.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .psf import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/psf.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .psf import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/psf.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .types import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/types.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .types import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/types.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .types import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/types.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .types import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/types.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .misc import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/loss.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/misc.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .misc import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/loss.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/misc.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .misc import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/loss.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/misc.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .misc import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/loss.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/misc.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .types import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/misc.py",
+      "stage": "03",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/types.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .types import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/misc.py",
+      "stage": "04",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/types.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .types import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/misc.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/types.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .types import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/misc.py",
+      "stage": "07",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/types.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .types import",
+      "from": "common/trad/third_party/nesvor/nesvor/utils/psf.py",
+      "stage": "06",
+      "to": "common/trad/third_party/nesvor/nesvor/utils/types.py"
+    },
+    {
+      "condition": "active invocation",
+      "edge_type": "MATLAB_FUNCTION",
+      "evidence": "MATLAB -batch addpath/local_preprocess_all",
+      "from": "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
+      "stage": "02",
+      "to": "common/trad/scripts/local_preprocess_all.m"
+    },
+    {
+      "condition": "active invocation",
+      "edge_type": "SHELL_BASH",
+      "evidence": "REPO-bound bash invocation",
+      "from": "pipeline/04_SPARSE_PROFILES/run_stage.sh",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh"
+    },
+    {
+      "condition": "active invocation",
+      "edge_type": "SHELL_BASH",
+      "evidence": "REPO-bound bash invocation",
+      "from": "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh"
+    },
+    {
+      "condition": "active invocation",
+      "edge_type": "PYTHON_MODULE",
+      "evidence": "python -m proposed",
+      "from": "pipeline/06_PROPOSED/run_stage.sh",
+      "stage": "06",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py"
+    },
+    {
+      "condition": "active invocation",
+      "edge_type": "SHELL_BASH",
+      "evidence": "REPO-bound bash invocation",
+      "from": "pipeline/07_FINAL_POSE/run_stage.sh",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh"
+    },
+    {
+      "condition": "active invocation",
+      "edge_type": "SHELL_BASH",
+      "evidence": "second evaluation wrapper",
+      "from": "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
+      "stage": "08",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh"
+    },
+    {
+      "condition": "active invocation",
+      "edge_type": "SHELL_BASH",
+      "evidence": "first evaluation wrapper",
+      "from": "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
+      "stage": "08",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh"
+    }
+  ],
+  "entrypoints": [
+    "pipeline/01_RAW_DICOM/run_stage.sh",
+    "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
+    "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
+    "pipeline/04_SPARSE_PROFILES/run_stage.sh",
+    "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
+    "pipeline/06_PROPOSED/run_stage.sh",
+    "pipeline/07_FINAL_POSE/run_stage.sh",
+    "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
+    "pipeline/09_INTEGRITY_AND_REPORTING/run_stage.sh"
+  ],
+  "generated_from_git_sha": "c92fde00ec65187b8cc172d5212dedfe6178ae1a",
+  "legacy_protocol_references": [
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": "legacy [50,150]/hhz_v1 reference",
+      "path": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m"
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": "legacy [50,150]/hhz_v1 reference",
+      "path": "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m"
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": "legacy [50,150]/hhz_v1 reference",
+      "path": "common/reconstruction_core/orchestration.py"
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": "legacy [50,150]/hhz_v1 reference",
+      "path": "common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py"
+    }
+  ],
+  "nodes": [
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from evaluation_common.myocardium.build_native_bundle import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/evaluation_common/myocardium/build_native_bundle.py",
+      "reason": "from evaluation_common.myocardium.build_native_bundle import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "evidence": [
+        "from evaluation_common.myocardium.legacy_masks import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/evaluation_common/myocardium/legacy_masks.py",
+      "reason": "from evaluation_common.myocardium.legacy_masks import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/mlp/modules/module_04_quantitative_inr/quantitative_inr.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .checkpoint_loader import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py",
+      "reason": "from .checkpoint_loader import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from mlp.modules.module_05_signal_decoder.decoder_factory import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/mlp/modules/module_05_signal_decoder/decoder_factory.py",
+      "reason": "from mlp.modules.module_05_signal_decoder.decoder_factory import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/mlp/modules/module_05_signal_decoder/frozen_decoder.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .mlp_model import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/mlp/modules/module_05_signal_decoder/mlp_model.py",
+      "reason": "from .mlp_model import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .provenance import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/mlp/modules/module_05_signal_decoder/provenance.py",
+      "reason": "from .provenance import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .trad_teacher.trad_signal_simulator import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/mlp/modules/module_05_signal_decoder/trad_teacher/trad_signal_simulator.py",
+      "reason": "from .trad_teacher.trad_signal_simulator import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from mlp.modules.module_07_objective_training.mlp_trainer import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/mlp/modules/module_07_objective_training/mlp_trainer.py",
+      "reason": "from mlp.modules.module_07_objective_training.mlp_trainer import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .cyj11_adapter import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py",
+      "reason": "from .cyj11_adapter import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .cyj11_aha16 import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py",
+      "reason": "from .cyj11_aha16 import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "evidence": [
+        "from .cyj11_legacy_roi import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py",
+      "reason": "from .cyj11_legacy_roi import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .cyj11_myocardial_roi_metrics import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py",
+      "reason": "from .cyj11_myocardial_roi_metrics import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .cyj11_postprocess import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "reason": "from .cyj11_postprocess import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .cyj11_r3_fit_first_final_pose_bundle import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py",
+      "reason": "from .cyj11_r3_fit_first_final_pose_bundle import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .cyj11_runner import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py",
+      "reason": "from .cyj11_runner import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "evidence": [
+        "from .final5_adapter import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py",
+      "reason": "from .final5_adapter import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "evidence": [
+        "from .final5_aha16 import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py",
+      "reason": "from .final5_aha16 import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "evidence": [
+        "from .final5_myocardial_roi_metrics import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
+      "reason": "from .final5_myocardial_roi_metrics import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "evidence": [
+        "from .legacy_aha16 import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py",
+      "reason": "from .legacy_aha16 import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .paired_final_pose_lv_metrics import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py",
+      "reason": "from .paired_final_pose_lv_metrics import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared runtime directory"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/CYJ_S2CH100_4CH50.json",
+      "reason": "declared runtime directory",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared runtime directory"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/CYJ_S2CH50_4CH100.json",
+      "reason": "declared runtime directory",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared runtime directory"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/CYJ_SAX100_2CH0_4CH0.json",
+      "reason": "declared runtime directory",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared runtime directory"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/CYJ_SAX100_2CH0_4CH100.json",
+      "reason": "declared runtime directory",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared runtime directory"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/CYJ_SAX100_2CH100_4CH0.json",
+      "reason": "declared runtime directory",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared runtime directory"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH100_4CH50.json",
+      "reason": "declared runtime directory",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared runtime directory"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH50_4CH100.json",
+      "reason": "declared runtime directory",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared runtime directory"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH0.json",
+      "reason": "declared runtime directory",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared runtime directory"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH100.json",
+      "reason": "declared runtime directory",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared runtime directory"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH100_4CH0.json",
+      "reason": "declared runtime directory",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "UNRESOLVED_DYNAMIC",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_08",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/common_native.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "08"
+      ]
+    },
+    {
+      "classification": "UNRESOLVED_DYNAMIC",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_08",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/common_native_all_stack_roi_metrics.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "08"
+      ]
+    },
+    {
+      "classification": "UNRESOLVED_DYNAMIC",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_08",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/common_native_metrics_qc.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "08"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .contracts import"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
+      "reason": "from .contracts import",
+      "stages": [
+        "04",
+        "05",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .current_native_central_component_mask import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py",
+      "reason": "from .current_native_central_component_mask import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .dictionary import"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py",
+      "reason": "from .dictionary import",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from ..phase2_clean.direct_native_bundles import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_bundles.py",
+      "reason": "from ..phase2_clean.direct_native_bundles import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from ..phase2_clean.direct_native_endpoint_audit import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py",
+      "reason": "from ..phase2_clean.direct_native_endpoint_audit import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from ..phase2_clean.evaluation import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py",
+      "reason": "from ..phase2_clean.evaluation import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "evidence": [
+        "from ..phase2_clean.final5_partitioned_native_metrics import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
+      "reason": "from ..phase2_clean.final5_partitioned_native_metrics import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "evidence": [
+        "from .final5_publication_visualization import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py",
+      "reason": "from .final5_publication_visualization import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .final_cyj_reporting import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py",
+      "reason": "from .final_cyj_reporting import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from ..phase2_clean.final_native_grid_metrics import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
+      "reason": "from ..phase2_clean.final_native_grid_metrics import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .final_sparse_native_metrics import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py",
+      "reason": "from .final_sparse_native_metrics import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_denormalize.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "COMPATIBILITY_IMPORT_ONLY",
+      "evidence": [
+        "from .fit_first_intensity_preserving import"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
+      "reason": "from .fit_first_intensity_preserving import",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .fit_first_mask_audit import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_mask_audit.py",
+      "reason": "from .fit_first_mask_audit import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from ..phase2_clean.fit_first_native_geometry import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py",
+      "reason": "from ..phase2_clean.fit_first_native_geometry import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .fit_first_native_pose_audit import"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_pose_audit.py",
+      "reason": "from .fit_first_native_pose_audit import",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .fit_first_route_contract import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_route_contract.py",
+      "reason": "from .fit_first_route_contract import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .formal_l100_sparse_manifest import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py",
+      "reason": "from .formal_l100_sparse_manifest import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .frozen_native_support import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/frozen_native_support.py",
+      "reason": "from .frozen_native_support import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .heldout import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py",
+      "reason": "from .heldout import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .l100_mask_paired_eval import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py",
+      "reason": "from .l100_mask_paired_eval import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .matched_output import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py",
+      "reason": "from .matched_output import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "COMPATIBILITY_IMPORT_ONLY",
+      "evidence": [
+        "from .reuse_standardized_native_dictionary_maps import"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
+      "reason": "from .reuse_standardized_native_dictionary_maps import",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_08",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "08"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_08",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "08"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "COMPATIBILITY_IMPORT_ONLY",
+      "evidence": [
+        "from .standardize_subject_slices import"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
+      "reason": "from .standardize_subject_slices import",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from ..phase2_clean.visualization import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py",
+      "reason": "from ..phase2_clean.visualization import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from ..simulation.simulate_hhz_signals import"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py",
+      "reason": "from ..simulation.simulate_hhz_signals import",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from quality_experiments.Q001_recon.config import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/quality_experiments/Q001_recon/config.py",
+      "reason": "from quality_experiments.Q001_recon.config import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .contracts import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py",
+      "reason": "from .contracts import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/joint_dataset.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .training_curves import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training_curves.py",
+      "reason": "from .training_curves import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/reconstruction_core/orchestration.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/scripts/deployment_manifest.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "02",
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_01",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/scripts/extract_subject_deployment_manifest.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "01"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.evaluation.profiling.summarize_timing_profile import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/evaluation/profiling/summarize_timing_profile.py",
+      "reason": "from trad.evaluation.profiling.summarize_timing_profile import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.evaluation.scmr.quality_control import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/evaluation/scmr/quality_control.py",
+      "reason": "from trad.evaluation.scmr.quality_control import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from .reference_2d import"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/evaluation/scmr/reference_2d.py",
+      "reason": "from .reference_2d import",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_02",
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/deformableReg2Dmind_adaptive.m",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_02",
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_02",
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_02",
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_02_data_bridge/build_manifest.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_02_data_bridge/geometry.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_02_data_bridge/mat_v73.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "02",
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_02_data_bridge/prepare_observations.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_02_data_bridge/timing.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py",
+      "reason": "from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.modules.module_04_quantitative_inr.quantitative_inr import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_04_quantitative_inr/quantitative_inr.py",
+      "reason": "from trad.modules.module_04_quantitative_inr.quantitative_inr import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.modules.module_05_signal_decoder.decoder_factory import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_05_signal_decoder/decoder_factory.py",
+      "reason": "from trad.modules.module_05_signal_decoder.decoder_factory import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.modules.module_05_signal_decoder.trad_signal_simulator import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_05_signal_decoder/trad_signal_simulator.py",
+      "reason": "from trad.modules.module_05_signal_decoder.trad_signal_simulator import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "reason": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
+      "stages": [
+        "04",
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_06_rigid_psf/rigid_psf_forward.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.modules.module_07_objective_training.experiment_infrastructure import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_07_objective_training/experiment_infrastructure.py",
+      "reason": "from trad.modules.module_07_objective_training.experiment_infrastructure import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.modules.module_07_objective_training.training_space import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_07_objective_training/training_space.py",
+      "reason": "from trad.modules.module_07_objective_training.training_space import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.modules.module_08_inference_export.export_quantitative import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_08_inference_export/export_quantitative.py",
+      "reason": "from trad.modules.module_08_inference_export.export_quantitative import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "from trad.modules.module_08_inference_export.reprojection import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/modules/module_08_inference_export/reprojection.py",
+      "reason": "from trad.modules.module_08_inference_export.reprojection import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_02",
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/scripts/local_preprocess_all.m",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_02",
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/scripts/local_preprocess_one.m",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/scripts/prepare_all_observations.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_02",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/scripts/validate_transferred_preprocessed.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from trad.third_party.nesvor.nesvor.image import"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/image/__init__.py",
+      "reason": "from trad.third_party.nesvor.nesvor.image import",
+      "stages": [
+        "04",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .image import"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "reason": "from .image import",
+      "stages": [
+        "04",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .image_utils import"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
+      "reason": "from .image_utils import",
+      "stages": [
+        "04",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from trad.third_party.nesvor.nesvor.inr import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/inr/__init__.py",
+      "reason": "from trad.third_party.nesvor.nesvor.inr import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from ..slice_acquisition import"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py",
+      "reason": "from ..slice_acquisition import",
+      "stages": [
+        "04",
+        "06"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .slice_acq import"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py",
+      "reason": "from .slice_acq import",
+      "stages": [
+        "04",
+        "06"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .slice_acq_torch import"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py",
+      "reason": "from .slice_acq_torch import",
+      "stages": [
+        "04",
+        "06"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from trad.third_party.nesvor.nesvor.svr.registration import"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "reason": "from trad.third_party.nesvor.nesvor.svr.registration import",
+      "stages": [
+        "04",
+        "06"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from trad.third_party.nesvor.nesvor.transform import"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/transform/__init__.py",
+      "reason": "from trad.third_party.nesvor.nesvor.transform import",
+      "stages": [
+        "03",
+        "06"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .transform import"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/transform/transform.py",
+      "reason": "from .transform import",
+      "stages": [
+        "03",
+        "06"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .transform_convert import"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py",
+      "reason": "from .transform_convert import",
+      "stages": [
+        "03",
+        "06"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .transform_convert_torch import"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py",
+      "reason": "from .transform_convert_torch import",
+      "stages": [
+        "03",
+        "06"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from trad.third_party.nesvor.nesvor.utils import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "reason": "from trad.third_party.nesvor.nesvor.utils import",
+      "stages": [
+        "03",
+        "04",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .logger import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/utils/logger.py",
+      "reason": "from .logger import",
+      "stages": [
+        "03",
+        "04",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .loss import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/utils/loss.py",
+      "reason": "from .loss import",
+      "stages": [
+        "03",
+        "04",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .misc import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/utils/misc.py",
+      "reason": "from .misc import",
+      "stages": [
+        "03",
+        "04",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from trad.third_party.nesvor.nesvor.utils.psf import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/utils/psf.py",
+      "reason": "from trad.third_party.nesvor.nesvor.utils.psf import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "THIRD_PARTY_ACTIVE",
+      "evidence": [
+        "from .types import"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/trad/third_party/nesvor/nesvor/utils/types.py",
+      "reason": "from .types import",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "configs/models_manifest.json",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "yaml",
+      "outputs": [],
+      "path": "configs/protocol_scmr_v5_10_100.yaml",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_09",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "configs/scientific_freeze_contract.json",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "09"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_01",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "configs/subject_stack_manifest.example.json",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "01"
+      ]
+    },
+    {
+      "classification": "ACTIVE_ENTRYPOINT",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_01",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "pipeline/01_RAW_DICOM/run_stage.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "01"
+      ]
+    },
+    {
+      "classification": "ACTIVE_ENTRYPOINT",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_02",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_ENTRYPOINT",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_03",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_ENTRYPOINT",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_04",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "pipeline/04_SPARSE_PROFILES/run_stage.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "ACTIVE_ENTRYPOINT",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_05",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_ENTRYPOINT",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "pipeline/06_PROPOSED/run_stage.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_ENTRYPOINT",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_07",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "pipeline/07_FINAL_POSE/run_stage.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "ACTIVE_ENTRYPOINT",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_08",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "08"
+      ]
+    },
+    {
+      "classification": "ACTIVE_ENTRYPOINT",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_09",
+      "inputs": [],
+      "language": "shell",
+      "outputs": [],
+      "path": "pipeline/09_INTEGRITY_AND_REPORTING/run_stage.sh",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "09"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_06",
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "runtime/runtime_contract.json",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_01",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "scripts/validate_active_subject.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "01"
+      ]
+    },
+    {
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_09",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "scripts/verify_no_legacy_code_path.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "09"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_09",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "scripts/verify_project_integrity.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "09"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_09",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "scripts/verify_runtime_contract.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "09"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "evidence": [
+        "declared active stage dependency"
+      ],
+      "functional_area": "stage_09",
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "scripts/verify_scientific_freeze.py",
+      "reason": "declared active stage dependency",
+      "stages": [
+        "09"
+      ]
+    }
+  ],
+  "schema_version": "active-dependency-inventory/v1",
+  "stages": {
+    "01": [
+      "common/scripts/extract_subject_deployment_manifest.py",
+      "configs/subject_stack_manifest.example.json",
+      "pipeline/01_RAW_DICOM/run_stage.sh",
+      "scripts/validate_active_subject.py"
+    ],
+    "02": [
+      "common/scripts/deployment_manifest.py",
+      "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/deformableReg2Dmind_adaptive.m",
+      "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m",
+      "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m",
+      "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m",
+      "common/trad/modules/module_02_data_bridge/mat_v73.py",
+      "common/trad/scripts/local_preprocess_all.m",
+      "common/trad/scripts/local_preprocess_one.m",
+      "common/trad/scripts/validate_transferred_preprocessed.py",
+      "pipeline/02_PREPROCESS_MATLAB/run_stage.sh"
+    ],
+    "03": [
+      "common/scripts/deployment_manifest.py",
+      "common/trad/modules/module_02_data_bridge/build_manifest.py",
+      "common/trad/modules/module_02_data_bridge/geometry.py",
+      "common/trad/modules/module_02_data_bridge/mat_v73.py",
+      "common/trad/modules/module_02_data_bridge/prepare_observations.py",
+      "common/trad/modules/module_02_data_bridge/timing.py",
+      "common/trad/scripts/prepare_all_observations.py",
+      "common/trad/third_party/nesvor/nesvor/transform/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/transform/transform.py",
+      "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py",
+      "common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py",
+      "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/utils/logger.py",
+      "common/trad/third_party/nesvor/nesvor/utils/loss.py",
+      "common/trad/third_party/nesvor/nesvor/utils/misc.py",
+      "configs/protocol_scmr_v5_10_100.yaml",
+      "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh"
+    ],
+    "04": [
+      "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/CYJ_S2CH100_4CH50.json",
+      "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/CYJ_S2CH50_4CH100.json",
+      "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/CYJ_SAX100_2CH0_4CH0.json",
+      "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/CYJ_SAX100_2CH0_4CH100.json",
+      "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/CYJ_SAX100_2CH100_4CH0.json",
+      "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH100_4CH50.json",
+      "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH50_4CH100.json",
+      "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH0.json",
+      "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH100.json",
+      "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH100_4CH0.json",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
+      "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "common/trad/third_party/nesvor/nesvor/image/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
+      "common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py",
+      "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py",
+      "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/utils/logger.py",
+      "common/trad/third_party/nesvor/nesvor/utils/loss.py",
+      "common/trad/third_party/nesvor/nesvor/utils/misc.py",
+      "pipeline/04_SPARSE_PROFILES/run_stage.sh"
+    ],
+    "05": [
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_denormalize.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_pose_audit.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
+      "common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py",
+      "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m",
+      "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh"
+    ],
+    "06": [
+      "common/mlp/modules/module_04_quantitative_inr/quantitative_inr.py",
+      "common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py",
+      "common/mlp/modules/module_05_signal_decoder/decoder_factory.py",
+      "common/mlp/modules/module_05_signal_decoder/frozen_decoder.py",
+      "common/mlp/modules/module_05_signal_decoder/mlp_model.py",
+      "common/mlp/modules/module_05_signal_decoder/provenance.py",
+      "common/mlp/modules/module_05_signal_decoder/trad_teacher/trad_signal_simulator.py",
+      "common/mlp/modules/module_07_objective_training/mlp_trainer.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py",
+      "common/quality_experiments/Q001_recon/config.py",
+      "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py",
+      "common/quality_experiments/Q002_B6_roi_same_anchor_mse/joint_dataset.py",
+      "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py",
+      "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training_curves.py",
+      "common/reconstruction_core/orchestration.py",
+      "common/trad/evaluation/profiling/summarize_timing_profile.py",
+      "common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py",
+      "common/trad/modules/module_04_quantitative_inr/quantitative_inr.py",
+      "common/trad/modules/module_05_signal_decoder/decoder_factory.py",
+      "common/trad/modules/module_05_signal_decoder/trad_signal_simulator.py",
+      "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
+      "common/trad/modules/module_06_rigid_psf/rigid_psf_forward.py",
+      "common/trad/modules/module_07_objective_training/experiment_infrastructure.py",
+      "common/trad/modules/module_07_objective_training/training_space.py",
+      "common/trad/modules/module_08_inference_export/export_quantitative.py",
+      "common/trad/modules/module_08_inference_export/reprojection.py",
+      "common/trad/third_party/nesvor/nesvor/image/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
+      "common/trad/third_party/nesvor/nesvor/inr/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py",
+      "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py",
+      "common/trad/third_party/nesvor/nesvor/svr/registration.py",
+      "common/trad/third_party/nesvor/nesvor/transform/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/transform/transform.py",
+      "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py",
+      "common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py",
+      "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/utils/logger.py",
+      "common/trad/third_party/nesvor/nesvor/utils/loss.py",
+      "common/trad/third_party/nesvor/nesvor/utils/misc.py",
+      "common/trad/third_party/nesvor/nesvor/utils/psf.py",
+      "common/trad/third_party/nesvor/nesvor/utils/types.py",
+      "configs/models_manifest.json",
+      "pipeline/06_PROPOSED/run_stage.sh",
+      "runtime/runtime_contract.json"
+    ],
+    "07": [
+      "common/evaluation_common/myocardium/build_native_bundle.py",
+      "common/evaluation_common/myocardium/legacy_masks.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py",
+      "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_bundles.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_mask_audit.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_route_contract.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/frozen_native_support.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py",
+      "common/trad/evaluation/scmr/quality_control.py",
+      "common/trad/evaluation/scmr/reference_2d.py",
+      "common/trad/third_party/nesvor/nesvor/image/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/image/image.py",
+      "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
+      "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
+      "common/trad/third_party/nesvor/nesvor/utils/logger.py",
+      "common/trad/third_party/nesvor/nesvor/utils/loss.py",
+      "common/trad/third_party/nesvor/nesvor/utils/misc.py",
+      "pipeline/07_FINAL_POSE/run_stage.sh"
+    ],
+    "08": [
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/common_native.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/common_native_all_stack_roi_metrics.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/common_native_metrics_qc.py",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh",
+      "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh",
+      "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh"
+    ],
+    "09": [
+      "configs/scientific_freeze_contract.json",
+      "pipeline/09_INTEGRITY_AND_REPORTING/run_stage.sh",
+      "scripts/verify_no_legacy_code_path.py",
+      "scripts/verify_project_integrity.py",
+      "scripts/verify_runtime_contract.py",
+      "scripts/verify_scientific_freeze.py"
+    ]
+  },
+  "subject_gating_references": [
+    "scripts/validate_active_subject.py"
+  ],
+  "unresolved_dynamic_dependencies": [
+    {
+      "path": "external:matlab",
+      "reason": "server-only MATLAB execution"
+    },
+    {
+      "path": "external:nesvor",
+      "reason": "server-only NeSVoR executable"
+    },
+    {
+      "path": "runtime/model_assets/*.pth",
+      "reason": "binary assets intentionally absent locally"
+    }
+  ]
+}
