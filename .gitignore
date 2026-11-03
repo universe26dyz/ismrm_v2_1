@@ -1,12 +1,8 @@
-# Patient data and generated outputs are never committed.
-subjects/*/raw_dicom/
-subjects/*/preprocessed/
-subjects/*/prepared/
-subjects/*/roi/
-subjects/*/inputs/
-!runs/
-runs/*/
-!runs/.gitkeep
+# Server-local subject archives and formal run outputs are never committed.
+subjects/
+runs/
+
+# Server-local model binaries are never committed.
 runtime/model_assets/*.pth
 runtime/model_assets/*.pt
 *.mat
@@ -19,8 +15,6 @@ __pycache__/
 .pytest_cache/
 
 # Keep metadata and manuals visible to Git.
-!subjects/*/manifest.json
-!subjects/*/sha256.jsonl
 !runtime/source_records/*.json
 !runtime/source_records/*.jsonl
 !runtime/source_records/*.txt

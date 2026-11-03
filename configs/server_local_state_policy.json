@@ -1,0 +1,11 @@
+{
+  "schema_version": "server-local-state-policy/v1",
+  "protected_paths": [
+    {"path": "subjects/", "policy": "preserve_recursive"},
+    {"path": "runs/", "policy": "preserve_recursive"},
+    {"path": "runtime/model_assets/", "policy": "preserve_runtime_binaries"}
+  ],
+  "preserve_root_patterns": ["materialize*.log", "verify*.log"],
+  "forbidden_operations": ["rm_repo_root", "git_clean_fd", "git_clean_fdx"],
+  "deployment_rule": "Update Git-tracked files in place; never replace the repository directory or runtime directory wholesale."
+}
