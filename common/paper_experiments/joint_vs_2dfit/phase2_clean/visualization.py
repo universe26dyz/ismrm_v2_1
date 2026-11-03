@@ -296,6 +296,7 @@ def _masked(panel: Panel) -> np.ma.MaskedArray:
 
 
 def _write_figure(figure: Any, target: Path) -> dict[str, str]:
+    target.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(target, dpi=320, bbox_inches="tight")
     pdf = target.with_suffix(".pdf")
     figure.savefig(pdf, bbox_inches="tight")
