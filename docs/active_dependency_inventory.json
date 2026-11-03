@@ -7,10 +7,10 @@
   "classification_summary": {
     "ACTIVE_ENTRYPOINT": 9,
     "ACTIVE_EXECUTED": 22,
-    "ACTIVE_TRANSITIVE": 69,
+    "ACTIVE_TRANSITIVE": 78,
     "COMPATIBILITY_IMPORT_ONLY": 3,
-    "CONDITIONAL_ACTIVE": 8,
-    "CONFIG_RUNTIME_ASSET": 3,
+    "CONDITIONAL_ACTIVE": 10,
+    "CONFIG_RUNTIME_ASSET": 8,
     "LEGACY_UNUSED_BY_PIPELINE": 3,
     "TEST_ONLY": 2,
     "THIRD_PARTY_ACTIVE": 18
@@ -677,6 +677,38 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_myocardial_roi_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_runner import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .legacy_aha16 import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
       "evidence": "from ..phase2_clean.contracts import",
       "from": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py",
       "stage": "07",
@@ -1101,6 +1133,14 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_postprocess import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
       "evidence": "from .cyj11_adapter import",
       "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py",
       "stage": "07",
@@ -1193,6 +1233,46 @@
       "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py",
       "stage": "07",
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_adapter import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .cyj11_runner import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.contracts import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.final_native_grid_metrics import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ..phase2_clean.visualization import",
+      "from": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py"
     },
     {
       "condition": "import-time",
@@ -2571,9 +2651,57 @@
       "to": "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m"
     },
     {
+      "condition": "always within Stage 04 batch",
+      "edge_type": "CONFIG_READ",
+      "evidence": "PROFILE loop and --profile path",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH100_4CH50.json"
+    },
+    {
+      "condition": "always within Stage 04 batch",
+      "edge_type": "CONFIG_READ",
+      "evidence": "PROFILE loop and --profile path",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH50_4CH100.json"
+    },
+    {
+      "condition": "always within Stage 04 batch",
+      "edge_type": "CONFIG_READ",
+      "evidence": "PROFILE loop and --profile path",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH0.json"
+    },
+    {
+      "condition": "always within Stage 04 batch",
+      "edge_type": "CONFIG_READ",
+      "evidence": "PROFILE loop and --profile path",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH100.json"
+    },
+    {
+      "condition": "always within Stage 04 batch",
+      "edge_type": "CONFIG_READ",
+      "evidence": "PROFILE loop and --profile path",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH100_4CH0.json"
+    },
+    {
       "condition": "per selected sparse profile",
       "edge_type": "SHELL_PYTHON_MODULE",
       "evidence": "profile builder",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
+    },
+    {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.phase2_clean.sparse",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
       "stage": "04",
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
@@ -2587,9 +2715,25 @@
       "to": "common/paper_experiments/joint_vs_2dfit/aha/common_native_all_stack_roi_metrics.py"
     },
     {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.aha.common_native_all_stack_roi_metrics",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh",
+      "stage": "08",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/common_native_all_stack_roi_metrics.py"
+    },
+    {
       "condition": "per case",
       "edge_type": "SHELL_PYTHON_MODULE",
       "evidence": "common-native metrics CLI",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh",
+      "stage": "08",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/common_native_metrics_qc.py"
+    },
+    {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.aha.common_native_metrics_qc",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh",
       "stage": "08",
       "to": "common/paper_experiments/joint_vs_2dfit/aha/common_native_metrics_qc.py"
@@ -2603,9 +2747,25 @@
       "to": "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py"
     },
     {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.aha.current_fit_first_final_pose_bundle",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py"
+    },
+    {
       "condition": "per case",
       "edge_type": "SHELL_PYTHON_MODULE",
       "evidence": "Proposed final-pose bundle",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py"
+    },
+    {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.aha.cyj11_r3_direct_final_pose_bundle",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
       "stage": "07",
       "to": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py"
@@ -2619,12 +2779,60 @@
       "to": "common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py"
     },
     {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.aha.derive_final_pose_mapping",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py"
+    },
+    {
+      "condition": "twice per case",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "AHA SD CLI for 1px and legacy cores",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py"
+    },
+    {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.aha.paired_aha_sd",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py"
+    },
+    {
       "condition": "per case",
       "edge_type": "SHELL_PYTHON_MODULE",
       "evidence": "paired AHA metrics",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
       "stage": "07",
       "to": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py"
+    },
+    {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.aha.paired_final_pose_postprocess",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py"
+    },
+    {
+      "condition": "per case",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "through-plane QC CLI",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py"
+    },
+    {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.aha.paired_final_pose_through_plane",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py"
     },
     {
       "condition": "L100 and sparse cases",
@@ -2635,9 +2843,25 @@
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py"
     },
     {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.phase2_clean.baseline",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py"
+    },
+    {
       "condition": "always",
       "edge_type": "SHELL_PYTHON_MODULE",
       "evidence": "SCMR-v5 native cache",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py"
+    },
+    {
+      "condition": "shell command",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.phase2_clean.scmr_v5_native_cache",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh",
       "stage": "05",
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py"
@@ -3147,6 +3371,54 @@
       "to": "common/trad/modules/module_07_objective_training/training_space.py"
     },
     {
+      "condition": "per stack",
+      "edge_type": "MATLAB_ADDPATH",
+      "evidence": "mapper verifies and addpaths matcher",
+      "from": "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m",
+      "stage": "05",
+      "to": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m"
+    },
+    {
+      "condition": "runtime function lookup",
+      "edge_type": "MATLAB_LOCAL_FUNCTION",
+      "evidence": "MATLAB call function_T1T2_10HB_bssfp_qc(...)",
+      "from": "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m",
+      "stage": "05",
+      "to": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m"
+    },
+    {
+      "condition": "per stack",
+      "edge_type": "MATLAB_ADDPATH",
+      "evidence": "mapper verifies and addpaths simulator",
+      "from": "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m",
+      "stage": "05",
+      "to": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m"
+    },
+    {
+      "condition": "per stack",
+      "edge_type": "MATLAB_ADDPATH",
+      "evidence": "mapper verifies and addpaths utility",
+      "from": "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m",
+      "stage": "05",
+      "to": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m"
+    },
+    {
+      "condition": "runtime function lookup",
+      "edge_type": "MATLAB_LOCAL_FUNCTION",
+      "evidence": "MATLAB call sim_T1T2_10HB_bssfp(...)",
+      "from": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m",
+      "stage": "05",
+      "to": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m"
+    },
+    {
+      "condition": "runtime function lookup",
+      "edge_type": "MATLAB_LOCAL_FUNCTION",
+      "evidence": "MATLAB call d2r(...)",
+      "from": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m",
+      "stage": "05",
+      "to": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m"
+    },
+    {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
       "evidence": "from .reference_2d import",
@@ -3161,6 +3433,38 @@
       "from": "common/trad/evaluation/scmr/quality_control.py",
       "stage": "08",
       "to": "common/trad/evaluation/scmr/reference_2d.py"
+    },
+    {
+      "condition": "runtime function lookup",
+      "edge_type": "MATLAB_LOCAL_FUNCTION",
+      "evidence": "MATLAB call MIND_descriptor2D(...)",
+      "from": "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m",
+      "stage": "02",
+      "to": "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/MIND_descriptor2D.m"
+    },
+    {
+      "condition": "runtime function lookup",
+      "edge_type": "MATLAB_LOCAL_FUNCTION",
+      "evidence": "MATLAB call deformableReg2Dmind_asym_nodisplay(...)",
+      "from": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m",
+      "stage": "02",
+      "to": "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m"
+    },
+    {
+      "condition": "runtime function lookup",
+      "edge_type": "MATLAB_LOCAL_FUNCTION",
+      "evidence": "MATLAB call HHMMSS2Sec(...)",
+      "from": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m",
+      "stage": "02",
+      "to": "common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m"
+    },
+    {
+      "condition": "runtime function lookup",
+      "edge_type": "MATLAB_LOCAL_FUNCTION",
+      "evidence": "MATLAB call mppca_denoise_multimap_stack(...)",
+      "from": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m",
+      "stage": "02",
+      "to": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m"
     },
     {
       "condition": "import-time",
@@ -3587,9 +3891,41 @@
       "to": "common/trad/scripts/local_preprocess_one.m"
     },
     {
+      "condition": "runtime function lookup",
+      "edge_type": "MATLAB_LOCAL_FUNCTION",
+      "evidence": "MATLAB call local_preprocess_one(...)",
+      "from": "common/trad/scripts/local_preprocess_all.m",
+      "stage": "02",
+      "to": "common/trad/scripts/local_preprocess_one.m"
+    },
+    {
+      "condition": "per stack",
+      "edge_type": "MATLAB_FUNCTION",
+      "evidence": "explicit options construction",
+      "from": "common/trad/scripts/local_preprocess_one.m",
+      "stage": "02",
+      "to": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m"
+    },
+    {
+      "condition": "runtime function lookup",
+      "edge_type": "MATLAB_LOCAL_FUNCTION",
+      "evidence": "MATLAB call preprocess_options_v1(...)",
+      "from": "common/trad/scripts/local_preprocess_one.m",
+      "stage": "02",
+      "to": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m"
+    },
+    {
       "condition": "per stack",
       "edge_type": "MATLAB_FUNCTION",
       "evidence": "explicit preprocess call",
+      "from": "common/trad/scripts/local_preprocess_one.m",
+      "stage": "02",
+      "to": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m"
+    },
+    {
+      "condition": "runtime function lookup",
+      "edge_type": "MATLAB_LOCAL_FUNCTION",
+      "evidence": "MATLAB call preprocess_stack_v1(...)",
       "from": "common/trad/scripts/local_preprocess_one.m",
       "stage": "02",
       "to": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m"
@@ -4885,6 +5221,14 @@
     {
       "condition": "runtime",
       "edge_type": "EXTERNAL_RUNTIME",
+      "evidence": "MATLAB argument or PATH",
+      "from": "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
+      "stage": "05",
+      "to": "external:matlab"
+    },
+    {
+      "condition": "runtime",
+      "edge_type": "EXTERNAL_RUNTIME",
       "evidence": "NESVOR environment variable or PATH",
       "from": "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
       "stage": "05",
@@ -4953,6 +5297,14 @@
       "from": "pipeline/07_FINAL_POSE/run_stage.sh",
       "stage": "07",
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh"
+    },
+    {
+      "condition": "runtime",
+      "edge_type": "EXTERNAL_RUNTIME",
+      "evidence": "cuda:0 requested by Stage commands",
+      "from": "pipeline/07_FINAL_POSE/run_stage.sh",
+      "stage": "07",
+      "to": "external:cuda"
     },
     {
       "condition": "always",
@@ -5071,17 +5423,19 @@
       ]
     }
   ],
-  "generated_from_git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+  "generated_from_git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
   "nodes": [
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from evaluation_common.myocardium.build_native_bundle import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5089,6 +5443,10 @@
       "outputs": [],
       "path": "common/evaluation_common/myocardium/build_native_bundle.py",
       "reason": "from evaluation_common.myocardium.build_native_bundle import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5096,14 +5454,16 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .legacy_masks import",
         "from evaluation_common.myocardium.legacy_masks import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "legacy"
@@ -5113,6 +5473,10 @@
       "outputs": [],
       "path": "common/evaluation_common/myocardium/legacy_masks.py",
       "reason": "from evaluation_common.myocardium.legacy_masks import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5120,13 +5484,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .checkpoint_loader import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5134,6 +5500,10 @@
       "outputs": [],
       "path": "common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py",
       "reason": "from .checkpoint_loader import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -5141,13 +5511,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from mlp.modules.module_05_signal_decoder.decoder_factory import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5155,6 +5527,10 @@
       "outputs": [],
       "path": "common/mlp/modules/module_05_signal_decoder/decoder_factory.py",
       "reason": "from mlp.modules.module_05_signal_decoder.decoder_factory import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -5162,13 +5538,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .frozen_decoder import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5176,6 +5554,10 @@
       "outputs": [],
       "path": "common/mlp/modules/module_05_signal_decoder/frozen_decoder.py",
       "reason": "from .frozen_decoder import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -5183,13 +5565,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .mlp_model import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5197,6 +5581,10 @@
       "outputs": [],
       "path": "common/mlp/modules/module_05_signal_decoder/mlp_model.py",
       "reason": "from .mlp_model import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -5204,13 +5592,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .provenance import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5218,6 +5608,10 @@
       "outputs": [],
       "path": "common/mlp/modules/module_05_signal_decoder/provenance.py",
       "reason": "from .provenance import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -5225,13 +5619,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .trad_teacher.trad_signal_simulator import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5239,6 +5635,10 @@
       "outputs": [],
       "path": "common/mlp/modules/module_05_signal_decoder/trad_teacher/trad_signal_simulator.py",
       "reason": "from .trad_teacher.trad_signal_simulator import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -5246,13 +5646,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from mlp.modules.module_07_objective_training.mlp_trainer import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5260,6 +5662,10 @@
       "outputs": [],
       "path": "common/mlp/modules/module_07_objective_training/mlp_trainer.py",
       "reason": "from mlp.modules.module_07_objective_training.mlp_trainer import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -5267,13 +5673,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .common_native import"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5281,19 +5689,26 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/common_native.py",
       "reason": "from .common_native import",
+      "stage_roles": {
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "08"
       ]
     },
     {
       "classification": "CONDITIONAL_ACTIVE",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "SHELL_MODULE_SCAN"
+      ],
       "evidence": [
-        "all-stack ROI CLI"
+        "all-stack ROI CLI",
+        "shell python -m paper_experiments.joint_vs_2dfit.aha.common_native_all_stack_roi_metrics"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5301,20 +5716,28 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/common_native_all_stack_roi_metrics.py",
       "reason": "all-stack ROI CLI",
+      "stage_roles": {
+        "08": "CONDITIONAL_ACTIVE"
+      },
       "stages": [
         "08"
       ]
     },
     {
       "classification": "CONDITIONAL_ACTIVE",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "PYTHON_IMPORT",
+        "SHELL_MODULE_SCAN"
+      ],
       "evidence": [
         "common-native metrics CLI",
-        "from .common_native_metrics_qc import"
+        "from .common_native_metrics_qc import",
+        "shell python -m paper_experiments.joint_vs_2dfit.aha.common_native_metrics_qc"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5322,19 +5745,26 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/common_native_metrics_qc.py",
       "reason": "common-native metrics CLI",
+      "stage_roles": {
+        "08": "CONDITIONAL_ACTIVE"
+      },
       "stages": [
         "08"
       ]
     },
     {
       "classification": "CONDITIONAL_ACTIVE",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "SHELL_MODULE_SCAN"
+      ],
       "evidence": [
-        "Fit-first final-pose bundle"
+        "Fit-first final-pose bundle",
+        "shell python -m paper_experiments.joint_vs_2dfit.aha.current_fit_first_final_pose_bundle"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5342,19 +5772,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py",
       "reason": "Fit-first final-pose bundle",
+      "stage_roles": {
+        "07": "CONDITIONAL_ACTIVE"
+      },
       "stages": [
         "07"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .cyj11_adapter import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "cyj11"
@@ -5364,6 +5799,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py",
       "reason": "from .cyj11_adapter import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5371,13 +5810,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .cyj11_aha16 import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "cyj11"
@@ -5387,6 +5828,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py",
       "reason": "from .cyj11_aha16 import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5394,13 +5839,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .cyj11_legacy_roi import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "cyj11",
@@ -5411,6 +5858,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py",
       "reason": "from .cyj11_legacy_roi import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5418,13 +5869,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .cyj11_myocardial_roi_metrics import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "cyj11"
@@ -5434,20 +5887,55 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py",
       "reason": "from .cyj11_myocardial_roi_metrics import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
       ]
     },
     {
-      "classification": "CONDITIONAL_ACTIVE",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
-        "Proposed final-pose bundle"
+        "from .cyj11_postprocess import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": true,
+      "historical_name_tokens": [
+        "cyj11"
+      ],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
+      "reason": "from .cyj11_postprocess import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "CONDITIONAL_ACTIVE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "SHELL_MODULE_SCAN"
+      ],
+      "evidence": [
+        "Proposed final-pose bundle",
+        "shell python -m paper_experiments.joint_vs_2dfit.aha.cyj11_r3_direct_final_pose_bundle"
+      ],
+      "functional_area": "stage_07",
+      "generic_runtime_usage": true,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "cyj11"
@@ -5457,19 +5945,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py",
       "reason": "Proposed final-pose bundle",
+      "stage_roles": {
+        "07": "CONDITIONAL_ACTIVE"
+      },
       "stages": [
         "07"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .cyj11_r3_fit_first_final_pose_bundle import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "cyj11"
@@ -5479,19 +5972,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py",
       "reason": "from .cyj11_r3_fit_first_final_pose_bundle import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .cyj11_runner import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "cyj11"
@@ -5501,6 +5999,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py",
       "reason": "from .cyj11_runner import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5508,13 +6010,17 @@
     },
     {
       "classification": "CONDITIONAL_ACTIVE",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "SHELL_MODULE_SCAN"
+      ],
       "evidence": [
-        "ROI mapping"
+        "ROI mapping",
+        "shell python -m paper_experiments.joint_vs_2dfit.aha.derive_final_pose_mapping"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5522,19 +6028,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py",
       "reason": "ROI mapping",
+      "stage_roles": {
+        "07": "CONDITIONAL_ACTIVE"
+      },
       "stages": [
         "07"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .final5_adapter import"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "final5"
@@ -5544,6 +6055,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py",
       "reason": "from .final5_adapter import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5551,13 +6066,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .final5_aha16 import"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "final5"
@@ -5567,6 +6084,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py",
       "reason": "from .final5_aha16 import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5574,13 +6095,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .final5_myocardial_roi_metrics import"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "final5"
@@ -5590,6 +6113,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
       "reason": "from .final5_myocardial_roi_metrics import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5597,13 +6124,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .legacy_aha16 import"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "legacy"
@@ -5613,20 +6142,53 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py",
       "reason": "from .legacy_aha16 import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
       ]
     },
     {
+      "classification": "CONDITIONAL_ACTIVE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "SHELL_MODULE_SCAN"
+      ],
+      "evidence": [
+        "AHA SD CLI for 1px and legacy cores",
+        "shell python -m paper_experiments.joint_vs_2dfit.aha.paired_aha_sd"
+      ],
+      "functional_area": "stage_07",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py",
+      "reason": "AHA SD CLI for 1px and legacy cores",
+      "stage_roles": {
+        "07": "CONDITIONAL_ACTIVE"
+      },
+      "stages": [
+        "07"
+      ]
+    },
+    {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .paired_final_pose_lv_metrics import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5634,6 +6196,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py",
       "reason": "from .paired_final_pose_lv_metrics import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5641,13 +6207,17 @@
     },
     {
       "classification": "CONDITIONAL_ACTIVE",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "SHELL_MODULE_SCAN"
+      ],
       "evidence": [
-        "paired AHA metrics"
+        "paired AHA metrics",
+        "shell python -m paper_experiments.joint_vs_2dfit.aha.paired_final_pose_postprocess"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5655,19 +6225,178 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py",
       "reason": "paired AHA metrics",
+      "stage_roles": {
+        "07": "CONDITIONAL_ACTIVE"
+      },
       "stages": [
         "07"
       ]
     },
     {
       "classification": "CONDITIONAL_ACTIVE",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "SHELL_MODULE_SCAN"
+      ],
       "evidence": [
-        "baseline CLI"
+        "shell python -m paper_experiments.joint_vs_2dfit.aha.paired_final_pose_through_plane",
+        "through-plane QC CLI"
+      ],
+      "functional_area": "stage_07",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+      "reason": "through-plane QC CLI",
+      "stage_roles": {
+        "07": "CONDITIONAL_ACTIVE"
+      },
+      "stages": [
+        "07"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "discovery_methods": [
+        "CONFIG_REFERENCE"
+      ],
+      "evidence": [
+        "PROFILE loop and --profile path"
+      ],
+      "functional_area": "stage_04",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH100_4CH50.json",
+      "reason": "PROFILE loop and --profile path",
+      "stage_roles": {
+        "04": "CONFIG_RUNTIME_ASSET"
+      },
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "discovery_methods": [
+        "CONFIG_REFERENCE"
+      ],
+      "evidence": [
+        "PROFILE loop and --profile path"
+      ],
+      "functional_area": "stage_04",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH50_4CH100.json",
+      "reason": "PROFILE loop and --profile path",
+      "stage_roles": {
+        "04": "CONFIG_RUNTIME_ASSET"
+      },
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "discovery_methods": [
+        "CONFIG_REFERENCE"
+      ],
+      "evidence": [
+        "PROFILE loop and --profile path"
+      ],
+      "functional_area": "stage_04",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH0.json",
+      "reason": "PROFILE loop and --profile path",
+      "stage_roles": {
+        "04": "CONFIG_RUNTIME_ASSET"
+      },
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "discovery_methods": [
+        "CONFIG_REFERENCE"
+      ],
+      "evidence": [
+        "PROFILE loop and --profile path"
+      ],
+      "functional_area": "stage_04",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH100.json",
+      "reason": "PROFILE loop and --profile path",
+      "stage_roles": {
+        "04": "CONFIG_RUNTIME_ASSET"
+      },
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONFIG_RUNTIME_ASSET",
+      "discovery_methods": [
+        "CONFIG_REFERENCE"
+      ],
+      "evidence": [
+        "PROFILE loop and --profile path"
+      ],
+      "functional_area": "stage_04",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "json",
+      "outputs": [],
+      "path": "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH100_4CH0.json",
+      "reason": "PROFILE loop and --profile path",
+      "stage_roles": {
+        "04": "CONFIG_RUNTIME_ASSET"
+      },
+      "stages": [
+        "04"
+      ]
+    },
+    {
+      "classification": "CONDITIONAL_ACTIVE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "SHELL_MODULE_SCAN"
+      ],
+      "evidence": [
+        "baseline CLI",
+        "shell python -m paper_experiments.joint_vs_2dfit.phase2_clean.baseline"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5675,13 +6404,18 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
       "reason": "baseline CLI",
+      "stage_roles": {
+        "05": "CONDITIONAL_ACTIVE"
+      },
       "stages": [
         "05"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.contracts import",
         "from .contracts import",
@@ -5689,7 +6423,7 @@
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5697,6 +6431,13 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
       "reason": "from .contracts import",
+      "stage_roles": {
+        "04": "ACTIVE_TRANSITIVE",
+        "05": "ACTIVE_TRANSITIVE",
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "04",
         "05",
@@ -5707,13 +6448,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .current_native_central_component_mask import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5721,6 +6464,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py",
       "reason": "from .current_native_central_component_mask import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5728,13 +6475,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .dictionary import"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5742,6 +6491,11 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py",
       "reason": "from .dictionary import",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "05",
         "07",
@@ -5750,13 +6504,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.direct_native_bundles import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5764,20 +6520,25 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_bundles.py",
       "reason": "from ..phase2_clean.direct_native_bundles import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.direct_native_endpoint_audit import",
         "from .direct_native_endpoint_audit import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5785,20 +6546,25 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py",
       "reason": "from ..phase2_clean.direct_native_endpoint_audit import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.evaluation import",
         "from .evaluation import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5806,6 +6572,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py",
       "reason": "from ..phase2_clean.evaluation import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5813,13 +6583,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.final5_partitioned_native_metrics import"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "final5"
@@ -5829,6 +6601,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py",
       "reason": "from ..phase2_clean.final5_partitioned_native_metrics import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5836,13 +6612,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .final5_publication_visualization import"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "final5"
@@ -5852,6 +6630,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py",
       "reason": "from .final5_publication_visualization import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5859,13 +6641,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .final_cyj_reporting import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5873,6 +6657,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py",
       "reason": "from .final_cyj_reporting import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5880,14 +6668,16 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.final_native_grid_metrics import",
         "from .final_native_grid_metrics import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5895,6 +6685,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py",
       "reason": "from ..phase2_clean.final_native_grid_metrics import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5902,14 +6696,16 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.final_sparse_native_metrics import",
         "from .final_sparse_native_metrics import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5917,6 +6713,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py",
       "reason": "from .final_sparse_native_metrics import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -5924,13 +6724,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.final_stratified_native_metrics import"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5938,20 +6740,25 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/final_stratified_native_metrics.py",
       "reason": "from ..phase2_clean.final_stratified_native_metrics import",
+      "stage_roles": {
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "08"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.fit_first import",
         "from .fit_first import"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5959,6 +6766,11 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
       "reason": "from .fit_first import",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "05",
         "07",
@@ -5967,13 +6779,16 @@
     },
     {
       "classification": "COMPATIBILITY_IMPORT_ONLY",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION",
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "baseline imports it, but Stage 05 supplies SCMR-v5 prebuilt/reuse flags, never intensity-preserving flags"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -5981,19 +6796,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
       "reason": "baseline imports it, but Stage 05 supplies SCMR-v5 prebuilt/reuse flags, never intensity-preserving flags",
+      "stage_roles": {
+        "05": "COMPATIBILITY_IMPORT_ONLY"
+      },
       "stages": [
         "05"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .fit_first_mask_audit import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6001,6 +6821,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_mask_audit.py",
       "reason": "from .fit_first_mask_audit import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -6008,14 +6832,16 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.fit_first_native_geometry import",
         "from .fit_first_native_geometry import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6023,6 +6849,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py",
       "reason": "from ..phase2_clean.fit_first_native_geometry import",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "05",
         "07"
@@ -6030,13 +6860,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .fit_first_native_pose_audit import"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6044,19 +6876,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_pose_audit.py",
       "reason": "from .fit_first_native_pose_audit import",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "05"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .fit_first_route_contract import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6064,6 +6901,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_route_contract.py",
       "reason": "from .fit_first_route_contract import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -6071,13 +6912,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .formal_l100_sparse_manifest import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6085,6 +6928,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py",
       "reason": "from .formal_l100_sparse_manifest import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -6092,13 +6939,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .frozen_native_support import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6106,6 +6955,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/frozen_native_support.py",
       "reason": "from .frozen_native_support import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -6113,13 +6966,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .heldout import"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6127,6 +6982,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py",
       "reason": "from .heldout import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -6134,13 +6993,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .l100_mask_paired_eval import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6148,6 +7009,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py",
       "reason": "from .l100_mask_paired_eval import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -6155,13 +7020,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .matched_output import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6169,6 +7036,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py",
       "reason": "from .matched_output import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -6176,13 +7047,15 @@
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "python -m proposed"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6190,19 +7063,25 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py",
       "reason": "python -m proposed",
+      "stage_roles": {
+        "06": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "COMPATIBILITY_IMPORT_ONLY",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION",
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "baseline imports it, but Stage 05 never supplies standardized reuse flags"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6210,19 +7089,26 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
       "reason": "baseline imports it, but Stage 05 never supplies standardized reuse flags",
+      "stage_roles": {
+        "05": "COMPATIBILITY_IMPORT_ONLY"
+      },
       "stages": [
         "05"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "SHELL_MODULE_SCAN"
+      ],
       "evidence": [
-        "SCMR-v5 native cache"
+        "SCMR-v5 native cache",
+        "shell python -m paper_experiments.joint_vs_2dfit.phase2_clean.scmr_v5_native_cache"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6230,19 +7116,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py",
       "reason": "SCMR-v5 native cache",
+      "stage_roles": {
+        "05": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "05"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "stage wrapper"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6250,19 +7141,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
       "reason": "stage wrapper",
+      "stage_roles": {
+        "04": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "04"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "second evaluation wrapper"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "hhz"
@@ -6272,19 +7168,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh",
       "reason": "second evaluation wrapper",
+      "stage_roles": {
+        "08": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "08"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "first evaluation wrapper"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "hhz"
@@ -6294,19 +7195,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh",
       "reason": "first evaluation wrapper",
+      "stage_roles": {
+        "08": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "08"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "stage wrapper"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "hhz"
@@ -6316,19 +7222,24 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
       "reason": "stage wrapper",
+      "stage_roles": {
+        "07": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "07"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "stage wrapper"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6336,20 +7247,28 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh",
       "reason": "stage wrapper",
+      "stage_roles": {
+        "05": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "05"
       ]
     },
     {
       "classification": "CONDITIONAL_ACTIVE",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "PYTHON_IMPORT",
+        "SHELL_MODULE_SCAN"
+      ],
       "evidence": [
         "from .sparse import",
-        "profile builder"
+        "profile builder",
+        "shell python -m paper_experiments.joint_vs_2dfit.phase2_clean.sparse"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6357,6 +7276,13 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
       "reason": "profile builder",
+      "stage_roles": {
+        "04": "CONDITIONAL_ACTIVE",
+        "05": "ACTIVE_TRANSITIVE",
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "04",
         "05",
@@ -6367,14 +7293,16 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .sparse_profile_manifest import",
         "from paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest import"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6382,6 +7310,12 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
       "reason": "from .sparse_profile_manifest import",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE",
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "05",
         "06",
@@ -6391,13 +7325,16 @@
     },
     {
       "classification": "COMPATIBILITY_IMPORT_ONLY",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION",
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "standardization route is not selected by Stage 05"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6405,20 +7342,25 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
       "reason": "standardization route is not selected by Stage 05",
+      "stage_roles": {
+        "05": "COMPATIBILITY_IMPORT_ONLY"
+      },
       "stages": [
         "05"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..phase2_clean.visualization import",
         "from .visualization import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6426,6 +7368,10 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py",
       "reason": "from ..phase2_clean.visualization import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -6433,13 +7379,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..simulation.simulate_hhz_signals import"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "hhz"
@@ -6449,6 +7397,11 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py",
       "reason": "from ..simulation.simulate_hhz_signals import",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "05",
         "07",
@@ -6457,13 +7410,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from quality_experiments.Q001_recon.config import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6471,19 +7426,24 @@
       "outputs": [],
       "path": "common/quality_experiments/Q001_recon/config.py",
       "reason": "from quality_experiments.Q001_recon.config import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .contracts import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6491,19 +7451,24 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py",
       "reason": "from .contracts import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "LEGACY_UNUSED_BY_PIPELINE",
-      "discovery_method": "AUDIT_EXCLUSION",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION"
+      ],
       "evidence": [
         "10k evaluation variant is not reached by formal Q002S640 command"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6511,19 +7476,24 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/evaluate_q003_s640_10k.py",
       "reason": "10k evaluation variant is not reached by formal Q002S640 command",
+      "stage_roles": {
+        "06": "LEGACY_UNUSED_BY_PIPELINE"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .joint_dataset import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6531,19 +7501,24 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/joint_dataset.py",
       "reason": "from .joint_dataset import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "Q002 formal reconstruction call"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6551,19 +7526,24 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
       "reason": "Q002 formal reconstruction call",
+      "stage_roles": {
+        "06": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "LEGACY_UNUSED_BY_PIPELINE",
-      "discovery_method": "AUDIT_EXCLUSION",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION"
+      ],
       "evidence": [
         "Q003 experiment is not reached by formal Q002S640 command"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6571,19 +7551,24 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q003_reconstruction.py",
       "reason": "Q003 experiment is not reached by formal Q002S640 command",
+      "stage_roles": {
+        "06": "LEGACY_UNUSED_BY_PIPELINE"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "LEGACY_UNUSED_BY_PIPELINE",
-      "discovery_method": "AUDIT_EXCLUSION",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION"
+      ],
       "evidence": [
         "Q004/K1 experiment is not reached by formal Q002S640 command"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6591,19 +7576,24 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q004_s640_k1_reconstruction.py",
       "reason": "Q004/K1 experiment is not reached by formal Q002S640 command",
+      "stage_roles": {
+        "06": "LEGACY_UNUSED_BY_PIPELINE"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "TEST_ONLY",
-      "discovery_method": "AUDIT_EXCLUSION",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION"
+      ],
       "evidence": [
         "K256 is test-only, not a Stage 06 runtime dependency"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6611,19 +7601,24 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q002s640_k256.py",
       "reason": "K256 is test-only, not a Stage 06 runtime dependency",
+      "stage_roles": {
+        "06": "TEST_ONLY"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "TEST_ONLY",
-      "discovery_method": "AUDIT_EXCLUSION",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION"
+      ],
       "evidence": [
         "Q005/K4 is test-only, not a Stage 06 runtime dependency"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6631,20 +7626,26 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q005s640_k4.py",
       "reason": "Q005/K4 is test-only, not a Stage 06 runtime dependency",
+      "stage_roles": {
+        "06": "TEST_ONLY"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "Q002 training call",
         "from .training import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6652,19 +7653,24 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py",
       "reason": "Q002 training call",
+      "stage_roles": {
+        "06": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .training_curves import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6672,20 +7678,26 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training_curves.py",
       "reason": "from .training_curves import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from reconstruction_core.orchestration import",
         "shared reconstruction engine"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6693,6 +7705,10 @@
       "outputs": [],
       "path": "common/reconstruction_core/orchestration.py",
       "reason": "shared reconstruction engine",
+      "stage_roles": {
+        "06": "ACTIVE_EXECUTED",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -6700,13 +7716,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from scripts.deployment_manifest import"
       ],
       "functional_area": "stage_02",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6714,6 +7732,10 @@
       "outputs": [],
       "path": "common/scripts/deployment_manifest.py",
       "reason": "from scripts.deployment_manifest import",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE",
+        "03": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "02",
         "03"
@@ -6721,13 +7743,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.evaluation.profiling.summarize_timing_profile import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6735,6 +7759,10 @@
       "outputs": [],
       "path": "common/trad/evaluation/profiling/summarize_timing_profile.py",
       "reason": "from trad.evaluation.profiling.summarize_timing_profile import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -6742,13 +7770,15 @@
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "MATLAB mapper subprocess"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6756,19 +7786,105 @@
       "outputs": [],
       "path": "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m",
       "reason": "MATLAB mapper subprocess",
+      "stage_roles": {
+        "05": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "05"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "MATLAB_CALL"
+      ],
+      "evidence": [
+        "MATLAB call function_T1T2_10HB_bssfp_qc(...)",
+        "mapper verifies and addpaths matcher"
+      ],
+      "functional_area": "stage_05",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m",
+      "reason": "mapper verifies and addpaths matcher",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "MATLAB_CALL"
+      ],
+      "evidence": [
+        "MATLAB call sim_T1T2_10HB_bssfp(...)",
+        "mapper verifies and addpaths simulator"
+      ],
+      "functional_area": "stage_05",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m",
+      "reason": "mapper verifies and addpaths simulator",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "MATLAB_CALL"
+      ],
+      "evidence": [
+        "MATLAB call d2r(...)",
+        "mapper verifies and addpaths utility"
+      ],
+      "functional_area": "stage_05",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m",
+      "reason": "mapper verifies and addpaths utility",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "05"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.evaluation.scmr.quality_control import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6776,6 +7892,10 @@
       "outputs": [],
       "path": "common/trad/evaluation/scmr/quality_control.py",
       "reason": "from trad.evaluation.scmr.quality_control import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
@@ -6783,13 +7903,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .reference_2d import"
       ],
-      "functional_area": "stage_08",
+      "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6797,20 +7919,161 @@
       "outputs": [],
       "path": "common/trad/evaluation/scmr/reference_2d.py",
       "reason": "from .reference_2d import",
+      "stage_roles": {
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "07",
         "08"
       ]
     },
     {
-      "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "MATLAB_CALL"
+      ],
       "evidence": [
+        "MATLAB call MIND_descriptor2D(...)"
+      ],
+      "functional_area": "stage_02",
+      "generic_runtime_usage": true,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": true,
+      "historical_name_tokens": [
+        "hhz"
+      ],
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/MIND_descriptor2D.m",
+      "reason": "MATLAB call MIND_descriptor2D(...)",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "MATLAB_CALL"
+      ],
+      "evidence": [
+        "MATLAB call deformableReg2Dmind_asym_nodisplay(...)"
+      ],
+      "functional_area": "stage_02",
+      "generic_runtime_usage": true,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": true,
+      "historical_name_tokens": [
+        "hhz"
+      ],
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m",
+      "reason": "MATLAB call deformableReg2Dmind_asym_nodisplay(...)",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "MATLAB_CALL"
+      ],
+      "evidence": [
+        "MATLAB call HHMMSS2Sec(...)"
+      ],
+      "functional_area": "stage_02",
+      "generic_runtime_usage": true,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": true,
+      "historical_name_tokens": [
+        "hhz"
+      ],
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m",
+      "reason": "MATLAB call HHMMSS2Sec(...)",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "MATLAB_CALL"
+      ],
+      "evidence": [
+        "MATLAB call mppca_denoise_multimap_stack(...)"
+      ],
+      "functional_area": "stage_02",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m",
+      "reason": "MATLAB call mppca_denoise_multimap_stack(...)",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "MATLAB_CALL"
+      ],
+      "evidence": [
+        "MATLAB call preprocess_options_v1(...)",
+        "explicit options construction"
+      ],
+      "functional_area": "stage_02",
+      "generic_runtime_usage": false,
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "matlab",
+      "outputs": [],
+      "path": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m",
+      "reason": "explicit options construction",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "MATLAB_CALL"
+      ],
+      "evidence": [
+        "MATLAB call preprocess_stack_v1(...)",
         "explicit preprocess call"
       ],
       "functional_area": "stage_02",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6818,19 +8081,24 @@
       "outputs": [],
       "path": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m",
       "reason": "explicit preprocess call",
+      "stage_roles": {
+        "02": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "02"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .build_manifest import"
       ],
       "functional_area": "stage_03",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6838,20 +8106,25 @@
       "outputs": [],
       "path": "common/trad/modules/module_02_data_bridge/build_manifest.py",
       "reason": "from .build_manifest import",
+      "stage_roles": {
+        "03": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "03"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .geometry import",
         "from trad.modules.module_02_data_bridge.geometry import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6859,6 +8132,14 @@
       "outputs": [],
       "path": "common/trad/modules/module_02_data_bridge/geometry.py",
       "reason": "from trad.modules.module_02_data_bridge.geometry import",
+      "stage_roles": {
+        "03": "ACTIVE_TRANSITIVE",
+        "04": "ACTIVE_TRANSITIVE",
+        "05": "ACTIVE_TRANSITIVE",
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -6870,14 +8151,16 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .mat_v73 import",
         "from trad.modules.module_02_data_bridge.mat_v73 import"
       ],
       "functional_area": "stage_02",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6885,6 +8168,10 @@
       "outputs": [],
       "path": "common/trad/modules/module_02_data_bridge/mat_v73.py",
       "reason": "from trad.modules.module_02_data_bridge.mat_v73 import",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE",
+        "03": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "02",
         "03"
@@ -6892,13 +8179,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.modules.module_02_data_bridge.prepare_observations import"
       ],
       "functional_area": "stage_03",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6906,19 +8195,24 @@
       "outputs": [],
       "path": "common/trad/modules/module_02_data_bridge/prepare_observations.py",
       "reason": "from trad.modules.module_02_data_bridge.prepare_observations import",
+      "stage_roles": {
+        "03": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "03"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .timing import"
       ],
       "functional_area": "stage_03",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6926,19 +8220,24 @@
       "outputs": [],
       "path": "common/trad/modules/module_02_data_bridge/timing.py",
       "reason": "from .timing import",
+      "stage_roles": {
+        "03": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "03"
       ]
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6946,6 +8245,10 @@
       "outputs": [],
       "path": "common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py",
       "reason": "from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -6953,13 +8256,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.modules.module_04_quantitative_inr.quantitative_inr import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6967,6 +8272,10 @@
       "outputs": [],
       "path": "common/trad/modules/module_04_quantitative_inr/quantitative_inr.py",
       "reason": "from trad.modules.module_04_quantitative_inr.quantitative_inr import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -6974,13 +8283,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.modules.module_05_signal_decoder.decoder_factory import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -6988,6 +8299,10 @@
       "outputs": [],
       "path": "common/trad/modules/module_05_signal_decoder/decoder_factory.py",
       "reason": "from trad.modules.module_05_signal_decoder.decoder_factory import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -6995,14 +8310,16 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .trad_signal_simulator import",
         "from trad.modules.module_05_signal_decoder.trad_signal_simulator import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7010,6 +8327,10 @@
       "outputs": [],
       "path": "common/trad/modules/module_05_signal_decoder/trad_signal_simulator.py",
       "reason": "from trad.modules.module_05_signal_decoder.trad_signal_simulator import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -7017,13 +8338,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7031,6 +8354,13 @@
       "outputs": [],
       "path": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
       "reason": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
+      "stage_roles": {
+        "04": "ACTIVE_TRANSITIVE",
+        "05": "ACTIVE_TRANSITIVE",
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "04",
         "05",
@@ -7041,13 +8371,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.modules.module_06_rigid_psf.rigid_psf_forward import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7055,6 +8387,10 @@
       "outputs": [],
       "path": "common/trad/modules/module_06_rigid_psf/rigid_psf_forward.py",
       "reason": "from trad.modules.module_06_rigid_psf.rigid_psf_forward import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -7062,13 +8398,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.modules.module_07_objective_training.experiment_infrastructure import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7076,6 +8414,10 @@
       "outputs": [],
       "path": "common/trad/modules/module_07_objective_training/experiment_infrastructure.py",
       "reason": "from trad.modules.module_07_objective_training.experiment_infrastructure import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -7083,13 +8425,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.modules.module_07_objective_training.training_space import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7097,6 +8441,10 @@
       "outputs": [],
       "path": "common/trad/modules/module_07_objective_training/training_space.py",
       "reason": "from trad.modules.module_07_objective_training.training_space import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -7104,13 +8452,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.modules.module_08_inference_export.export_quantitative import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7118,6 +8468,10 @@
       "outputs": [],
       "path": "common/trad/modules/module_08_inference_export/export_quantitative.py",
       "reason": "from trad.modules.module_08_inference_export.export_quantitative import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -7125,13 +8479,15 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.modules.module_08_inference_export.reprojection import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7139,19 +8495,24 @@
       "outputs": [],
       "path": "common/trad/modules/module_08_inference_export/reprojection.py",
       "reason": "from trad.modules.module_08_inference_export.reprojection import",
+      "stage_roles": {
+        "06": "ACTIVE_TRANSITIVE"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "MATLAB -batch local_preprocess_all"
       ],
       "functional_area": "stage_02",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7159,19 +8520,26 @@
       "outputs": [],
       "path": "common/trad/scripts/local_preprocess_all.m",
       "reason": "MATLAB -batch local_preprocess_all",
+      "stage_roles": {
+        "02": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "02"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "MATLAB_CALL"
+      ],
       "evidence": [
+        "MATLAB call local_preprocess_one(...)",
         "local_preprocess_all loop"
       ],
       "functional_area": "stage_02",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7179,19 +8547,24 @@
       "outputs": [],
       "path": "common/trad/scripts/local_preprocess_one.m",
       "reason": "local_preprocess_all loop",
+      "stage_roles": {
+        "02": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "02"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "explicit --protocol"
       ],
       "functional_area": "stage_03",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7199,19 +8572,24 @@
       "outputs": [],
       "path": "common/trad/scripts/prepare_all_observations.py",
       "reason": "explicit --protocol",
+      "stage_roles": {
+        "03": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "03"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "post-transfer validator"
       ],
       "functional_area": "stage_02",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7219,20 +8597,25 @@
       "outputs": [],
       "path": "common/trad/scripts/validate_transferred_preprocessed.py",
       "reason": "post-transfer validator",
+      "stage_roles": {
+        "02": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "02"
       ]
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..image import",
         "from trad.third_party.nesvor.nesvor.image import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7240,6 +8623,13 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/image/__init__.py",
       "reason": "from trad.third_party.nesvor.nesvor.image import",
+      "stage_roles": {
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "04",
         "05",
@@ -7250,13 +8640,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .image import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7264,6 +8656,13 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/image/image.py",
       "reason": "from .image import",
+      "stage_roles": {
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "04",
         "05",
@@ -7274,13 +8673,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .image_utils import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7288,6 +8689,13 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/image/image_utils.py",
       "reason": "from .image_utils import",
+      "stage_roles": {
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "04",
         "05",
@@ -7298,13 +8706,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.third_party.nesvor.nesvor.inr import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7312,6 +8722,10 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/inr/__init__.py",
       "reason": "from trad.third_party.nesvor.nesvor.inr import",
+      "stage_roles": {
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "06",
         "07"
@@ -7319,13 +8733,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..slice_acquisition import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7333,6 +8749,13 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py",
       "reason": "from ..slice_acquisition import",
+      "stage_roles": {
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "04",
         "05",
@@ -7343,13 +8766,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .slice_acq import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7357,6 +8782,13 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py",
       "reason": "from .slice_acq import",
+      "stage_roles": {
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "04",
         "05",
@@ -7367,13 +8799,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .slice_acq_torch import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7381,6 +8815,13 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py",
       "reason": "from .slice_acq_torch import",
+      "stage_roles": {
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "04",
         "05",
@@ -7391,13 +8832,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from trad.third_party.nesvor.nesvor.svr.registration import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7405,6 +8848,13 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/svr/registration.py",
       "reason": "from trad.third_party.nesvor.nesvor.svr.registration import",
+      "stage_roles": {
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "04",
         "05",
@@ -7415,14 +8865,16 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..transform import",
         "from trad.third_party.nesvor.nesvor.transform import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7430,6 +8882,14 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/transform/__init__.py",
       "reason": "from trad.third_party.nesvor.nesvor.transform import",
+      "stage_roles": {
+        "03": "THIRD_PARTY_ACTIVE",
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -7441,13 +8901,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .transform import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7455,6 +8917,14 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/transform/transform.py",
       "reason": "from .transform import",
+      "stage_roles": {
+        "03": "THIRD_PARTY_ACTIVE",
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -7466,13 +8936,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .transform_convert import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7480,6 +8952,14 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py",
       "reason": "from .transform_convert import",
+      "stage_roles": {
+        "03": "THIRD_PARTY_ACTIVE",
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -7491,13 +8971,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .transform_convert_torch import"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7505,6 +8987,14 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py",
       "reason": "from .transform_convert_torch import",
+      "stage_roles": {
+        "03": "THIRD_PARTY_ACTIVE",
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -7516,14 +9006,16 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from ..utils import",
         "from trad.third_party.nesvor.nesvor.utils import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7531,6 +9023,14 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/utils/__init__.py",
       "reason": "from trad.third_party.nesvor.nesvor.utils import",
+      "stage_roles": {
+        "03": "THIRD_PARTY_ACTIVE",
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -7542,13 +9042,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .logger import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7556,6 +9058,14 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/utils/logger.py",
       "reason": "from .logger import",
+      "stage_roles": {
+        "03": "THIRD_PARTY_ACTIVE",
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -7567,13 +9077,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .loss import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7581,6 +9093,14 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/utils/loss.py",
       "reason": "from .loss import",
+      "stage_roles": {
+        "03": "THIRD_PARTY_ACTIVE",
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -7592,13 +9112,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .misc import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7606,6 +9128,14 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/utils/misc.py",
       "reason": "from .misc import",
+      "stage_roles": {
+        "03": "THIRD_PARTY_ACTIVE",
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -7617,14 +9147,16 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .psf import",
         "from trad.third_party.nesvor.nesvor.utils.psf import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7632,6 +9164,14 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/utils/psf.py",
       "reason": "from trad.third_party.nesvor.nesvor.utils.psf import",
+      "stage_roles": {
+        "03": "THIRD_PARTY_ACTIVE",
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -7643,13 +9183,15 @@
     },
     {
       "classification": "THIRD_PARTY_ACTIVE",
-      "discovery_method": "PYTHON_IMPORT",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from .types import"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7657,6 +9199,14 @@
       "outputs": [],
       "path": "common/trad/third_party/nesvor/nesvor/utils/types.py",
       "reason": "from .types import",
+      "stage_roles": {
+        "03": "THIRD_PARTY_ACTIVE",
+        "04": "THIRD_PARTY_ACTIVE",
+        "05": "THIRD_PARTY_ACTIVE",
+        "06": "THIRD_PARTY_ACTIVE",
+        "07": "THIRD_PARTY_ACTIVE",
+        "08": "THIRD_PARTY_ACTIVE"
+      },
       "stages": [
         "03",
         "04",
@@ -7668,13 +9218,15 @@
     },
     {
       "classification": "CONFIG_RUNTIME_ASSET",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "model provenance"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7682,20 +9234,25 @@
       "outputs": [],
       "path": "configs/models_manifest.json",
       "reason": "model provenance",
+      "stage_roles": {
+        "06": "CONFIG_RUNTIME_ASSET"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "CONFIG_RUNTIME_ASSET",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "--protocol",
         "Stage 03 --protocol"
       ],
       "functional_area": "stage_03",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7703,6 +9260,10 @@
       "outputs": [],
       "path": "configs/protocol_scmr_v5_10_100.yaml",
       "reason": "Stage 03 --protocol",
+      "stage_roles": {
+        "03": "CONFIG_RUNTIME_ASSET",
+        "06": "CONFIG_RUNTIME_ASSET"
+      },
       "stages": [
         "03",
         "06"
@@ -7710,13 +9271,15 @@
     },
     {
       "classification": "ACTIVE_ENTRYPOINT",
-      "discovery_method": "ENTRYPOINT",
+      "discovery_methods": [
+        "ENTRYPOINT"
+      ],
       "evidence": [
         "Stage entrypoint"
       ],
       "functional_area": "stage_01",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [
@@ -7728,19 +9291,24 @@
       ],
       "path": "pipeline/01_RAW_DICOM/run_stage.sh",
       "reason": "Stage entrypoint",
+      "stage_roles": {
+        "01": "ACTIVE_ENTRYPOINT"
+      },
       "stages": [
         "01"
       ]
     },
     {
       "classification": "ACTIVE_ENTRYPOINT",
-      "discovery_method": "ENTRYPOINT",
+      "discovery_methods": [
+        "ENTRYPOINT"
+      ],
       "evidence": [
         "Stage entrypoint"
       ],
       "functional_area": "stage_02",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [
@@ -7753,19 +9321,24 @@
       ],
       "path": "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
       "reason": "Stage entrypoint",
+      "stage_roles": {
+        "02": "ACTIVE_ENTRYPOINT"
+      },
       "stages": [
         "02"
       ]
     },
     {
       "classification": "ACTIVE_ENTRYPOINT",
-      "discovery_method": "ENTRYPOINT",
+      "discovery_methods": [
+        "ENTRYPOINT"
+      ],
       "evidence": [
         "Stage entrypoint"
       ],
       "functional_area": "stage_03",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [
@@ -7782,19 +9355,24 @@
       ],
       "path": "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
       "reason": "Stage entrypoint",
+      "stage_roles": {
+        "03": "ACTIVE_ENTRYPOINT"
+      },
       "stages": [
         "03"
       ]
     },
     {
       "classification": "ACTIVE_ENTRYPOINT",
-      "discovery_method": "ENTRYPOINT",
+      "discovery_methods": [
+        "ENTRYPOINT"
+      ],
       "evidence": [
         "Stage entrypoint"
       ],
       "functional_area": "stage_04",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [
@@ -7807,19 +9385,24 @@
       ],
       "path": "pipeline/04_SPARSE_PROFILES/run_stage.sh",
       "reason": "Stage entrypoint",
+      "stage_roles": {
+        "04": "ACTIVE_ENTRYPOINT"
+      },
       "stages": [
         "04"
       ]
     },
     {
       "classification": "ACTIVE_ENTRYPOINT",
-      "discovery_method": "ENTRYPOINT",
+      "discovery_methods": [
+        "ENTRYPOINT"
+      ],
       "evidence": [
         "Stage entrypoint"
       ],
       "functional_area": "stage_05",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [
@@ -7834,19 +9417,24 @@
       ],
       "path": "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
       "reason": "Stage entrypoint",
+      "stage_roles": {
+        "05": "ACTIVE_ENTRYPOINT"
+      },
       "stages": [
         "05"
       ]
     },
     {
       "classification": "ACTIVE_ENTRYPOINT",
-      "discovery_method": "ENTRYPOINT",
+      "discovery_methods": [
+        "ENTRYPOINT"
+      ],
       "evidence": [
         "Stage entrypoint"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [
@@ -7865,19 +9453,24 @@
       ],
       "path": "pipeline/06_PROPOSED/run_stage.sh",
       "reason": "Stage entrypoint",
+      "stage_roles": {
+        "06": "ACTIVE_ENTRYPOINT"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "ACTIVE_ENTRYPOINT",
-      "discovery_method": "ENTRYPOINT",
+      "discovery_methods": [
+        "ENTRYPOINT"
+      ],
       "evidence": [
         "Stage entrypoint"
       ],
       "functional_area": "stage_07",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [
@@ -7890,19 +9483,24 @@
       ],
       "path": "pipeline/07_FINAL_POSE/run_stage.sh",
       "reason": "Stage entrypoint",
+      "stage_roles": {
+        "07": "ACTIVE_ENTRYPOINT"
+      },
       "stages": [
         "07"
       ]
     },
     {
       "classification": "ACTIVE_ENTRYPOINT",
-      "discovery_method": "ENTRYPOINT",
+      "discovery_methods": [
+        "ENTRYPOINT"
+      ],
       "evidence": [
         "Stage entrypoint"
       ],
       "functional_area": "stage_08",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [
@@ -7916,19 +9514,24 @@
       ],
       "path": "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
       "reason": "Stage entrypoint",
+      "stage_roles": {
+        "08": "ACTIVE_ENTRYPOINT"
+      },
       "stages": [
         "08"
       ]
     },
     {
       "classification": "ACTIVE_ENTRYPOINT",
-      "discovery_method": "ENTRYPOINT",
+      "discovery_methods": [
+        "ENTRYPOINT"
+      ],
       "evidence": [
         "Stage entrypoint"
       ],
       "functional_area": "stage_09",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [
@@ -7940,19 +9543,24 @@
       ],
       "path": "pipeline/09_INTEGRITY_AND_REPORTING/run_stage.sh",
       "reason": "Stage entrypoint",
+      "stage_roles": {
+        "09": "ACTIVE_ENTRYPOINT"
+      },
       "stages": [
         "09"
       ]
     },
     {
       "classification": "CONFIG_RUNTIME_ASSET",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "runtime contract"
       ],
       "functional_area": "stage_06",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7960,19 +9568,24 @@
       "outputs": [],
       "path": "runtime/runtime_contract.json",
       "reason": "runtime contract",
+      "stage_roles": {
+        "06": "CONFIG_RUNTIME_ASSET"
+      },
       "stages": [
         "06"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "run_stage builds manifest"
       ],
       "functional_area": "stage_01",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -7980,20 +9593,26 @@
       "outputs": [],
       "path": "scripts/build_subject_deployment_manifest.py",
       "reason": "run_stage builds manifest",
+      "stage_roles": {
+        "01": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "01"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "PYTHON_IMPORT"
+      ],
       "evidence": [
         "from validate_subject_id import",
         "run_stage invokes validator"
       ],
       "functional_area": "stage_01",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -8001,19 +9620,24 @@
       "outputs": [],
       "path": "scripts/validate_subject_id.py",
       "reason": "run_stage invokes validator",
+      "stage_roles": {
+        "01": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "01"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "legacy checker"
       ],
       "functional_area": "stage_09",
       "generic_runtime_usage": true,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": true,
       "historical_name_tokens": [
         "legacy"
@@ -8023,19 +9647,24 @@
       "outputs": [],
       "path": "scripts/verify_no_legacy_code_path.py",
       "reason": "legacy checker",
+      "stage_roles": {
+        "09": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "09"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "integrity checker"
       ],
       "functional_area": "stage_09",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -8043,19 +9672,24 @@
       "outputs": [],
       "path": "scripts/verify_project_integrity.py",
       "reason": "integrity checker",
+      "stage_roles": {
+        "09": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "09"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "runtime checker"
       ],
       "functional_area": "stage_09",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -8063,19 +9697,24 @@
       "outputs": [],
       "path": "scripts/verify_runtime_contract.py",
       "reason": "runtime checker",
+      "stage_roles": {
+        "09": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "09"
       ]
     },
     {
       "classification": "ACTIVE_EXECUTED",
-      "discovery_method": "MANUAL_DYNAMIC_OVERRIDE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
       "evidence": [
         "freeze checker"
       ],
       "functional_area": "stage_09",
       "generic_runtime_usage": false,
-      "git_sha": "817ae69a0496e069a56da6eab834e074e083c836",
+      "git_sha": "9cb0b64a8991ee415989c66db9a3ea5c68421673",
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [],
@@ -8083,12 +9722,15 @@
       "outputs": [],
       "path": "scripts/verify_scientific_freeze.py",
       "reason": "freeze checker",
+      "stage_roles": {
+        "09": "ACTIVE_EXECUTED"
+      },
       "stages": [
         "09"
       ]
     }
   ],
-  "schema_version": "active-dependency-inventory/v2",
+  "schema_version": "active-dependency-inventory/v3",
   "stages": {
     "01": {
       "entrypoint": "pipeline/01_RAW_DICOM/run_stage.sh",
@@ -8115,6 +9757,11 @@
       ],
       "paths": [
         "common/scripts/deployment_manifest.py",
+        "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/MIND_descriptor2D.m",
+        "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m",
+        "common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m",
+        "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m",
+        "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m",
         "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m",
         "common/trad/modules/module_02_data_bridge/mat_v73.py",
         "common/trad/scripts/local_preprocess_all.m",
@@ -8168,6 +9815,11 @@
         "sparse_inputs/SUBJECT/CASE/sparse_manifest.json"
       ],
       "paths": [
+        "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH100_4CH50.json",
+        "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH50_4CH100.json",
+        "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH0.json",
+        "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH100.json",
+        "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH100_4CH0.json",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
@@ -8220,6 +9872,9 @@
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
         "common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py",
         "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m",
+        "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m",
+        "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m",
+        "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m",
         "common/trad/modules/module_02_data_bridge/geometry.py",
         "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
         "common/trad/third_party/nesvor/nesvor/image/__init__.py",
@@ -8341,6 +9996,7 @@
         "common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py",
         "common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py",
         "common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py",
+        "common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py",
         "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py",
         "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py",
         "common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py",
@@ -8349,8 +10005,10 @@
         "common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py",
         "common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py",
         "common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py",
+        "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py",
         "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py",
         "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py",
+        "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py",

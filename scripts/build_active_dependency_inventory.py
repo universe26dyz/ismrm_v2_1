@@ -11,6 +11,7 @@ import argparse
 import ast
 import csv
 import json
+import re
 import subprocess
 from collections import Counter, defaultdict, deque
 from pathlib import Path
@@ -40,6 +41,7 @@ DECLARED_EDGES = [
     ("02", STAGE_ENTRYPOINTS["02"], "common/trad/scripts/local_preprocess_all.m", "MATLAB_FUNCTION", "always", "MATLAB -batch local_preprocess_all", "ACTIVE_EXECUTED"),
     ("02", "common/trad/scripts/local_preprocess_all.m", "common/trad/scripts/local_preprocess_one.m", "MATLAB_FUNCTION", "per stack", "local_preprocess_all loop", "ACTIVE_EXECUTED"),
     ("02", "common/trad/scripts/local_preprocess_one.m", "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m", "MATLAB_FUNCTION", "per stack", "explicit preprocess call", "ACTIVE_EXECUTED"),
+    ("02", "common/trad/scripts/local_preprocess_one.m", "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m", "MATLAB_FUNCTION", "per stack", "explicit options construction", "ACTIVE_TRANSITIVE"),
     ("02", STAGE_ENTRYPOINTS["02"], "common/trad/scripts/validate_transferred_preprocessed.py", "SHELL_PYTHON_SCRIPT", "always", "post-transfer validator", "ACTIVE_EXECUTED"),
     ("03", STAGE_ENTRYPOINTS["03"], "common/trad/scripts/prepare_all_observations.py", "SHELL_PYTHON_SCRIPT", "always", "explicit --protocol", "ACTIVE_EXECUTED"),
     ("03", "common/trad/scripts/prepare_all_observations.py", "configs/protocol_scmr_v5_10_100.yaml", "CONFIG_READ", "always", "Stage 03 --protocol", "CONFIG_RUNTIME_ASSET"),
@@ -48,6 +50,9 @@ DECLARED_EDGES = [
     ("05", STAGE_ENTRYPOINTS["05"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "SHELL_BASH", "always", "stage wrapper", "ACTIVE_EXECUTED"),
     ("05", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py", "SHELL_PYTHON_MODULE", "always", "SCMR-v5 native cache", "ACTIVE_EXECUTED"),
     ("05", "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "MATLAB_FUNCTION", "per stack", "MATLAB mapper subprocess", "ACTIVE_EXECUTED"),
+    ("05", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths matcher", "ACTIVE_TRANSITIVE"),
+    ("05", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths simulator", "ACTIVE_TRANSITIVE"),
+    ("05", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths utility", "ACTIVE_TRANSITIVE"),
     ("05", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py", "SHELL_PYTHON_MODULE", "L100 and sparse cases", "baseline CLI", "CONDITIONAL_ACTIVE"),
     ("06", STAGE_ENTRYPOINTS["06"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py", "SHELL_PYTHON_MODULE", "always", "python -m proposed", "ACTIVE_EXECUTED"),
     ("06", "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py", "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py", "PYTHON_CALL", "formal Q002S640", "Q002 formal reconstruction call", "ACTIVE_EXECUTED"),
@@ -61,6 +66,8 @@ DECLARED_EDGES = [
     ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py", "SHELL_PYTHON_MODULE", "per case", "Fit-first final-pose bundle", "CONDITIONAL_ACTIVE"),
     ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py", "SHELL_PYTHON_MODULE", "per case", "ROI mapping", "CONDITIONAL_ACTIVE"),
     ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py", "SHELL_PYTHON_MODULE", "per case", "paired AHA metrics", "CONDITIONAL_ACTIVE"),
+    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py", "SHELL_PYTHON_MODULE", "twice per case", "AHA SD CLI for 1px and legacy cores", "CONDITIONAL_ACTIVE"),
+    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py", "SHELL_PYTHON_MODULE", "per case", "through-plane QC CLI", "CONDITIONAL_ACTIVE"),
     ("08", STAGE_ENTRYPOINTS["08"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh", "SHELL_BASH", "always", "first evaluation wrapper", "ACTIVE_EXECUTED"),
     ("08", STAGE_ENTRYPOINTS["08"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh", "SHELL_BASH", "always", "second evaluation wrapper", "ACTIVE_EXECUTED"),
     ("08", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh", "common/paper_experiments/joint_vs_2dfit/aha/common_native_metrics_qc.py", "SHELL_PYTHON_MODULE", "per case", "common-native metrics CLI", "CONDITIONAL_ACTIVE"),
@@ -70,6 +77,11 @@ DECLARED_EDGES = [
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_runtime_contract.py", "SHELL_PYTHON_SCRIPT", "always", "runtime checker", "ACTIVE_EXECUTED"),
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_scientific_freeze.py", "SHELL_PYTHON_SCRIPT", "always", "freeze checker", "ACTIVE_EXECUTED"),
 ]
+KNOWN_RUNTIME_ASSETS = [
+    ("04", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh", f"common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/{name}.json", "always within Stage 04 batch", "PROFILE loop and --profile path")
+    for name in ("SAX100_2CH0_4CH0", "SAX100_2CH0_4CH100", "SAX100_2CH100_4CH0", "S2CH100_4CH50", "S2CH50_4CH100")
+]
+ROLE_PRIORITY = {"ACTIVE_ENTRYPOINT": 9, "ACTIVE_EXECUTED": 8, "CONDITIONAL_ACTIVE": 7, "ACTIVE_TRANSITIVE": 6, "COMPATIBILITY_IMPORT_ONLY": 5, "CONFIG_RUNTIME_ASSET": 4, "THIRD_PARTY_ACTIVE": 3, "TEST_ONLY": 2, "LEGACY_UNUSED_BY_PIPELINE": 1}
 COMPATIBILITY = {
     "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py": "baseline imports it, but Stage 05 supplies SCMR-v5 prebuilt/reuse flags, never intensity-preserving flags",
     "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py": "baseline imports it, but Stage 05 never supplies standardized reuse flags",
@@ -130,13 +142,54 @@ def _imports(root: Path, path: Path) -> list[tuple[Path, str]]:
     return found
 
 
+def _matlab_local_functions(path: Path) -> set[str]:
+    matches = re.findall(r"(?m)^\s*function(?:\s+\[[^\]]+\]|\s+\w+)?\s*=\s*(\w+)\s*\(|^\s*function\s+(\w+)\s*\(", path.read_text(encoding="utf-8", errors="ignore"))
+    return {name for pair in matches for name in pair if name}
+
+
+def _matlab_calls(root: Path, path: Path) -> list[tuple[Path, str]]:
+    """Resolve calls only when their function name is repository-local.
+
+    MATLAB builtins/toolbox calls are deliberately ignored; an apparent call to
+    a function with a repository-local implementation must resolve or fail.
+    """
+    text = re.sub(r"%.*$", "", path.read_text(encoding="utf-8", errors="ignore"), flags=re.M)
+    local = _matlab_local_functions(path)
+    index = {candidate.stem: candidate for candidate in root.glob("common/**/*.m")}
+    names = set(re.findall(r"(?<![\w.])([A-Za-z]\w*)\s*\(", text)) - local
+    calls: list[tuple[Path, str]] = []
+    for name in sorted(names):
+        target = index.get(name)
+        if target is not None and target != path:
+            calls.append((target, f"MATLAB call {name}(...)"))
+    return calls
+
+
+def _shell_modules(root: Path, path: Path) -> list[tuple[Path, str]]:
+    """Resolve repository Python modules executed by a shell script.
+
+    This deliberately targets the stable ``python -m package.module`` form.
+    Variable-expanded filesystem commands remain represented by the narrow
+    declared boundary edges above.
+    """
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    modules = re.findall(r"(?:\"\$PY(?:THON)?\"|\$PY(?:THON)?|python(?:3)?)\s+-m\s+([A-Za-z_]\w*(?:\.\w+)*)", text)
+    resolved: list[tuple[Path, str]] = []
+    for module in sorted(set(modules)):
+        candidate = root / "common" / Path(*module.split("."))
+        target = candidate.with_suffix(".py")
+        if target.is_file():
+            resolved.append((target, f"shell python -m {module}"))
+    return resolved
+
+
 def _historical(path: str) -> list[str]:
     return [token for token in ("cyj11", "final5", "hhz", "legacy") if token in path.lower()]
 
 
 def scan(root: Path) -> dict[str, Any]:
     sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
-    nodes: dict[str, dict[str, Any]] = {}; edges: list[dict[str, Any]] = []; direct: dict[str, str] = {}
+    nodes: dict[str, dict[str, Any]] = {}; edges: list[dict[str, Any]] = []; direct: dict[tuple[str, str], str] = {}
     stage_paths: dict[str, set[str]] = defaultdict(set); queue: deque[tuple[str, str, str, str]] = deque()
     def internal(path: str) -> bool: return path.startswith(("common/", "pipeline/", "scripts/", "configs/", "runtime/"))
     def add_node(path: str, stage: str, classification: str, reason: str, discovery: str) -> None:
@@ -145,53 +198,78 @@ def scan(root: Path) -> dict[str, Any]:
         record = nodes.get(path)
         if record is None:
             tokens = _historical(path)
-            nodes[path] = {"path": path, "language": _language(path), "classification": classification, "stages": [stage], "functional_area": f"stage_{stage}", "reason": reason, "evidence": [reason], "inputs": [], "outputs": [], "historical_name": bool(tokens), "historical_name_tokens": tokens, "generic_runtime_usage": bool(tokens) and classification not in {"LEGACY_UNUSED_BY_PIPELINE", "TEST_ONLY"}, "discovery_method": discovery, "git_sha": sha}
+            nodes[path] = {"path": path, "language": _language(path), "classification": classification, "stage_roles": {stage: classification}, "stages": [stage], "functional_area": f"stage_{stage}", "reason": reason, "evidence": [reason], "inputs": [], "outputs": [], "historical_name": bool(tokens), "historical_name_tokens": tokens, "generic_runtime_usage": bool(tokens) and classification not in {"LEGACY_UNUSED_BY_PIPELINE", "TEST_ONLY"}, "discovery_methods": [discovery], "git_sha": sha}
         else:
             if stage not in record["stages"]: record["stages"].append(stage)
             record["evidence"].append(reason)
+            record["discovery_methods"].append(discovery)
+            old = record["stage_roles"].get(stage)
+            if old is None or ROLE_PRIORITY[classification] > ROLE_PRIORITY[old]:
+                record["stage_roles"][stage] = classification
         stage_paths[stage].add(path)
     for stage, entry in STAGE_ENTRYPOINTS.items(): add_node(entry, stage, "ACTIVE_ENTRYPOINT", "Stage entrypoint", "ENTRYPOINT")
     for stage, src, dst, kind, condition, evidence, classification in DECLARED_EDGES:
         add_node(dst, stage, classification, evidence, "MANUAL_DYNAMIC_OVERRIDE")
-        direct[dst] = classification
+        direct[(stage, dst)] = classification
         edges.append({"from": src, "to": dst, "edge_type": kind, "stage": stage, "condition": condition, "evidence": evidence})
+    for stage, src, dst, condition, evidence in KNOWN_RUNTIME_ASSETS:
+        add_node(dst, stage, "CONFIG_RUNTIME_ASSET", evidence, "CONFIG_REFERENCE")
+        direct[(stage, dst)] = "CONFIG_RUNTIME_ASSET"
+        edges.append({"from": src, "to": dst, "edge_type": "CONFIG_READ", "stage": stage, "condition": condition, "evidence": evidence})
     for path, reason in AUDITED_UNUSED.items(): add_node(path, "06", "TEST_ONLY" if "/tests/" in path else "LEGACY_UNUSED_BY_PIPELINE", reason, "AUDIT_EXCLUSION")
-    queue.extend((path, stage, "PYTHON_IMPORT", "declared Python execution") for stage, _, path, kind, _, _, _ in DECLARED_EDGES if kind.startswith("SHELL_PYTHON") or kind == "PYTHON_CALL")
+    queue.extend((path, stage, "DECLARED_RUNTIME", "declared runtime execution") for stage, _, path, _, _, _, _ in DECLARED_EDGES if Path(path).suffix in {".py", ".m", ".sh"})
     seen: set[tuple[str, str]] = set()
     while queue:
         raw, stage, _, reason = queue.popleft(); key = (raw, stage)
         if key in seen: continue
         seen.add(key); path = root / raw
-        if not path.is_file() or path.suffix != ".py": continue
-        for target, evidence in _imports(root, path):
-            dest = target.relative_to(root).as_posix()
-            if dest in COMPATIBILITY:
-                classification = "COMPATIBILITY_IMPORT_ONLY"
-            elif dest in direct:
-                classification = direct[dest]
-            elif "/third_party/" in dest:
-                classification = "THIRD_PARTY_ACTIVE"
-            elif dest.startswith(("configs/", "runtime/")) or "/configs/" in dest:
-                classification = "CONFIG_RUNTIME_ASSET"
-            else:
-                classification = "ACTIVE_TRANSITIVE"
-            add_node(dest, stage, classification, COMPATIBILITY.get(dest, evidence), "PYTHON_IMPORT")
-            edges.append({"from": raw, "to": dest, "edge_type": "PYTHON_IMPORT", "stage": stage, "condition": "import-time", "evidence": evidence})
-            queue.append((dest, stage, "PYTHON_IMPORT", evidence))
+        if not path.is_file(): continue
+        if path.suffix == ".py":
+            for target, evidence in _imports(root, path):
+                dest = target.relative_to(root).as_posix()
+                if dest in COMPATIBILITY:
+                    classification = "COMPATIBILITY_IMPORT_ONLY"
+                elif (stage, dest) in direct:
+                    classification = direct[(stage, dest)]
+                elif "/third_party/" in dest:
+                    classification = "THIRD_PARTY_ACTIVE"
+                elif dest.startswith(("configs/", "runtime/")) or "/configs/" in dest:
+                    classification = "CONFIG_RUNTIME_ASSET"
+                else:
+                    classification = "ACTIVE_TRANSITIVE"
+                add_node(dest, stage, classification, COMPATIBILITY.get(dest, evidence), "PYTHON_IMPORT")
+                edges.append({"from": raw, "to": dest, "edge_type": "PYTHON_IMPORT", "stage": stage, "condition": "import-time", "evidence": evidence})
+                queue.append((dest, stage, "PYTHON_IMPORT", evidence))
+        if path.suffix == ".m":
+            for target, evidence in _matlab_calls(root, path):
+                dest = target.relative_to(root).as_posix()
+                add_node(dest, stage, "ACTIVE_TRANSITIVE", evidence, "MATLAB_CALL")
+                edges.append({"from": raw, "to": dest, "edge_type": "MATLAB_LOCAL_FUNCTION", "stage": stage, "condition": "runtime function lookup", "evidence": evidence})
+                queue.append((dest, stage, "MATLAB_FUNCTION", evidence))
+        if path.suffix == ".sh":
+            for target, evidence in _shell_modules(root, path):
+                dest = target.relative_to(root).as_posix()
+                classification = direct.get((stage, dest), "CONDITIONAL_ACTIVE")
+                add_node(dest, stage, classification, evidence, "SHELL_MODULE_SCAN")
+                edges.append({"from": raw, "to": dest, "edge_type": "SHELL_PYTHON_MODULE", "stage": stage, "condition": "shell command", "evidence": evidence})
+                queue.append((dest, stage, "SHELL_PYTHON_MODULE", evidence))
     for path, reason in COMPATIBILITY.items():
         if (root / path).is_file(): add_node(path, "05", "COMPATIBILITY_IMPORT_ONLY", reason, "AUDIT_EXCLUSION")
     for item in EXTERNAL:
-        stage = item["required_by_stages"][0]; source = STAGE_ENTRYPOINTS[stage]
-        edges.append({"from": source, "to": f"external:{item['id']}", "edge_type": "EXTERNAL_RUNTIME", "stage": stage, "condition": "runtime", "evidence": item.get("resolution", "runtime-provided model asset")})
+        for stage in item["required_by_stages"]:
+            source = STAGE_ENTRYPOINTS[stage]
+            edges.append({"from": source, "to": f"external:{item['id']}", "edge_type": "EXTERNAL_RUNTIME", "stage": stage, "condition": "runtime", "evidence": item.get("resolution", "runtime-provided model asset")})
     for stage, values in STAGE_IO.items():
         stage_paths[stage].update([STAGE_ENTRYPOINTS[stage]])
         for path in stage_paths[stage]:
             if path in nodes:
                 nodes[path]["inputs"], nodes[path]["outputs"] = values if path == STAGE_ENTRYPOINTS[stage] else ([], [])
     unique = {(e["from"], e["to"], e["edge_type"], e["stage"], e["condition"], e["evidence"]): e for e in edges}
-    for node in nodes.values(): node["stages"].sort(); node["evidence"] = sorted(set(node["evidence"]))
+    for node in nodes.values():
+        node["stages"].sort(); node["evidence"] = sorted(set(node["evidence"])); node["discovery_methods"] = sorted(set(node["discovery_methods"]))
+        node["classification"] = max(node["stage_roles"].values(), key=lambda role: ROLE_PRIORITY[role])
     summary = dict(sorted(Counter(node["classification"] for node in nodes.values()).items()))
-    return {"schema_version": "active-dependency-inventory/v2", "generated_from_git_sha": sha, "entrypoints": list(STAGE_ENTRYPOINTS.values()), "nodes": sorted(nodes.values(), key=lambda n: n["path"]), "edges": sorted(unique.values(), key=lambda e: (e["from"], e["to"], e["edge_type"], e["stage"])), "stages": {stage: {"entrypoint": STAGE_ENTRYPOINTS[stage], "paths": sorted(paths), "inputs": STAGE_IO[stage][0], "outputs": STAGE_IO[stage][1]} for stage, paths in sorted(stage_paths.items())}, "external_runtime_boundaries": EXTERNAL, "duplicate_or_proxy_modules": PROXIES, "classification_summary": summary, "audit_notes": {"formal_proposed_route": "Q002S640_B6_roi_same_anchor_mse; K8, anchor batch 640, 10 weights, 6400 residuals, A2000/B4000", "fit_first": "MATLAB SCMR-v5 native cache and L100/sparse reuse are active; Python fit_native and standardized routes are compatibility-only", "historical_names": "Historical filename tokens are metadata, never a legacy classification heuristic."}}
+    return {"schema_version": "active-dependency-inventory/v3", "generated_from_git_sha": sha, "entrypoints": list(STAGE_ENTRYPOINTS.values()), "nodes": sorted(nodes.values(), key=lambda n: n["path"]), "edges": sorted(unique.values(), key=lambda e: (e["from"], e["to"], e["edge_type"], e["stage"])), "stages": {stage: {"entrypoint": STAGE_ENTRYPOINTS[stage], "paths": sorted(paths), "inputs": STAGE_IO[stage][0], "outputs": STAGE_IO[stage][1]} for stage, paths in sorted(stage_paths.items())}, "external_runtime_boundaries": EXTERNAL, "duplicate_or_proxy_modules": PROXIES, "classification_summary": summary, "audit_notes": {"formal_proposed_route": "Q002S640_B6_roi_same_anchor_mse; K8, anchor batch 640, 10 weights, 6400 residuals, A2000/B4000", "fit_first": "MATLAB SCMR-v5 native cache and L100/sparse reuse are active; Python fit_native and standardized routes are compatibility-only", "historical_names": "Historical filename tokens are metadata, never a legacy classification heuristic."}}
 
 
 def markdown(inventory: dict[str, Any]) -> str:
@@ -200,9 +278,10 @@ def markdown(inventory: dict[str, Any]) -> str:
     for stage, details in inventory["stages"].items():
         paths = details["paths"]; by_class = defaultdict(list)
         for path in paths:
-            if path in nodes: by_class[nodes[path]["classification"]].append(path)
+            if path in nodes and stage in nodes[path]["stage_roles"]:
+                by_class[nodes[path]["stage_roles"][stage]].append(path)
         lines += [f"## Stage {stage}", "", f"Entrypoint: `{details['entrypoint']}`", "", "Inputs:"] + [f"- `{item}`" for item in details["inputs"]] + ["", "Outputs:"] + [f"- `{item}`" for item in details["outputs"]]
-        for label, category in (("Direct execution chain", "ACTIVE_EXECUTED"), ("Transitive implementation dependencies", "ACTIVE_TRANSITIVE"), ("Conditional branches", "CONDITIONAL_ACTIVE"), ("Compatibility-only dependencies", "COMPATIBILITY_IMPORT_ONLY"), ("Configs/assets", "CONFIG_RUNTIME_ASSET")):
+        for label, category in (("Direct execution chain", "ACTIVE_EXECUTED"), ("Conditional direct execution", "CONDITIONAL_ACTIVE"), ("Transitive implementation dependencies", "ACTIVE_TRANSITIVE"), ("Compatibility import closure", "COMPATIBILITY_IMPORT_ONLY"), ("Runtime configs/assets", "CONFIG_RUNTIME_ASSET"), ("Third-party runtime closure", "THIRD_PARTY_ACTIVE")):
             lines += ["", f"{label}:"] + [f"- `{path}`" for path in sorted(by_class.get(category, []))]
         boundaries = [item["id"] for item in inventory["external_runtime_boundaries"] if stage in item["required_by_stages"]]
         historical = [path for path in paths if path in nodes and nodes[path]["historical_name"]]

@@ -1,6 +1,6 @@
 # Active pipeline dependency trace
 
-Generated deterministically from `817ae69a0496e069a56da6eab834e074e083c836`. Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
+Generated deterministically from `9cb0b64a8991ee415989c66db9a3ea5c68421673`. Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
 
 ## Stage 01
 
@@ -16,13 +16,15 @@ Direct execution chain:
 - `scripts/build_subject_deployment_manifest.py`
 - `scripts/validate_subject_id.py`
 
+Conditional direct execution:
+
 Transitive implementation dependencies:
 
-Conditional branches:
+Compatibility import closure:
 
-Compatibility-only dependencies:
+Runtime configs/assets:
 
-Configs/assets:
+Third-party runtime closure:
 
 External runtime boundaries:
 
@@ -45,20 +47,30 @@ Direct execution chain:
 - `common/trad/scripts/local_preprocess_one.m`
 - `common/trad/scripts/validate_transferred_preprocessed.py`
 
+Conditional direct execution:
+
 Transitive implementation dependencies:
 - `common/scripts/deployment_manifest.py`
+- `common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/MIND_descriptor2D.m`
+- `common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m`
+- `common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m`
+- `common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m`
+- `common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m`
 - `common/trad/modules/module_02_data_bridge/mat_v73.py`
 
-Conditional branches:
+Compatibility import closure:
 
-Compatibility-only dependencies:
+Runtime configs/assets:
 
-Configs/assets:
+Third-party runtime closure:
 
 External runtime boundaries:
 - `matlab`
 
 Historical-name cleanup candidates:
+- `common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/MIND_descriptor2D.m`
+- `common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m`
+- `common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m`
 
 ## Stage 03
 
@@ -78,6 +90,8 @@ Outputs:
 Direct execution chain:
 - `common/trad/scripts/prepare_all_observations.py`
 
+Conditional direct execution:
+
 Transitive implementation dependencies:
 - `common/scripts/deployment_manifest.py`
 - `common/trad/modules/module_02_data_bridge/build_manifest.py`
@@ -86,12 +100,22 @@ Transitive implementation dependencies:
 - `common/trad/modules/module_02_data_bridge/prepare_observations.py`
 - `common/trad/modules/module_02_data_bridge/timing.py`
 
-Conditional branches:
+Compatibility import closure:
 
-Compatibility-only dependencies:
-
-Configs/assets:
+Runtime configs/assets:
 - `configs/protocol_scmr_v5_10_100.yaml`
+
+Third-party runtime closure:
+- `common/trad/third_party/nesvor/nesvor/transform/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py`
+- `common/trad/third_party/nesvor/nesvor/utils/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/utils/logger.py`
+- `common/trad/third_party/nesvor/nesvor/utils/loss.py`
+- `common/trad/third_party/nesvor/nesvor/utils/misc.py`
+- `common/trad/third_party/nesvor/nesvor/utils/psf.py`
+- `common/trad/third_party/nesvor/nesvor/utils/types.py`
 
 External runtime boundaries:
 
@@ -111,17 +135,41 @@ Outputs:
 Direct execution chain:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh`
 
+Conditional direct execution:
+- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
+
 Transitive implementation dependencies:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py`
 - `common/trad/modules/module_02_data_bridge/geometry.py`
 - `common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py`
 
-Conditional branches:
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
+Compatibility import closure:
 
-Compatibility-only dependencies:
+Runtime configs/assets:
+- `common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH100_4CH50.json`
+- `common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/S2CH50_4CH100.json`
+- `common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH0.json`
+- `common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH0_4CH100.json`
+- `common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH100_4CH0.json`
 
-Configs/assets:
+Third-party runtime closure:
+- `common/trad/third_party/nesvor/nesvor/image/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/image/image.py`
+- `common/trad/third_party/nesvor/nesvor/image/image_utils.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py`
+- `common/trad/third_party/nesvor/nesvor/svr/registration.py`
+- `common/trad/third_party/nesvor/nesvor/transform/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py`
+- `common/trad/third_party/nesvor/nesvor/utils/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/utils/logger.py`
+- `common/trad/third_party/nesvor/nesvor/utils/loss.py`
+- `common/trad/third_party/nesvor/nesvor/utils/misc.py`
+- `common/trad/third_party/nesvor/nesvor/utils/psf.py`
+- `common/trad/third_party/nesvor/nesvor/utils/types.py`
 
 External runtime boundaries:
 
@@ -145,27 +193,49 @@ Direct execution chain:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh`
 - `common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m`
 
+Conditional direct execution:
+- `common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py`
+
 Transitive implementation dependencies:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_pose_audit.py`
+- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py`
 - `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
+- `common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m`
+- `common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m`
+- `common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m`
 - `common/trad/modules/module_02_data_bridge/geometry.py`
 - `common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py`
 
-Conditional branches:
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
-
-Compatibility-only dependencies:
+Compatibility import closure:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py`
 
-Configs/assets:
+Runtime configs/assets:
+
+Third-party runtime closure:
+- `common/trad/third_party/nesvor/nesvor/image/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/image/image.py`
+- `common/trad/third_party/nesvor/nesvor/image/image_utils.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py`
+- `common/trad/third_party/nesvor/nesvor/svr/registration.py`
+- `common/trad/third_party/nesvor/nesvor/transform/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py`
+- `common/trad/third_party/nesvor/nesvor/utils/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/utils/logger.py`
+- `common/trad/third_party/nesvor/nesvor/utils/loss.py`
+- `common/trad/third_party/nesvor/nesvor/utils/misc.py`
+- `common/trad/third_party/nesvor/nesvor/utils/psf.py`
+- `common/trad/third_party/nesvor/nesvor/utils/types.py`
 
 External runtime boundaries:
 - `matlab`
@@ -197,6 +267,8 @@ Direct execution chain:
 - `common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py`
 - `common/reconstruction_core/orchestration.py`
 
+Conditional direct execution:
+
 Transitive implementation dependencies:
 - `common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py`
 - `common/mlp/modules/module_05_signal_decoder/decoder_factory.py`
@@ -206,6 +278,7 @@ Transitive implementation dependencies:
 - `common/mlp/modules/module_05_signal_decoder/trad_teacher/trad_signal_simulator.py`
 - `common/mlp/modules/module_07_objective_training/mlp_trainer.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py`
+- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py`
 - `common/quality_experiments/Q001_recon/config.py`
 - `common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py`
@@ -224,15 +297,32 @@ Transitive implementation dependencies:
 - `common/trad/modules/module_08_inference_export/export_quantitative.py`
 - `common/trad/modules/module_08_inference_export/reprojection.py`
 
-Conditional branches:
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
+Compatibility import closure:
 
-Compatibility-only dependencies:
-
-Configs/assets:
+Runtime configs/assets:
 - `configs/models_manifest.json`
 - `configs/protocol_scmr_v5_10_100.yaml`
 - `runtime/runtime_contract.json`
+
+Third-party runtime closure:
+- `common/trad/third_party/nesvor/nesvor/image/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/image/image.py`
+- `common/trad/third_party/nesvor/nesvor/image/image_utils.py`
+- `common/trad/third_party/nesvor/nesvor/inr/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py`
+- `common/trad/third_party/nesvor/nesvor/svr/registration.py`
+- `common/trad/third_party/nesvor/nesvor/transform/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py`
+- `common/trad/third_party/nesvor/nesvor/utils/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/utils/logger.py`
+- `common/trad/third_party/nesvor/nesvor/utils/loss.py`
+- `common/trad/third_party/nesvor/nesvor/utils/misc.py`
+- `common/trad/third_party/nesvor/nesvor/utils/psf.py`
+- `common/trad/third_party/nesvor/nesvor/utils/types.py`
 
 External runtime boundaries:
 - `cuda`
@@ -254,7 +344,14 @@ Outputs:
 
 Direct execution chain:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh`
-- `common/reconstruction_core/orchestration.py`
+
+Conditional direct execution:
+- `common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py`
+- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py`
+- `common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py`
+- `common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py`
+- `common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py`
+- `common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py`
 
 Transitive implementation dependencies:
 - `common/evaluation_common/myocardium/build_native_bundle.py`
@@ -270,6 +367,7 @@ Transitive implementation dependencies:
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py`
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py`
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py`
+- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py`
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py`
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py`
 - `common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py`
@@ -297,9 +395,11 @@ Transitive implementation dependencies:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py`
+- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py`
 - `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
+- `common/reconstruction_core/orchestration.py`
 - `common/trad/evaluation/profiling/summarize_timing_profile.py`
 - `common/trad/evaluation/scmr/quality_control.py`
 - `common/trad/evaluation/scmr/reference_2d.py`
@@ -314,16 +414,29 @@ Transitive implementation dependencies:
 - `common/trad/modules/module_07_objective_training/training_space.py`
 - `common/trad/modules/module_08_inference_export/export_quantitative.py`
 
-Conditional branches:
-- `common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
+Compatibility import closure:
 
-Compatibility-only dependencies:
+Runtime configs/assets:
 
-Configs/assets:
+Third-party runtime closure:
+- `common/trad/third_party/nesvor/nesvor/image/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/image/image.py`
+- `common/trad/third_party/nesvor/nesvor/image/image_utils.py`
+- `common/trad/third_party/nesvor/nesvor/inr/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py`
+- `common/trad/third_party/nesvor/nesvor/svr/registration.py`
+- `common/trad/third_party/nesvor/nesvor/transform/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py`
+- `common/trad/third_party/nesvor/nesvor/utils/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/utils/logger.py`
+- `common/trad/third_party/nesvor/nesvor/utils/loss.py`
+- `common/trad/third_party/nesvor/nesvor/utils/misc.py`
+- `common/trad/third_party/nesvor/nesvor/utils/psf.py`
+- `common/trad/third_party/nesvor/nesvor/utils/types.py`
 
 External runtime boundaries:
 - `cuda`
@@ -334,6 +447,7 @@ Historical-name cleanup candidates:
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py`
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py`
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py`
+- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py`
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py`
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py`
 - `common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py`
@@ -361,6 +475,10 @@ Outputs:
 Direct execution chain:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh`
+
+Conditional direct execution:
+- `common/paper_experiments/joint_vs_2dfit/aha/common_native_all_stack_roi_metrics.py`
+- `common/paper_experiments/joint_vs_2dfit/aha/common_native_metrics_qc.py`
 
 Transitive implementation dependencies:
 - `common/evaluation_common/myocardium/build_native_bundle.py`
@@ -394,6 +512,7 @@ Transitive implementation dependencies:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py`
+- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py`
 - `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
@@ -402,14 +521,28 @@ Transitive implementation dependencies:
 - `common/trad/modules/module_02_data_bridge/geometry.py`
 - `common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py`
 
-Conditional branches:
-- `common/paper_experiments/joint_vs_2dfit/aha/common_native_all_stack_roi_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/common_native_metrics_qc.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
+Compatibility import closure:
 
-Compatibility-only dependencies:
+Runtime configs/assets:
 
-Configs/assets:
+Third-party runtime closure:
+- `common/trad/third_party/nesvor/nesvor/image/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/image/image.py`
+- `common/trad/third_party/nesvor/nesvor/image/image_utils.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq.py`
+- `common/trad/third_party/nesvor/nesvor/slice_acquisition/slice_acq_torch.py`
+- `common/trad/third_party/nesvor/nesvor/svr/registration.py`
+- `common/trad/third_party/nesvor/nesvor/transform/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert.py`
+- `common/trad/third_party/nesvor/nesvor/transform/transform_convert_torch.py`
+- `common/trad/third_party/nesvor/nesvor/utils/__init__.py`
+- `common/trad/third_party/nesvor/nesvor/utils/logger.py`
+- `common/trad/third_party/nesvor/nesvor/utils/loss.py`
+- `common/trad/third_party/nesvor/nesvor/utils/misc.py`
+- `common/trad/third_party/nesvor/nesvor/utils/psf.py`
+- `common/trad/third_party/nesvor/nesvor/utils/types.py`
 
 External runtime boundaries:
 
@@ -446,13 +579,15 @@ Direct execution chain:
 - `scripts/verify_runtime_contract.py`
 - `scripts/verify_scientific_freeze.py`
 
+Conditional direct execution:
+
 Transitive implementation dependencies:
 
-Conditional branches:
+Compatibility import closure:
 
-Compatibility-only dependencies:
+Runtime configs/assets:
 
-Configs/assets:
+Third-party runtime closure:
 
 External runtime boundaries:
 
