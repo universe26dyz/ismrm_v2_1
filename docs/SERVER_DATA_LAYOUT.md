@@ -117,6 +117,12 @@ SCMR-v5 root for fit-first/final-pose/metrics and the verified supplemental
 root above for Proposed. An audit must not report HHZ Proposed as missing just
 because it is absent from `ismrm_v2_scmr_v5`.
 
+When materializing HHZ into the project archive, pass the formal run root with
+`--run-root` and pass the verified Proposed root separately with
+`--supplemental-proposed-root`. The materializer records both sources and
+includes the supplemental files in the same `sha256.jsonl`; do not copy this
+subtree manually.
+
 The five subject names are a paper-cohort record only. Active runtime admission must remain manifest/parameter based, not a subject-name whitelist.
 
 ## Historical Final5 and standardization

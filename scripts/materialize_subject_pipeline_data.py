@@ -80,7 +80,8 @@ def _copy_run_outputs(source: Path, destination: Path, records: list[dict[str, A
 def materialize_subject(*, project_root: str | Path, subject: str, run_root: str | Path,
                         raw_dicom_subject_root: str | Path, preprocessed_subject_root: str | Path,
                         prepared_subject_root: str | Path, roi_bundle: str | Path,
-                        deployment_manifest: str | Path | None = None) -> Path:
+                        deployment_manifest: str | Path | None = None,
+                        supplemental_proposed_root: str | Path | None = None) -> Path:
     project = Path(project_root).resolve()
     subject_root = project / "subjects" / subject
     input_root = subject_root / "inputs"
@@ -96,6 +97,22 @@ def materialize_subject(*, project_root: str | Path, subject: str, run_root: str
     _copy_tree(sparse_source, input_root / "sparse_inputs", records, label="input/sparse_inputs")
 
     _copy_run_outputs(Path(run_root).resolve(), output_root, records)
+
+    supplemental_source = None
+    if supplemental_proposed_root is not None:
+        supplemental_source = Path(supplemental_proposed_root).resolve()
+        formal_proposed = Path(run_root).resolve() / "reconstruction" / "proposed" / subject
+        if formal_proposed.exists():
+            raise ValueError(
+                "supplemental Proposed source is ambiguous because the formal "
+                f"run already contains {formal_proposed}"
+            )
+        _copy_tree(
+            supplemental_source,
+            output_root / "reconstruction" / "proposed" / subject,
+            records,
+            label="supplemental/proposed",
+        )
 
     if deployment_manifest is not None:
         _copy_file(Path(deployment_manifest), subject_root / "deployment_manifest.json", records,
@@ -119,6 +136,9 @@ def materialize_subject(*, project_root: str | Path, subject: str, run_root: str
             "roi": str(Path(roi_bundle).resolve()),
             "sparse_inputs": str(sparse_source),
         },
+        "supplemental_sources": {
+            "proposed": str(supplemental_source) if supplemental_source is not None else None,
+        },
         "archive_inputs": str(input_root.relative_to(project)),
         "archive_outputs": str(output_root.relative_to(project)),
         "file_count": len(records),
@@ -139,6 +159,7 @@ def main() -> None:
     parser.add_argument("--prepared-subject-root", required=True)
     parser.add_argument("--roi-bundle", required=True)
     parser.add_argument("--deployment-manifest")
+    parser.add_argument("--supplemental-proposed-root")
     print(materialize_subject(**vars(parser.parse_args())))
 
 
