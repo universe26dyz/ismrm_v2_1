@@ -7,15 +7,16 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+COMMON_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = COMMON_ROOT.parent
 # This file remains executable directly for deployment compatibility.  Place
-# the repository root ahead of ``trad/scripts`` so the explicit root package
-# ``scripts.deployment_manifest`` cannot be shadowed by the sibling package.
-while str(REPO_ROOT) in sys.path:
-    sys.path.remove(str(REPO_ROOT))
-sys.path.insert(0, str(REPO_ROOT))
+# the clean package and the legacy common package ahead of ``trad/scripts``.
+for import_root in reversed((PROJECT_ROOT / "src", COMMON_ROOT)):
+    while str(import_root) in sys.path:
+        sys.path.remove(str(import_root))
+    sys.path.insert(0, str(import_root))
 
-from scripts.deployment_manifest import load_deployment_manifest
+from ismrm_v2.io.deployment_manifest import load_deployment_manifest
 from trad.modules.module_02_data_bridge.prepare_observations import prepare_observations
 
 

@@ -13,4 +13,8 @@ def test_phase2a_allows_only_subject_admission_io_in_clean_package() -> None:
     assert result.returncode == 0, result.stdout + result.stderr
     skeleton = ROOT / "src/ismrm_v2"
     implementation = {path.relative_to(skeleton).as_posix() for path in skeleton.rglob("*.py") if path.name != "__init__.py"}
-    assert implementation == {"io/validate_subject_id.py", "io/build_subject_deployment_manifest.py"}
+    assert implementation == {
+        "io/validate_subject_id.py",
+        "io/build_subject_deployment_manifest.py",
+        "io/deployment_manifest.py",
+    }

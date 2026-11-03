@@ -39,7 +39,11 @@ def main(root: Path = ROOT) -> None:
         if not (root / entrypoint).is_file():
             raise SystemExit(f"pipeline entrypoint missing: {entrypoint}")
     package = root / "src/ismrm_v2"
-    migrated = {"io/validate_subject_id.py", "io/build_subject_deployment_manifest.py"}
+    migrated = {
+        "io/validate_subject_id.py",
+        "io/build_subject_deployment_manifest.py",
+        "io/deployment_manifest.py",
+    }
     unexpected = [path.relative_to(package).as_posix() for path in package.rglob("*.py") if path.name != "__init__.py" and path.relative_to(package).as_posix() not in migrated]
     if unexpected:
         raise SystemExit(f"unexpected clean-package implementation: {unexpected}")
@@ -47,8 +51,9 @@ def main(root: Path = ROOT) -> None:
     entries = {entry["current_path"]: entry for entry in manifest["entries"]}
     for relative in migrated:
         entry = entries.get(f"src/ismrm_v2/{relative}")
-        if entry is None or entry.get("migration_status") != "MIGRATED_PHASE_2A":
-            raise SystemExit(f"Phase 2A package module is not recorded as migrated: {relative}")
+        expected_status = "MIGRATED_PHASE_2B" if relative == "io/deployment_manifest.py" else "MIGRATED_PHASE_2A"
+        if entry is None or entry.get("migration_status") != expected_status:
+            raise SystemExit(f"completed package module is not recorded as migrated: {relative}")
     for deferred in ("proposed", "fit_first", "evaluation"):
         implementation = [path.relative_to(package).as_posix() for path in (package / deferred).rglob("*.py") if path.name != "__init__.py"]
         if implementation:

@@ -7,16 +7,17 @@ import json
 import sys
 from pathlib import Path
 
-CODE_ROOT = Path(__file__).resolve().parents[2]
-if str(CODE_ROOT) not in sys.path:
-    sys.path.insert(0, str(CODE_ROOT))
+COMMON_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = COMMON_ROOT.parent
+for import_root in reversed((PROJECT_ROOT / "src", COMMON_ROOT)):
+    if str(import_root) not in sys.path:
+        sys.path.insert(0, str(import_root))
 
 # This file is commonly launched directly as
-# ``python trad/scripts/validate_transferred_preprocessed.py``.  Importing
-# through the repository package keeps that mode independent of the caller's
-# current working directory and avoids relying on a top-level ``modules`` or
-# ``scripts`` path entry.
-from scripts.deployment_manifest import load_deployment_manifest
+# ``python trad/scripts/validate_transferred_preprocessed.py``.  Explicit
+# repository-local roots keep that mode independent of the caller's current
+# working directory.
+from ismrm_v2.io.deployment_manifest import load_deployment_manifest
 from trad.modules.module_02_data_bridge.mat_v73 import load_preprocessed_v73
 
 

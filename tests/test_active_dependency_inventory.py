@@ -116,6 +116,14 @@ def test_phase2a_subject_admission_modules_have_direct_stage_roles(tmp_path: Pat
     assert "scripts/build_subject_deployment_manifest.py" not in nodes
 
 
+def test_phase2b_deployment_manifest_loader_follows_the_direct_callers(tmp_path: Path) -> None:
+    inventory = _inventory(tmp_path)
+    nodes = {node["path"]: node for node in inventory["nodes"]}
+    loader = "src/ismrm_v2/io/deployment_manifest.py"
+    assert nodes[loader]["stage_roles"] == {"02": "ACTIVE_TRANSITIVE", "03": "ACTIVE_TRANSITIVE"}
+    assert "common/scripts/deployment_manifest.py" not in nodes
+
+
 def test_markdown_uses_the_stage_specific_role_not_global_role(tmp_path: Path) -> None:
     inventory = _inventory(tmp_path)
     node = next(node for node in inventory["nodes"] if node["path"] == "common/reconstruction_core/orchestration.py")
