@@ -12,6 +12,20 @@
     "current_server_project_root_status": "CURRENT_RUNTIME_REFERENCE"
   },
   "subjects": ["CYJ", "DYL_2", "DYZ", "HHZ", "HJL"],
+  "server_audit_result": {
+    "date": "2026-11-03",
+    "evidence_source": "read-only terminal output supplied by the user",
+    "codex_direct_server_access": false,
+    "all_subjects_pipeline_cases": "8/8 PASS",
+    "archive_sha256": "PASS",
+    "dicom_counts": {
+      "HHZ": {"sax": 120, "2ch": 160, "4ch": 100},
+      "CYJ": {"sax": 140, "2ch": 150, "4ch": 120},
+      "DYZ": {"sax": 120, "2ch": 160, "4ch": 100},
+      "DYL_2": {"sax": 120, "2ch": 160, "4ch": 100},
+      "HJL": {"sax": 120, "2ch": 160, "4ch": 100}
+    }
+  },
   "roots": [
     {"purpose": "raw_dicom", "path": "/data/dengyz/dataset/mapping_subject_dicom/<SUBJECT>", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
     {"purpose": "shared_data_root", "path": "/data/dengyz/dataset/Code_10w_v1", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},

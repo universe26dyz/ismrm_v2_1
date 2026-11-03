@@ -21,6 +21,32 @@
 
 除本文档和核验命令外，本次没有连接服务器、移动数据、复制数据、删除数据、运行 MATLAB/GPU、修改 ROI/metrics 或修改 scientific pipeline。
 
+## Final server audit result
+
+The following results were returned by the read-only audit commands executed
+on CMRServer04 on 2026-11-03. Codex did not directly mount or access the
+server filesystem; the terminal output is the evidence supplied by the user.
+
+| Subject | SAX DICOM | 2CH DICOM | 4CH DICOM | Pipeline cases | Archive SHA256 |
+|---|---:|---:|---:|---:|---|
+| HHZ | 120 | 160 | 100 | 8/8 PASS | PASS |
+| CYJ | 140 | 150 | 120 | 8/8 PASS | PASS |
+| DYZ | 120 | 160 | 100 | 8/8 PASS | PASS |
+| DYL_2 | 120 | 160 | 100 | 8/8 PASS | PASS |
+| HJL | 120 | 160 | 100 | 8/8 PASS | PASS |
+
+All five subjects passed DICOM, preprocessing, prepared observations,
+Proposed, fit-first, final-pose, common-native metrics, and archive SHA256
+verification. Each subject has eight cases:
+`L100_fold0`, `L25_fold0`, `L50_fold0`, `SAX100_2CH0_4CH0`,
+`SAX100_2CH0_4CH100`, `SAX100_2CH100_4CH0`, `S2CH100_4CH50_fold0`, and
+`S2CH50_4CH100_fold0`.
+
+The only non-uniform source layout is HHZ: its formal SCMR-v5 run root holds
+fit-first/final-pose/metrics, while its verified Proposed source is the
+supplemental `ismrm_v2` root documented below. All eight HHZ Proposed cases
+passed provenance, decoder SHA256, B6 SHA256, subject, and method checks.
+
 ## Repository examined
 
 | Item | Value | Evidence |
