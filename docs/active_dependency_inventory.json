@@ -3933,14 +3933,6 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from scripts.deployment_manifest import",
-      "from": "common/trad/scripts/prepare_all_observations.py",
-      "stage": "03",
-      "to": "common/scripts/deployment_manifest.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
       "evidence": "from trad.modules.module_02_data_bridge.prepare_observations import",
       "from": "common/trad/scripts/prepare_all_observations.py",
       "stage": "03",
@@ -3957,10 +3949,10 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from scripts.deployment_manifest import",
-      "from": "common/trad/scripts/validate_transferred_preprocessed.py",
-      "stage": "02",
-      "to": "common/scripts/deployment_manifest.py"
+      "evidence": "from ismrm_v2.io.deployment_manifest import",
+      "from": "common/trad/scripts/prepare_all_observations.py",
+      "stage": "03",
+      "to": "src/ismrm_v2/io/deployment_manifest.py"
     },
     {
       "condition": "import-time",
@@ -3969,6 +3961,14 @@
       "from": "common/trad/scripts/validate_transferred_preprocessed.py",
       "stage": "02",
       "to": "common/trad/modules/module_02_data_bridge/mat_v73.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.io.deployment_manifest import",
+      "from": "common/trad/scripts/validate_transferred_preprocessed.py",
+      "stage": "02",
+      "to": "src/ismrm_v2/io/deployment_manifest.py"
     },
     {
       "condition": "import-time",
@@ -5483,7 +5483,7 @@
     "generator_sha256": "aa6acc04ea923ce23501f391392f3fc115c839d8c292a298887cf5751abe5e94",
     "inventory_schema": "active-dependency-inventory/v3",
     "source_file_count": 153,
-    "source_runtime_fingerprint_sha256": "7e2940aa06ced4ada177eb4681e33099b00dd53db51b61930bffed1f5233c3eb"
+    "source_runtime_fingerprint_sha256": "b5eaf200e19c67b6b45d1c6f7826b90226562b8cbcf14f175f7e18147fcfb4b0"
   },
   "nodes": [
     {
@@ -7781,33 +7781,6 @@
         "PYTHON_IMPORT"
       ],
       "evidence": [
-        "from scripts.deployment_manifest import"
-      ],
-      "functional_area": "stage_02",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/scripts/deployment_manifest.py",
-      "reason": "from scripts.deployment_manifest import",
-      "source_sha256": "f438ea530ccba4a32a42a0c9edd2afd572fb9986d5e98766c6cd46ede543470c",
-      "stage_roles": {
-        "02": "ACTIVE_TRANSITIVE",
-        "03": "ACTIVE_TRANSITIVE"
-      },
-      "stages": [
-        "02",
-        "03"
-      ]
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
-      "discovery_methods": [
-        "PYTHON_IMPORT"
-      ],
-      "evidence": [
         "from trad.evaluation.profiling.summarize_timing_profile import"
       ],
       "functional_area": "stage_06",
@@ -8632,7 +8605,7 @@
       "outputs": [],
       "path": "common/trad/scripts/prepare_all_observations.py",
       "reason": "explicit --protocol",
-      "source_sha256": "b1254545285d7cb5944fd0597609b6b3410834d35dd6225413fd62872ce514ef",
+      "source_sha256": "43175da3871b7cf28f198d620387a52355cd1fc82425d83c1ed398b70467741b",
       "stage_roles": {
         "03": "ACTIVE_EXECUTED"
       },
@@ -8657,7 +8630,7 @@
       "outputs": [],
       "path": "common/trad/scripts/validate_transferred_preprocessed.py",
       "reason": "post-transfer validator",
-      "source_sha256": "6d6c035ce0cb23732a810846fc55ce7450aea014a2d99fcf3511d12afd757e42",
+      "source_sha256": "93400c8fda77a8dbd1f5b46c827b11765743e88e45b45df771775b2a60be2450",
       "stage_roles": {
         "02": "ACTIVE_EXECUTED"
       },
@@ -9764,6 +9737,33 @@
       ]
     },
     {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
+      "evidence": [
+        "from ismrm_v2.io.deployment_manifest import"
+      ],
+      "functional_area": "stage_02",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/io/deployment_manifest.py",
+      "reason": "from ismrm_v2.io.deployment_manifest import",
+      "source_sha256": "f438ea530ccba4a32a42a0c9edd2afd572fb9986d5e98766c6cd46ede543470c",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE",
+        "03": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "02",
+        "03"
+      ]
+    },
+    {
       "classification": "ACTIVE_EXECUTED",
       "discovery_methods": [
         "MANUAL_DYNAMIC_OVERRIDE",
@@ -9831,7 +9831,6 @@
         "RUN_ROOT/preprocessed/SUBJECT/{stack}/preprocessed.mat"
       ],
       "paths": [
-        "common/scripts/deployment_manifest.py",
         "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/MIND_descriptor2D.m",
         "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m",
         "common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m",
@@ -9843,6 +9842,7 @@
         "common/trad/scripts/local_preprocess_one.m",
         "common/trad/scripts/validate_transferred_preprocessed.py",
         "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
+        "src/ismrm_v2/io/deployment_manifest.py",
         "src/ismrm_v2/io/validate_subject_id.py"
       ]
     },
@@ -9860,7 +9860,6 @@
         "qc_summary.json"
       ],
       "paths": [
-        "common/scripts/deployment_manifest.py",
         "common/trad/modules/module_02_data_bridge/build_manifest.py",
         "common/trad/modules/module_02_data_bridge/geometry.py",
         "common/trad/modules/module_02_data_bridge/mat_v73.py",
@@ -9879,6 +9878,7 @@
         "common/trad/third_party/nesvor/nesvor/utils/types.py",
         "configs/protocol_scmr_v5_10_100.yaml",
         "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
+        "src/ismrm_v2/io/deployment_manifest.py",
         "src/ismrm_v2/io/validate_subject_id.py"
       ]
     },

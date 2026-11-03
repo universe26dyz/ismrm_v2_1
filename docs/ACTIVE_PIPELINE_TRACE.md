@@ -1,6 +1,6 @@
 # Active pipeline dependency trace
 
-Generated deterministically from runtime-source fingerprint `7e2940aa06ced4ada177eb4681e33099b00dd53db51b61930bffed1f5233c3eb` (generator `aa6acc04ea923ce23501f391392f3fc115c839d8c292a298887cf5751abe5e94`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
+Generated deterministically from runtime-source fingerprint `b5eaf200e19c67b6b45d1c6f7826b90226562b8cbcf14f175f7e18147fcfb4b0` (generator `aa6acc04ea923ce23501f391392f3fc115c839d8c292a298887cf5751abe5e94`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
 
 ## Stage 01
 
@@ -51,13 +51,13 @@ Direct execution chain:
 Conditional direct execution:
 
 Transitive implementation dependencies:
-- `common/scripts/deployment_manifest.py`
 - `common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/MIND_descriptor2D.m`
 - `common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m`
 - `common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m`
 - `common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m`
 - `common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m`
 - `common/trad/modules/module_02_data_bridge/mat_v73.py`
+- `src/ismrm_v2/io/deployment_manifest.py`
 
 Compatibility import closure:
 
@@ -95,12 +95,12 @@ Direct execution chain:
 Conditional direct execution:
 
 Transitive implementation dependencies:
-- `common/scripts/deployment_manifest.py`
 - `common/trad/modules/module_02_data_bridge/build_manifest.py`
 - `common/trad/modules/module_02_data_bridge/geometry.py`
 - `common/trad/modules/module_02_data_bridge/mat_v73.py`
 - `common/trad/modules/module_02_data_bridge/prepare_observations.py`
 - `common/trad/modules/module_02_data_bridge/timing.py`
+- `src/ismrm_v2/io/deployment_manifest.py`
 
 Compatibility import closure:
 

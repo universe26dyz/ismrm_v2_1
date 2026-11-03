@@ -55,3 +55,17 @@ def test_phase2a_subject_admission_moves_are_recorded_without_old_inventory_node
         assert record["kind"] == kind
         assert record["pre_move_source_sha256"]
         assert record["post_move_source_sha256"]
+
+
+def test_phase2b_deployment_manifest_move_is_recorded_without_old_inventory_node() -> None:
+    manifest = json.loads((ROOT / "docs/clean_code_migration_manifest.json").read_text(encoding="utf-8"))
+    entries = {entry["current_path"]: entry for entry in manifest["entries"]}
+    old_path = "common/scripts/deployment_manifest.py"
+    new_path = "src/ismrm_v2/io/deployment_manifest.py"
+    assert old_path not in entries
+    assert entries[new_path]["migration_status"] == "MIGRATED_PHASE_2B"
+    assert entries[new_path]["future_target_path"] == new_path
+    record = next(item for item in manifest["completed_migrations"] if item["from_path"] == old_path)
+    assert record["to_path"] == new_path
+    assert record["kind"] == "MOVE"
+    assert record["pre_move_source_sha256"] == record["post_move_source_sha256"]

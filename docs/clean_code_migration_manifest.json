@@ -17,6 +17,15 @@
       "pre_move_source_sha256": "cc0516507913a94348dc6c00da8a96c76ea6aefc336a6a069ed3a2df328fe9d8",
       "reason": "Generic subject validation moved without behavior changes into the clean I/O package.",
       "to_path": "src/ismrm_v2/io/validate_subject_id.py"
+    },
+    {
+      "from_path": "common/scripts/deployment_manifest.py",
+      "kind": "MOVE",
+      "phase": "2B",
+      "post_move_source_sha256": "f438ea530ccba4a32a42a0c9edd2afd572fb9986d5e98766c6cd46ede543470c",
+      "pre_move_source_sha256": "f438ea530ccba4a32a42a0c9edd2afd572fb9986d5e98766c6cd46ede543470c",
+      "reason": "Deployment-manifest loader moved unchanged into the clean I/O package.",
+      "to_path": "src/ismrm_v2/io/deployment_manifest.py"
     }
   ],
   "duplicate_implementation_plan": [
@@ -1199,20 +1208,6 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "current_path": "common/scripts/deployment_manifest.py",
-      "future_action": "KEEP_CURRENT",
-      "future_target_path": "common/scripts/deployment_manifest.py",
-      "phase1_action": "KEEP_CURRENT",
-      "reason": "active path remains authoritative during Phase 1",
-      "safe_to_delete_now": false,
-      "source_sha256": "f438ea530ccba4a32a42a0c9edd2afd572fb9986d5e98766c6cd46ede543470c",
-      "stage_roles": {
-        "02": "ACTIVE_TRANSITIVE",
-        "03": "ACTIVE_TRANSITIVE"
-      }
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
       "current_path": "common/trad/evaluation/profiling/summarize_timing_profile.py",
       "future_action": "KEEP_CURRENT",
       "future_target_path": "common/trad/evaluation/profiling/summarize_timing_profile.py",
@@ -1630,7 +1625,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
-      "source_sha256": "b1254545285d7cb5944fd0597609b6b3410834d35dd6225413fd62872ce514ef",
+      "source_sha256": "43175da3871b7cf28f198d620387a52355cd1fc82425d83c1ed398b70467741b",
       "stage_roles": {
         "03": "ACTIVE_EXECUTED"
       }
@@ -1643,7 +1638,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
-      "source_sha256": "6d6c035ce0cb23732a810846fc55ce7450aea014a2d99fcf3511d12afd757e42",
+      "source_sha256": "93400c8fda77a8dbd1f5b46c827b11765743e88e45b45df771775b2a60be2450",
       "stage_roles": {
         "02": "ACTIVE_EXECUTED"
       }
@@ -2185,6 +2180,21 @@
       }
     },
     {
+      "classification": "ACTIVE_TRANSITIVE",
+      "current_path": "src/ismrm_v2/io/deployment_manifest.py",
+      "future_action": "MIGRATED_PHASE_2B",
+      "future_target_path": "src/ismrm_v2/io/deployment_manifest.py",
+      "migration_status": "MIGRATED_PHASE_2B",
+      "phase1_action": "MIGRATED_PHASE_2B",
+      "reason": "Deployment-manifest loader moved unchanged into the clean I/O package.",
+      "safe_to_delete_now": false,
+      "source_sha256": "f438ea530ccba4a32a42a0c9edd2afd572fb9986d5e98766c6cd46ede543470c",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE",
+        "03": "ACTIVE_TRANSITIVE"
+      }
+    },
+    {
       "classification": "ACTIVE_EXECUTED",
       "current_path": "src/ismrm_v2/io/validate_subject_id.py",
       "future_action": "MIGRATED_PHASE_2A",
@@ -2208,6 +2218,6 @@
   ],
   "entry_count": 153,
   "inventory_schema": "active-dependency-inventory/v3",
-  "inventory_source_runtime_fingerprint_sha256": "7e2940aa06ced4ada177eb4681e33099b00dd53db51b61930bffed1f5233c3eb",
+  "inventory_source_runtime_fingerprint_sha256": "b5eaf200e19c67b6b45d1c6f7826b90226562b8cbcf14f175f7e18147fcfb4b0",
   "schema_version": "clean-code-migration/v1"
 }
