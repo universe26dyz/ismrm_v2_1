@@ -99,13 +99,23 @@ For HHZ, the formal SCMR-v5 run pattern is:
   evaluation/common_native/HHZ/
 ~~~
 
-The formal HHZ Proposed source was recorded at:
+The verified HHZ Proposed supplemental source is:
 
 ~~~text
 /data/dengyz/dataset/Code_10w_v1/Code_10w_runs/ismrm_v2/reconstruction/proposed/HHZ/
 ~~~
 
-That source is historical/supplemental provenance and must be verified before reuse. The final archived copy is under /data/dengyz/code/ismrm_v2_1/runs/HHZ/reconstruction/proposed/HHZ.
+The 2026-11-03 server audit found all eight cases present and verified their
+`run_provenance.json` records: subject=HHZ, method=proposed, decoder SHA256,
+and B6 SHA256 all match the active runtime contract. The parallel
+`ismrm_five_subject_analysis_v1` copies were rejected because all eight cases
+lacked provenance. The final archived copy belongs under
+`/data/dengyz/code/ismrm_v2_1/runs/HHZ/reconstruction/proposed/HHZ`.
+
+Therefore HHZ is intentionally assembled from two source roots: the formal
+SCMR-v5 root for fit-first/final-pose/metrics and the verified supplemental
+root above for Proposed. An audit must not report HHZ Proposed as missing just
+because it is absent from `ismrm_v2_scmr_v5`.
 
 The five subject names are a paper-cohort record only. Active runtime admission must remain manifest/parameter based, not a subject-name whitelist.
 

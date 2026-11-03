@@ -20,6 +20,7 @@
     {"purpose": "prepared_hhz", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_prepared_scmr_v5/HHZ", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
     {"purpose": "prepared_other_subjects", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/scmr_v5_rebuild_20261102_corrected/<SUBJECT>/prepared/<SUBJECT>", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
     {"purpose": "formal_hhz_run", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/ismrm_v2_scmr_v5", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
+    {"purpose": "hhz_proposed_supplemental", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/ismrm_v2/reconstruction/proposed/HHZ", "status": "VERIFIED_BY_USER_SERVER_AUDIT_8_OF_8_PROVENANCE", "protected": true},
     {"purpose": "formal_other_runs", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/scmr_v5_rebuild_20261102_corrected/<SUBJECT>", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
     {"purpose": "roi_bundle", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/ismrm_five_subject_analysis_v1/roi/derived/<SUBJECT>/20261026_scmr_native_roi_bundle", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
     {"purpose": "archive_inputs", "path": "/data/dengyz/code/ismrm_v2_1/subjects/<SUBJECT>/inputs", "status": "CURRENT_RUNTIME_REFERENCE_ARCHIVE_COPY", "protected": true},

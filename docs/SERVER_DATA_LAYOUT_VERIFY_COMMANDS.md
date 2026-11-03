@@ -44,14 +44,19 @@ for s in CYJ DYL_2 DYZ HHZ HJL; do
     PREPARED=$DATA_ROOT/Code_10w_prepared_scmr_v5/HHZ
     RUN_ROOT=$DATA_ROOT/Code_10w_runs/ismrm_v2_scmr_v5
     PREPROCESSED=$DATA_ROOT/Code_10w_preprocessed/HHZ
+    # HHZ Proposed is a verified supplemental source, separate from the
+    # formal SCMR-v5 fit-first/final-pose run root.
+    PROPOSED_ROOT=$DATA_ROOT/Code_10w_runs/ismrm_v2/reconstruction/proposed/$s
   elif [ "$s" = DYL_2 ]; then
     PREPARED=$DATA_ROOT/Code_10w_runs/scmr_v5_rebuild_20261102_corrected/$s/prepared/$s
     RUN_ROOT=$DATA_ROOT/Code_10w_runs/scmr_v5_rebuild_20261102_corrected/$s
     PREPROCESSED=$RUN_ROOT/preprocessed/$s
+    PROPOSED_ROOT=$RUN_ROOT/reconstruction/proposed/$s
   else
     PREPARED=$DATA_ROOT/Code_10w_runs/scmr_v5_rebuild_20261102_corrected/$s/prepared/$s
     RUN_ROOT=$DATA_ROOT/Code_10w_runs/scmr_v5_rebuild_20261102_corrected/$s
     PREPROCESSED=$DATA_ROOT/Code_10w_preprocessed/$s
+    PROPOSED_ROOT=$RUN_ROOT/reconstruction/proposed/$s
   fi
 
   for p in \
@@ -61,7 +66,7 @@ for s in CYJ DYL_2 DYZ HHZ HJL; do
     "$RUN_ROOT/sparse_inputs/$s" \
     "$RUN_ROOT/native_cache" \
     "$RUN_ROOT/mapping" \
-    "$RUN_ROOT/reconstruction/proposed/$s" \
+    "$PROPOSED_ROOT" \
     "$RUN_ROOT/reconstruction/fit_first/$s" \
     "$RUN_ROOT/evaluation/final_pose/$s" \
     "$RUN_ROOT/evaluation/common_native/$s" \
