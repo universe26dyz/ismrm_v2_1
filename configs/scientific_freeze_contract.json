@@ -1,0 +1,70 @@
+{
+  "schema_version": "ismrm-v2.1-scientific-freeze/v1",
+  "authority": {
+    "entrypoint": "paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py",
+    "experiment_id": "Q002S640_B6_roi_same_anchor_mse",
+    "description": "Latest HHZ corrected SCMR-v5 Proposed route; historical Phase-2 compatibility records are not the active authority."
+  },
+  "protocol": {
+    "tr_ms": 2.61,
+    "vps": 87,
+    "ti_ms": [10.0, 100.0],
+    "t2prep_ms": [35.0, 45.0, 55.0],
+    "fa_deg": [45.0, 45.0, 45.0],
+    "ramp_up_pulses": 10,
+    "num_images": 10
+  },
+  "models": {
+    "decoder_sha256": "338f2c0b8db90851f733ed31caa2c99914605fed3f7215ec2f69f19eba59583b",
+    "b6_model_sha256": "15981fbe93d2c70e14755ea756a02856c9383481e7d92d239619268a628a29b5",
+    "protocol_sha256": "3865b6bde1154750d4ed687456823fafad7b0cad5a61f763decb27dd1a4ed1c7",
+    "forbidden_decoder_ti_ms": [50.0, 150.0]
+  },
+  "proposed": {
+    "experiment_id": "Q002S640_B6_roi_same_anchor_mse",
+    "training_psf_samples": 8,
+    "anchor_batch_size": 640,
+    "weights_per_anchor": 10,
+    "signal_residual_count": 6400,
+    "seed": 20260911,
+    "stage_a_iterations": 2000,
+    "stage_b_iterations": 4000,
+    "cosine_loss": false,
+    "heteroscedastic_uncertainty": false,
+    "amplitude_guidance": false
+  },
+  "inr": {
+    "coarsest_resolution_mm": 8.0,
+    "finest_resolution_mm": 1.0,
+    "level_scale": 1.5,
+    "n_features_per_level": 2,
+    "log2_hashmap_size": 19,
+    "latent_features": 32,
+    "width": 64,
+    "depth": 3,
+    "t2_ms": [5.0, 200.0],
+    "t1_upper_bound_ms": 2500.0,
+    "b1": [0.1, 1.2],
+    "amplitude_positive": true
+  },
+  "baseline_fit_first": {
+    "registration": "stack",
+    "transformation_optimization": true,
+    "t1_t2_independent": true,
+    "pose_sharing": false,
+    "slice_thickness_mm": 8.0,
+    "output_resolution_mm": 1.0,
+    "n_iter": 10000,
+    "n_samples": 256,
+    "n_inference_samples": 128,
+    "pixel_variance_weight": 1.0,
+    "output_intensity_mean": 0,
+    "no_slice_scale": true,
+    "matching": "normalized_absolute_10D_inner_product",
+    "interpolation_refinement": false,
+    "qc_score_threshold": 0.9
+  },
+  "active_submission_cohort": ["CYJ", "DYL_2", "DYZ", "HHZ", "HJL"],
+  "rejected_subjects": {"DYL": "VPS=85 is incompatible with the frozen VPS=87 decoder."},
+  "slice_standardization": {"active": false, "forbidden_target_counts": {"sax": 12, "2ch": 15, "4ch": 10}}
+}

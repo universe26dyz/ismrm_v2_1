@@ -5,6 +5,7 @@ RUN_ROOT=${1:?usage: $0 RUN_ROOT SUBJECT MANIFEST [MATLAB] [PYTHON]}
 SUBJECT=${2:?usage: $0 RUN_ROOT SUBJECT MANIFEST [MATLAB] [PYTHON]}
 MANIFEST=${3:?usage: $0 RUN_ROOT SUBJECT MANIFEST [MATLAB] [PYTHON]}
 MATLAB=${4:-matlab}; PYTHON=${5:-python}
+"$PYTHON" "$PROJECT_ROOT/scripts/validate_active_subject.py" "$SUBJECT"
 PREPROCESSED_ROOT="$RUN_ROOT/preprocessed"
 [ ! -e "$PREPROCESSED_ROOT" ] || { echo "refusing to overwrite: $PREPROCESSED_ROOT" >&2; exit 1; }
 mkdir -p "$RUN_ROOT"

@@ -2,7 +2,7 @@
 
 ## 作用
 
-MATLAB 使用 SCMR-v5 dictionary matcher 生成 native mapping/cache；随后 NeSVoR 与 fit-first 入口生成 L100 和 sparse case 的 T1/T2 volume。此步骤必须在服务器运行，MATLAB matcher、simulator、prepared observations 和 protocol 都要能追溯。
+MATLAB 使用 SCMR-v5 dictionary matcher 生成 native mapping/cache；随后独立的 T1/T2 NeSVoR/fit-first 入口生成 L100 和 sparse case 的 volume。此步骤必须在服务器运行，MATLAB matcher、simulator、prepared observations 和 protocol 都要能追溯；active route 不读取 standardized native maps。
 
 `run_stage.sh`：调用 native-cache/fitting 服务器脚本，并保留每个 case 的日志。
 

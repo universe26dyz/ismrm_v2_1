@@ -4,4 +4,6 @@ All metrics, AHA maps, slice-pairs and QC use outputs from module 07. LV is `out
 
 `run_stage.sh` first runs common-native metrics/QC and then all-stack ROI metrics for the selected case.
 
+AHA16, final-five publication figures, and multi-subject aggregation remain optional publication reporting: they are not claimed as automatic Stage 08/09 outputs.
+
 Use the two server command wrappers shown in the Chinese manual, with explicit `SUBJECT`, `REPO`, `PY` and ROI paths. A shape mismatch is a pose/plane error; never hide it by cropping arrays.

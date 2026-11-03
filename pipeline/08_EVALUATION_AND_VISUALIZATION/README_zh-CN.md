@@ -4,6 +4,8 @@ metrics、AHA、slice-pair 和 QC 必须使用 07 的 final-pose 输出。LV 使
 
 `run_stage.sh`：按 case 先做 common-native metrics/QC，再做 all-stack ROI metrics。
 
+AHA16、final-five publication figures 与 multi-subject aggregation 属于可选 publication reporting，不是 Stage 08/09 自动生成的输出。
+
 ```bash
 SUBJECT="$SUBJECT" REPO="$PROJECT_ROOT/common" PY="$PYTHON" \
 bash "$PROJECT_ROOT/common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh" \

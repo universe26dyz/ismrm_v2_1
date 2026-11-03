@@ -5,7 +5,8 @@ RUN_ROOT=${1:?usage: $0 RUN_ROOT SUBJECT ROI_BUNDLE CASE}
 SUBJECT=${2:?usage: $0 RUN_ROOT SUBJECT ROI_BUNDLE CASE}
 ROI_BUNDLE=${3:?usage: $0 RUN_ROOT SUBJECT ROI_BUNDLE CASE}
 CASE=${4:?usage: $0 RUN_ROOT SUBJECT ROI_BUNDLE CASE}
+PYTHON=${PYTHON:-python}
+"$PYTHON" "$PROJECT_ROOT/scripts/validate_active_subject.py" "$SUBJECT"
 REPO="$PROJECT_ROOT/common" SUBJECT="$SUBJECT" \
   bash "$REPO/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh" \
   "$RUN_ROOT" "$RUN_ROOT" "$ROI_BUNDLE" "$CASE"
-

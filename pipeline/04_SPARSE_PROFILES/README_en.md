@@ -1,6 +1,6 @@
 # 04 Sparse profiles
 
-Derive L100, L25, L50 and five cross-stack profiles from one correct prepared subject root. This stage selects groups/layers and writes immutable sparse manifests; it does not fit maps.
+Derive L100, L25, L50 and five cross-stack profiles directly from one correct prepared subject root. This stage selects groups/layers and writes immutable sparse manifests; it does not fit maps or apply 12/15/10 slice standardization.
 
 `run_stage.sh` invokes the sparse profile builder and creates the eight case manifests.
 

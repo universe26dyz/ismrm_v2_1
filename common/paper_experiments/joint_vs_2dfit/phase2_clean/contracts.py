@@ -5,7 +5,11 @@ import hashlib
 import json
 from pathlib import Path
 
-APPROVED_DECODER_SHA256 = "f83280d4f73bfc9e0540b9606ee20bf83395339ad4e54dd0fb7be93ed9c9a7a9"
+# Historical Phase-2 compatibility provenance. It is not the active
+# ISMRM-v2.1 decoder; that binding is explicit in the runtime freeze contract.
+HISTORICAL_APPROVED_DECODER_SHA256 = "f83280d4f73bfc9e0540b9606ee20bf83395339ad4e54dd0fb7be93ed9c9a7a9"
+SCMR_V5_CORRECTED_DECODER_SHA256 = "338f2c0b8db90851f733ed31caa2c99914605fed3f7215ec2f69f19eba59583b"
+APPROVED_DECODER_SHA256 = HISTORICAL_APPROVED_DECODER_SHA256
 B6_CONFIG_SOURCE_SHA256 = "15981fbe93d2c70e14755ea756a02856c9383481e7d92d239619268a628a29b5"
 CANONICAL_APPROVED_DECODER_RELATIVE_PATH = "Code_10w_runs/CYJ_decoder_comparison_20260924_clean_v1/inputs/mlp/signal_simulator_approved.pth"
 CANONICAL_APPROVED_DECODER_DECLARED_PATH = "/data/dengyz/dataset/Code_10w_v1/" + CANONICAL_APPROVED_DECODER_RELATIVE_PATH

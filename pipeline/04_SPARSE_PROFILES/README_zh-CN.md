@@ -2,7 +2,7 @@
 
 ## 作用
 
-从同一个正确的 prepared subject root 派生 L100、L25、L50 和五种跨 stack profile。它只选择 group/layer 并写入 sparse manifest，不重新拟合。
+从同一个正确的 prepared subject root 直接派生 L100、L25、L50 和五种跨 stack profile。它只选择 group/layer 并写入 sparse manifest，不重新拟合，也不做 12/15/10 slice standardization。
 
 `run_stage.sh`：调用 sparse profile builder，创建八个 case 的 manifest。
 

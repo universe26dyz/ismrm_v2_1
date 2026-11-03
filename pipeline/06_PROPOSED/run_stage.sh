@@ -5,6 +5,7 @@ RUN_ROOT=${1:?usage: $0 RUN_ROOT SUBJECT CASE [PYTHON]}
 SUBJECT=${2:?usage: $0 RUN_ROOT SUBJECT CASE [PYTHON]}
 CASE=${3:?usage: $0 RUN_ROOT SUBJECT CASE [PYTHON]}
 PYTHON=${4:-python}
+"$PYTHON" "$PROJECT_ROOT/scripts/validate_active_subject.py" "$SUBJECT"
 SPARSE="$RUN_ROOT/sparse_inputs/$SUBJECT/$CASE"
 MANIFEST="$SPARSE/sparse_manifest.json"
 OUT="$RUN_ROOT/reconstruction/proposed/$SUBJECT/$CASE"
@@ -25,4 +26,3 @@ PYTHONPATH="$PROJECT_ROOT/common${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m paper_
   --expected-decoder-sha256 338f2c0b8db90851f733ed31caa2c99914605fed3f7215ec2f69f19eba59583b \
   --expected-protocol-sha256 3865b6bde1154750d4ed687456823fafad7b0cad5a61f763decb27dd1a4ed1c7 \
   --output "$OUT" --device cuda:0 --execute
-

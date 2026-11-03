@@ -2,11 +2,11 @@
 from __future__ import annotations
 import argparse, subprocess, sys
 from pathlib import Path
-from .contracts import APPROVED_DECODER_SHA256, PROPOSED_CONTRACT, sha256
+from .contracts import PROPOSED_CONTRACT, SCMR_V5_CORRECTED_DECODER_SHA256, sha256
 
 def build_proposed_command(prepared_root: str|Path, decoder: str|Path, b6_model: str|Path, output: str|Path, subject_id: str = 'CYJ', device: str = 'cuda:0', *, protocol: str|Path = 'mlp/configs/protocol_scmr_v5_10_100.yaml', sparse_manifest: str|Path|None = None, expected_sparse_generator_git_sha: str|None = None, expected_sparse_manifest_sha256: str|None = None, expected_b6_model_sha256: str|None = None, expected_decoder_sha256: str|None = None, expected_protocol_sha256: str|None = None, endpoint_policy: str = 'legacy') -> str:
     decoder = Path(decoder)
-    expected_decoder_sha256 = expected_decoder_sha256 or APPROVED_DECODER_SHA256
+    expected_decoder_sha256 = expected_decoder_sha256 or SCMR_V5_CORRECTED_DECODER_SHA256
     if sha256(decoder) != expected_decoder_sha256: raise ValueError('decoder path does not match expected decoder SHA256')
     args = [sys.executable,'-m','quality_experiments.Q002_B6_roi_same_anchor_mse.run_q002_reconstruction','--cropped-prepared-root',str(Path(prepared_root)),'--subject-id',subject_id,'--b6-model',str(Path(b6_model)),'--signal-simulator',str(decoder),'--expected-decoder-sha256',expected_decoder_sha256,'--protocol',str(Path(protocol)),'--output',str(Path(output)),'--device',device,'--experiment-id','Q002S640_B6_roi_same_anchor_mse','--anchor-batch-size','640','--endpoint-policy',endpoint_policy]
     if sparse_manifest is not None:
