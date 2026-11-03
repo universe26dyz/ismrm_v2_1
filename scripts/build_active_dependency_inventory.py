@@ -10,9 +10,9 @@ from __future__ import annotations
 import argparse
 import ast
 import csv
+import hashlib
 import json
 import re
-import subprocess
 from collections import Counter, defaultdict, deque
 from pathlib import Path
 from typing import Any
@@ -187,8 +187,34 @@ def _historical(path: str) -> list[str]:
     return [token for token in ("cyj11", "final5", "hhz", "legacy") if token in path.lower()]
 
 
+def _sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _generation_provenance(root: Path, nodes: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Fingerprint source content without embedding a self-referential HEAD."""
+    fingerprint = hashlib.sha256()
+    fingerprint.update(b"active-dependency-inventory/v3\0")
+    generator = Path(__file__).resolve()
+    generator_sha256 = _sha256_file(generator)
+    fingerprint.update(b"scripts/build_active_dependency_inventory.py\0")
+    fingerprint.update(generator_sha256.encode("ascii"))
+    for path in sorted(nodes):
+        source = root / path
+        if not source.is_file():
+            continue
+        fingerprint.update(path.encode("utf-8"))
+        fingerprint.update(b"\0")
+        fingerprint.update(nodes[path]["source_sha256"].encode("ascii"))
+    return {
+        "inventory_schema": "active-dependency-inventory/v3",
+        "generator_sha256": generator_sha256,
+        "source_runtime_fingerprint_sha256": fingerprint.hexdigest(),
+        "source_file_count": sum((root / path).is_file() for path in nodes),
+    }
+
+
 def scan(root: Path) -> dict[str, Any]:
-    sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
     nodes: dict[str, dict[str, Any]] = {}; edges: list[dict[str, Any]] = []; direct: dict[tuple[str, str], str] = {}
     stage_paths: dict[str, set[str]] = defaultdict(set); queue: deque[tuple[str, str, str, str]] = deque()
     def internal(path: str) -> bool: return path.startswith(("common/", "pipeline/", "scripts/", "configs/", "runtime/"))
@@ -198,7 +224,7 @@ def scan(root: Path) -> dict[str, Any]:
         record = nodes.get(path)
         if record is None:
             tokens = _historical(path)
-            nodes[path] = {"path": path, "language": _language(path), "classification": classification, "stage_roles": {stage: classification}, "stages": [stage], "functional_area": f"stage_{stage}", "reason": reason, "evidence": [reason], "inputs": [], "outputs": [], "historical_name": bool(tokens), "historical_name_tokens": tokens, "generic_runtime_usage": bool(tokens) and classification not in {"LEGACY_UNUSED_BY_PIPELINE", "TEST_ONLY"}, "discovery_methods": [discovery], "git_sha": sha}
+            nodes[path] = {"path": path, "language": _language(path), "classification": classification, "stage_roles": {stage: classification}, "stages": [stage], "functional_area": f"stage_{stage}", "reason": reason, "evidence": [reason], "inputs": [], "outputs": [], "historical_name": bool(tokens), "historical_name_tokens": tokens, "generic_runtime_usage": bool(tokens) and classification not in {"LEGACY_UNUSED_BY_PIPELINE", "TEST_ONLY"}, "discovery_methods": [discovery], "source_sha256": _sha256_file(root / path)}
         else:
             if stage not in record["stages"]: record["stages"].append(stage)
             record["evidence"].append(reason)
@@ -269,11 +295,12 @@ def scan(root: Path) -> dict[str, Any]:
         node["stages"].sort(); node["evidence"] = sorted(set(node["evidence"])); node["discovery_methods"] = sorted(set(node["discovery_methods"]))
         node["classification"] = max(node["stage_roles"].values(), key=lambda role: ROLE_PRIORITY[role])
     summary = dict(sorted(Counter(node["classification"] for node in nodes.values()).items()))
-    return {"schema_version": "active-dependency-inventory/v3", "generated_from_git_sha": sha, "entrypoints": list(STAGE_ENTRYPOINTS.values()), "nodes": sorted(nodes.values(), key=lambda n: n["path"]), "edges": sorted(unique.values(), key=lambda e: (e["from"], e["to"], e["edge_type"], e["stage"])), "stages": {stage: {"entrypoint": STAGE_ENTRYPOINTS[stage], "paths": sorted(paths), "inputs": STAGE_IO[stage][0], "outputs": STAGE_IO[stage][1]} for stage, paths in sorted(stage_paths.items())}, "external_runtime_boundaries": EXTERNAL, "duplicate_or_proxy_modules": PROXIES, "classification_summary": summary, "audit_notes": {"formal_proposed_route": "Q002S640_B6_roi_same_anchor_mse; K8, anchor batch 640, 10 weights, 6400 residuals, A2000/B4000", "fit_first": "MATLAB SCMR-v5 native cache and L100/sparse reuse are active; Python fit_native and standardized routes are compatibility-only", "historical_names": "Historical filename tokens are metadata, never a legacy classification heuristic."}}
+    return {"schema_version": "active-dependency-inventory/v3", "generation_provenance": _generation_provenance(root, nodes), "entrypoints": list(STAGE_ENTRYPOINTS.values()), "nodes": sorted(nodes.values(), key=lambda n: n["path"]), "edges": sorted(unique.values(), key=lambda e: (e["from"], e["to"], e["edge_type"], e["stage"])), "stages": {stage: {"entrypoint": STAGE_ENTRYPOINTS[stage], "paths": sorted(paths), "inputs": STAGE_IO[stage][0], "outputs": STAGE_IO[stage][1]} for stage, paths in sorted(stage_paths.items())}, "external_runtime_boundaries": EXTERNAL, "duplicate_or_proxy_modules": PROXIES, "classification_summary": summary, "audit_notes": {"formal_proposed_route": "Q002S640_B6_roi_same_anchor_mse; K8, anchor batch 640, 10 weights, 6400 residuals, A2000/B4000", "fit_first": "MATLAB SCMR-v5 native cache and L100/sparse reuse are active; Python fit_native and standardized routes are compatibility-only", "historical_names": "Historical filename tokens are metadata, never a legacy classification heuristic."}}
 
 
 def markdown(inventory: dict[str, Any]) -> str:
-    lines = ["# Active pipeline dependency trace", "", f"Generated deterministically from `{inventory['generated_from_git_sha']}`. Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.", ""]
+    provenance = inventory["generation_provenance"]
+    lines = ["# Active pipeline dependency trace", "", f"Generated deterministically from runtime-source fingerprint `{provenance['source_runtime_fingerprint_sha256']}` (generator `{provenance['generator_sha256']}`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.", ""]
     nodes = {node["path"]: node for node in inventory["nodes"]}
     for stage, details in inventory["stages"].items():
         paths = details["paths"]; by_class = defaultdict(list)

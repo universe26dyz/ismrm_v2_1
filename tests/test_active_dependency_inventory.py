@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import importlib.util
 import subprocess
@@ -50,12 +51,20 @@ def test_inventory_is_deterministic_and_has_no_missing_internal_active_nodes(tmp
     inventory = json.loads(first.read_text(encoding="utf-8"))
     assert len(inventory["entrypoints"]) == 9
     assert inventory["schema_version"] == "active-dependency-inventory/v3"
+    assert "generated_from_git_sha" not in inventory
+    provenance = inventory["generation_provenance"]
+    assert {"inventory_schema", "generator_sha256", "source_runtime_fingerprint_sha256", "source_file_count"} <= provenance.keys()
+    assert provenance["inventory_schema"] == inventory["schema_version"]
+    assert provenance["generator_sha256"] == hashlib.sha256(GENERATOR.read_bytes()).hexdigest()
+    assert len(provenance["source_runtime_fingerprint_sha256"]) == 64
+    assert provenance["source_file_count"] == len(inventory["nodes"])
     assert len({node["path"] for node in inventory["nodes"]}) == len(inventory["nodes"])
     assert {node["classification"] for node in inventory["nodes"]} <= ALLOWED
     for node in inventory["nodes"]:
-        assert {"path", "language", "classification", "stage_roles", "functional_area", "reason", "evidence", "inputs", "outputs", "git_sha", "discovery_methods", "historical_name", "generic_runtime_usage"} <= node.keys()
+        assert {"path", "language", "classification", "stage_roles", "functional_area", "reason", "evidence", "inputs", "outputs", "source_sha256", "discovery_methods", "historical_name", "generic_runtime_usage"} <= node.keys()
         assert node["stage_roles"]
         assert node["classification"] == max(node["stage_roles"].values(), key=ROLE_PRIORITY.__getitem__)
+        assert node["source_sha256"] == hashlib.sha256((ROOT / node["path"]).read_bytes()).hexdigest()
         if node["classification"] in ACTIVE_INTERNAL and node["path"].startswith(("common/", "pipeline/", "scripts/", "configs/", "runtime/")):
             assert (ROOT / node["path"]).exists(), node
 
