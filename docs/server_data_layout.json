@@ -1,0 +1,46 @@
+{
+  "schema_version": "server-data-layout/v1",
+  "audit_date": "2026-11-03",
+  "codex_server_access": false,
+  "repository": {
+    "local_root": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_1",
+    "remote": "https://github.com/universe26dyz/ismrm_v2_1.git",
+    "head": "4523e16d5b3061ba04becee2025ad18d33008ff8",
+    "branch": "main",
+    "historical_server_code_root": "/data/dengyz/code/Code_10w",
+    "current_server_project_root": "/data/dengyz/code/ismrm_v2_1",
+    "current_server_project_root_status": "CURRENT_RUNTIME_REFERENCE"
+  },
+  "subjects": ["CYJ", "DYL_2", "DYZ", "HHZ", "HJL"],
+  "roots": [
+    {"purpose": "raw_dicom", "path": "/data/dengyz/dataset/mapping_subject_dicom/<SUBJECT>", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
+    {"purpose": "shared_data_root", "path": "/data/dengyz/dataset/Code_10w_v1", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
+    {"purpose": "preprocessed_standard", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_preprocessed/<SUBJECT>", "status": "CURRENT_RUNTIME_REFERENCE_FOR_CYJ_DYZ_HHZ_HJL", "protected": true},
+    {"purpose": "preprocessed_dyl2", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/scmr_v5_rebuild_20261102_corrected/DYL_2/preprocessed/DYL_2", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
+    {"purpose": "prepared_hhz", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_prepared_scmr_v5/HHZ", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
+    {"purpose": "prepared_other_subjects", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/scmr_v5_rebuild_20261102_corrected/<SUBJECT>/prepared/<SUBJECT>", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
+    {"purpose": "formal_hhz_run", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/ismrm_v2_scmr_v5", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
+    {"purpose": "formal_other_runs", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/scmr_v5_rebuild_20261102_corrected/<SUBJECT>", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
+    {"purpose": "roi_bundle", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/ismrm_five_subject_analysis_v1/roi/derived/<SUBJECT>/20261026_scmr_native_roi_bundle", "status": "CURRENT_RUNTIME_REFERENCE", "protected": true},
+    {"purpose": "archive_inputs", "path": "/data/dengyz/code/ismrm_v2_1/subjects/<SUBJECT>/inputs", "status": "CURRENT_RUNTIME_REFERENCE_ARCHIVE_COPY", "protected": true},
+    {"purpose": "archive_outputs", "path": "/data/dengyz/code/ismrm_v2_1/runs/<SUBJECT>", "status": "CURRENT_RUNTIME_REFERENCE_ARCHIVE_COPY", "protected": true},
+    {"purpose": "historical_final5", "path": "/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/phase4r_final_five_subject_k8_central_20261023", "status": "DOCUMENTED_HISTORICAL_SERVER_VERIFICATION_REQUIRED", "protected": true},
+    {"purpose": "deprecated_slice_standardization", "path": "02_standardized_12_15_10", "status": "DEPRECATED", "protected": false}
+  ],
+  "verification_required": [
+    "readlink -f and stat for every server root",
+    "filesystem/mount and approximate size",
+    "exact native_cache and mapping roots per subject",
+    "whether historical Final5 outputs remain active",
+    "server model-binary location",
+    "whether Code_10w is still used by any active job"
+  ],
+  "policy": {
+    "large_data_outside_git": true,
+    "refactor_must_preserve_external_roots": true,
+    "active_slice_standardization": false,
+    "server_access_attempted": false,
+    "data_mutation_performed": false,
+    "push_performed": false
+  }
+}
