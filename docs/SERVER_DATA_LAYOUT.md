@@ -193,7 +193,7 @@ large metrics and visualization trees
 manual ROI archives
 ~~~
 
-The local archive keeps these under subjects/ and runs/ for reproducibility, but they are gitignored. Small manifest.json and sha256.jsonl files may appear as untracked metadata; that does not mean the large data are tracked.
+The local archive keeps these under subjects/ and runs/ for reproducibility, but they are gitignored. Subject archive metadata such as manifest.json and sha256.jsonl are server-local ignored files together with the archived subject tree and are not uploaded to GitHub.
 
 ## Code refactor boundary
 

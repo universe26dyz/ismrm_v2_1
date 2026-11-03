@@ -5427,7 +5427,7 @@
     "generator_sha256": "2e13540679c1f4a714a9ccf705444d0f81799be4f8fd09d8501d5182a778596f",
     "inventory_schema": "active-dependency-inventory/v3",
     "source_file_count": 153,
-    "source_runtime_fingerprint_sha256": "a5520d8dc0c97aa41af2ae42816e0bda6d3203d7ce2938411e9786c618ee3826"
+    "source_runtime_fingerprint_sha256": "fc14774cc657e7d1a262cd488ad371854607f33186f60b15a970fa2db7d47061"
   },
   "nodes": [
     {
@@ -9651,7 +9651,7 @@
       "outputs": [],
       "path": "scripts/verify_no_legacy_code_path.py",
       "reason": "legacy checker",
-      "source_sha256": "6cd637d2ad1e7b044048d880de479957b3a36a2890179964a2799af4422fc256",
+      "source_sha256": "f84c2d2558148bf7c0857330d58ae5e2def03dcbc64836c7a57dda042ef7ffd0",
       "stage_roles": {
         "09": "ACTIVE_EXECUTED"
       },
