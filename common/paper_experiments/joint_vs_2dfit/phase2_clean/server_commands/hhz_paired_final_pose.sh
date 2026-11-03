@@ -84,6 +84,14 @@ for CASE in "${CASES[@]}"; do
   MANIFEST=$CASE_ROOT/sparse_manifest.json
   PROPOSED=$PROPOSED_BASE/reconstruction/proposed/$SUBJECT/$CASE
   FIT=$FIT_BASE/reconstruction/fit_first/$SUBJECT/$CASE
+  # L100 is an identity sparse manifest: build_sparse_condition deliberately
+  # writes no copied observations there.  Its prepared-root is the complete
+  # subject prepared tree; only the sparse cases use CASE_ROOT.
+  if [ "$CASE" = "L100_fold0" ]; then
+    PREPARED_FOR_CASE=$FIT_BASE/prepared/$SUBJECT
+  else
+    PREPARED_FOR_CASE=$CASE_ROOT
+  fi
   DIRECT_BUNDLE=$EVAL_ROOT/bundles/proposed/$CASE
   FIT_BUNDLE=$EVAL_ROOT/bundles/fit_first/$CASE
   MAPPING=$EVAL_ROOT/roi/mapping/$CASE.json
@@ -99,7 +107,7 @@ for CASE in "${CASES[@]}"; do
 
   run_new "$CASE Proposed final-pose bundle" "$DIRECT_BUNDLE" \
     "$PY" -m paper_experiments.joint_vs_2dfit.aha.cyj11_r3_direct_final_pose_bundle \
-      --checkpoint "$PROPOSED/model.pt" --prepared-root "$CASE_ROOT" --sparse-manifest "$MANIFEST" \
+      --checkpoint "$PROPOSED/model.pt" --prepared-root "$PREPARED_FOR_CASE" --sparse-manifest "$MANIFEST" \
       --subject "$SUBJECT" --case "$CASE" --output "$DIRECT_BUNDLE" --device cuda:0 || exit 1
 
   run_new "$CASE Fit-first final-pose bundle" "$FIT_BUNDLE" \
