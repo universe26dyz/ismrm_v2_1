@@ -5,6 +5,8 @@ until the corresponding import migration and validation are complete.
 
 | Current path group | Future module | Action | Risk | Phase |
 |---|---|---|---|---|
+| Generic subject validator | `src/ismrm_v2/io/validate_subject_id.py` | **COMPLETED** — moved from `scripts/validate_subject_id.py` | generic admission only | 2A |
+| Subject deployment-manifest builder | `src/ismrm_v2/io/build_subject_deployment_manifest.py` | **COMPLETED** — moved from `scripts/build_subject_deployment_manifest.py` | generic filesystem I/O only | 2A |
 | `phase2_clean/proposed.py` and Q002 | `src/ismrm_v2/proposed/` | Move implementation once | formal Proposed authority | 2 |
 | `phase2_clean/baseline.py`, `fit_first*.py` | `src/ismrm_v2/fit_first/` | Move after CLI/import migration | SCMR-v5 and NeSVoR route | 2 |
 | `common/mlp/` | `src/ismrm_v2/proposed/` | Merge later with TRAD only after validation | frozen decoder and checkpoint compatibility | 2 |

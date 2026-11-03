@@ -1,6 +1,6 @@
 # Active pipeline dependency trace
 
-Generated deterministically from runtime-source fingerprint `fc14774cc657e7d1a262cd488ad371854607f33186f60b15a970fa2db7d47061` (generator `2e13540679c1f4a714a9ccf705444d0f81799be4f8fd09d8501d5182a778596f`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
+Generated deterministically from runtime-source fingerprint `7e2940aa06ced4ada177eb4681e33099b00dd53db51b61930bffed1f5233c3eb` (generator `aa6acc04ea923ce23501f391392f3fc115c839d8c292a298887cf5751abe5e94`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
 
 ## Stage 01
 
@@ -13,8 +13,8 @@ Outputs:
 - `subjects/SUBJECT/manifest.json`
 
 Direct execution chain:
-- `scripts/build_subject_deployment_manifest.py`
-- `scripts/validate_subject_id.py`
+- `src/ismrm_v2/io/build_subject_deployment_manifest.py`
+- `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
 
@@ -46,6 +46,7 @@ Direct execution chain:
 - `common/trad/scripts/local_preprocess_all.m`
 - `common/trad/scripts/local_preprocess_one.m`
 - `common/trad/scripts/validate_transferred_preprocessed.py`
+- `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
 
@@ -89,6 +90,7 @@ Outputs:
 
 Direct execution chain:
 - `common/trad/scripts/prepare_all_observations.py`
+- `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
 
@@ -134,6 +136,7 @@ Outputs:
 
 Direct execution chain:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh`
+- `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
@@ -192,6 +195,7 @@ Direct execution chain:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh`
 - `common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m`
+- `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py`
@@ -266,6 +270,7 @@ Direct execution chain:
 - `common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py`
 - `common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py`
 - `common/reconstruction_core/orchestration.py`
+- `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
 
@@ -344,6 +349,7 @@ Outputs:
 
 Direct execution chain:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh`
+- `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
 - `common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py`
@@ -475,6 +481,7 @@ Outputs:
 Direct execution chain:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh`
+- `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
 - `common/paper_experiments/joint_vs_2dfit/aha/common_native_all_stack_roi_metrics.py`

@@ -5156,19 +5156,19 @@
     },
     {
       "condition": "always",
-      "edge_type": "SHELL_PYTHON_SCRIPT",
-      "evidence": "run_stage builds manifest",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "run_stage builds manifest module",
       "from": "pipeline/01_RAW_DICOM/run_stage.sh",
       "stage": "01",
-      "to": "scripts/build_subject_deployment_manifest.py"
+      "to": "src/ismrm_v2/io/build_subject_deployment_manifest.py"
     },
     {
       "condition": "always",
-      "edge_type": "SHELL_PYTHON_SCRIPT",
-      "evidence": "run_stage invokes validator",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "run_stage invokes validator module",
       "from": "pipeline/01_RAW_DICOM/run_stage.sh",
       "stage": "01",
-      "to": "scripts/validate_subject_id.py"
+      "to": "src/ismrm_v2/io/validate_subject_id.py"
     },
     {
       "condition": "always",
@@ -5196,6 +5196,14 @@
     },
     {
       "condition": "always",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "run_stage invokes validator module",
+      "from": "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
+      "stage": "02",
+      "to": "src/ismrm_v2/io/validate_subject_id.py"
+    },
+    {
+      "condition": "always",
       "edge_type": "SHELL_PYTHON_SCRIPT",
       "evidence": "explicit --protocol",
       "from": "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
@@ -5204,11 +5212,27 @@
     },
     {
       "condition": "always",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "run_stage invokes validator module",
+      "from": "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
+      "stage": "03",
+      "to": "src/ismrm_v2/io/validate_subject_id.py"
+    },
+    {
+      "condition": "always",
       "edge_type": "SHELL_BASH",
       "evidence": "stage wrapper",
       "from": "pipeline/04_SPARSE_PROFILES/run_stage.sh",
       "stage": "04",
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh"
+    },
+    {
+      "condition": "always",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "run_stage invokes validator module",
+      "from": "pipeline/04_SPARSE_PROFILES/run_stage.sh",
+      "stage": "04",
+      "to": "src/ismrm_v2/io/validate_subject_id.py"
     },
     {
       "condition": "always",
@@ -5233,6 +5257,14 @@
       "from": "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
       "stage": "05",
       "to": "external:nesvor"
+    },
+    {
+      "condition": "always",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "run_stage invokes validator module",
+      "from": "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
+      "stage": "05",
+      "to": "src/ismrm_v2/io/validate_subject_id.py"
     },
     {
       "condition": "always",
@@ -5292,6 +5324,14 @@
     },
     {
       "condition": "always",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "run_stage invokes validator module",
+      "from": "pipeline/06_PROPOSED/run_stage.sh",
+      "stage": "06",
+      "to": "src/ismrm_v2/io/validate_subject_id.py"
+    },
+    {
+      "condition": "always",
       "edge_type": "SHELL_BASH",
       "evidence": "stage wrapper",
       "from": "pipeline/07_FINAL_POSE/run_stage.sh",
@@ -5308,6 +5348,14 @@
     },
     {
       "condition": "always",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "run_stage invokes validator module",
+      "from": "pipeline/07_FINAL_POSE/run_stage.sh",
+      "stage": "07",
+      "to": "src/ismrm_v2/io/validate_subject_id.py"
+    },
+    {
+      "condition": "always",
       "edge_type": "SHELL_BASH",
       "evidence": "second evaluation wrapper",
       "from": "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
@@ -5321,6 +5369,14 @@
       "from": "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
       "stage": "08",
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh"
+    },
+    {
+      "condition": "always",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "run_stage invokes validator module",
+      "from": "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
+      "stage": "08",
+      "to": "src/ismrm_v2/io/validate_subject_id.py"
     },
     {
       "condition": "always",
@@ -5357,10 +5413,10 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from validate_subject_id import",
-      "from": "scripts/build_subject_deployment_manifest.py",
+      "evidence": "from ismrm_v2.io.validate_subject_id import",
+      "from": "src/ismrm_v2/io/build_subject_deployment_manifest.py",
       "stage": "01",
-      "to": "scripts/validate_subject_id.py"
+      "to": "src/ismrm_v2/io/validate_subject_id.py"
     }
   ],
   "entrypoints": [
@@ -5424,10 +5480,10 @@
     }
   ],
   "generation_provenance": {
-    "generator_sha256": "2e13540679c1f4a714a9ccf705444d0f81799be4f8fd09d8501d5182a778596f",
+    "generator_sha256": "aa6acc04ea923ce23501f391392f3fc115c839d8c292a298887cf5751abe5e94",
     "inventory_schema": "active-dependency-inventory/v3",
     "source_file_count": 153,
-    "source_runtime_fingerprint_sha256": "fc14774cc657e7d1a262cd488ad371854607f33186f60b15a970fa2db7d47061"
+    "source_runtime_fingerprint_sha256": "7e2940aa06ced4ada177eb4681e33099b00dd53db51b61930bffed1f5233c3eb"
   },
   "nodes": [
     {
@@ -9295,7 +9351,7 @@
       ],
       "path": "pipeline/01_RAW_DICOM/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "b5b7a96bebc7248680f68dc6c482ee9ec4f2554da73f6169afa85d7b56fab903",
+      "source_sha256": "9ab40d827b8336de9fdca53699f7251373dc179cc423a965daa02b6facb8bda9",
       "stage_roles": {
         "01": "ACTIVE_ENTRYPOINT"
       },
@@ -9325,7 +9381,7 @@
       ],
       "path": "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "94b3892ee003253b007a0f101c1270edf03de90d1547458a2391e337d750f027",
+      "source_sha256": "900a4a26640fc9420479c4e989dc0df4e0beb404a9c03f0096798419dffbfddb",
       "stage_roles": {
         "02": "ACTIVE_ENTRYPOINT"
       },
@@ -9359,7 +9415,7 @@
       ],
       "path": "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "72db2c2e5e42620f1aa81ca72ba5186e9f634968abd22f8811fbc37439ffa132",
+      "source_sha256": "83e6cda1935d4d8b423a3a73d4e14f326bbb0840df7134a89e526856cd1ba842",
       "stage_roles": {
         "03": "ACTIVE_ENTRYPOINT"
       },
@@ -9389,7 +9445,7 @@
       ],
       "path": "pipeline/04_SPARSE_PROFILES/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "1b215b6ea5fc4907934121ef0160aab189dd95731641993a4faaa26560957cb3",
+      "source_sha256": "a9d2f2337d734d46a81d091baeaa24f24f2230f252a146ccb4751ab754b63dc8",
       "stage_roles": {
         "04": "ACTIVE_ENTRYPOINT"
       },
@@ -9421,7 +9477,7 @@
       ],
       "path": "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "4b2a5346d0008da35c2f6832d26877a01c13f0bd27c320a977720f1dd8bb3eb4",
+      "source_sha256": "d9563f0a3cfe717c02daf03665734f0674efa8435752d4bb222ffe174cf37ff6",
       "stage_roles": {
         "05": "ACTIVE_ENTRYPOINT"
       },
@@ -9457,7 +9513,7 @@
       ],
       "path": "pipeline/06_PROPOSED/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "07c6ab20b87f78d9269510f78b55babd8c96881ec195418df11905b697da9aa7",
+      "source_sha256": "812033ecd496b06be58fba2f855b1936a67471ad0bd991db2afd9d49cc5efb30",
       "stage_roles": {
         "06": "ACTIVE_ENTRYPOINT"
       },
@@ -9487,7 +9543,7 @@
       ],
       "path": "pipeline/07_FINAL_POSE/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "bb845db270ba15bf183d3a60325b898834aeba09f7f7599d0b0179b88de1486b",
+      "source_sha256": "7efd7ef2d84c9cb3dab56f2f1e4a676e8dd875914bbca9079698eec7e911f072",
       "stage_roles": {
         "07": "ACTIVE_ENTRYPOINT"
       },
@@ -9518,7 +9574,7 @@
       ],
       "path": "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "e891dbec8058bab1709315c2dea0ee3aaf2d14e95b5534714e4768953476a708",
+      "source_sha256": "69a1be7fed44fa4b420d234e4c42c49343d6b33d0cb4c389b444a61a8c834ffa",
       "stage_roles": {
         "08": "ACTIVE_ENTRYPOINT"
       },
@@ -9578,58 +9634,6 @@
       },
       "stages": [
         "06"
-      ]
-    },
-    {
-      "classification": "ACTIVE_EXECUTED",
-      "discovery_methods": [
-        "MANUAL_DYNAMIC_OVERRIDE"
-      ],
-      "evidence": [
-        "run_stage builds manifest"
-      ],
-      "functional_area": "stage_01",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "scripts/build_subject_deployment_manifest.py",
-      "reason": "run_stage builds manifest",
-      "source_sha256": "42dcd2db17632aad61ceeac1fb9e343cc5bda21b3ed1b931811334d3d4aaf329",
-      "stage_roles": {
-        "01": "ACTIVE_EXECUTED"
-      },
-      "stages": [
-        "01"
-      ]
-    },
-    {
-      "classification": "ACTIVE_EXECUTED",
-      "discovery_methods": [
-        "MANUAL_DYNAMIC_OVERRIDE",
-        "PYTHON_IMPORT"
-      ],
-      "evidence": [
-        "from validate_subject_id import",
-        "run_stage invokes validator"
-      ],
-      "functional_area": "stage_01",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "scripts/validate_subject_id.py",
-      "reason": "run_stage invokes validator",
-      "source_sha256": "cc0516507913a94348dc6c00da8a96c76ea6aefc336a6a069ed3a2df328fe9d8",
-      "stage_roles": {
-        "01": "ACTIVE_EXECUTED"
-      },
-      "stages": [
-        "01"
       ]
     },
     {
@@ -9726,12 +9730,78 @@
       "outputs": [],
       "path": "scripts/verify_scientific_freeze.py",
       "reason": "freeze checker",
-      "source_sha256": "e1d628b1ee04a0d737e2c33fd590fe3ffeae8b66f3d10f795f68c7238725d87a",
+      "source_sha256": "03f350f4bb84092d0be6adeef32c8a4981fa5efd8b5bd0e16e4728f42c850491",
       "stage_roles": {
         "09": "ACTIVE_EXECUTED"
       },
       "stages": [
         "09"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
+      "evidence": [
+        "run_stage builds manifest module"
+      ],
+      "functional_area": "stage_01",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/io/build_subject_deployment_manifest.py",
+      "reason": "run_stage builds manifest module",
+      "source_sha256": "5f0e78c205f5223f3144dfb5431c69f1078fe460eed9e999030bf4c441c434de",
+      "stage_roles": {
+        "01": "ACTIVE_EXECUTED"
+      },
+      "stages": [
+        "01"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "PYTHON_IMPORT"
+      ],
+      "evidence": [
+        "from ismrm_v2.io.validate_subject_id import",
+        "run_stage invokes validator module"
+      ],
+      "functional_area": "stage_01",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/io/validate_subject_id.py",
+      "reason": "run_stage invokes validator module",
+      "source_sha256": "cc0516507913a94348dc6c00da8a96c76ea6aefc336a6a069ed3a2df328fe9d8",
+      "stage_roles": {
+        "01": "ACTIVE_EXECUTED",
+        "02": "ACTIVE_EXECUTED",
+        "03": "ACTIVE_EXECUTED",
+        "04": "ACTIVE_EXECUTED",
+        "05": "ACTIVE_EXECUTED",
+        "06": "ACTIVE_EXECUTED",
+        "07": "ACTIVE_EXECUTED",
+        "08": "ACTIVE_EXECUTED"
+      },
+      "stages": [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08"
       ]
     }
   ],
@@ -9747,8 +9817,8 @@
       ],
       "paths": [
         "pipeline/01_RAW_DICOM/run_stage.sh",
-        "scripts/build_subject_deployment_manifest.py",
-        "scripts/validate_subject_id.py"
+        "src/ismrm_v2/io/build_subject_deployment_manifest.py",
+        "src/ismrm_v2/io/validate_subject_id.py"
       ]
     },
     "02": {
@@ -9772,7 +9842,8 @@
         "common/trad/scripts/local_preprocess_all.m",
         "common/trad/scripts/local_preprocess_one.m",
         "common/trad/scripts/validate_transferred_preprocessed.py",
-        "pipeline/02_PREPROCESS_MATLAB/run_stage.sh"
+        "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
+        "src/ismrm_v2/io/validate_subject_id.py"
       ]
     },
     "03": {
@@ -9807,7 +9878,8 @@
         "common/trad/third_party/nesvor/nesvor/utils/psf.py",
         "common/trad/third_party/nesvor/nesvor/utils/types.py",
         "configs/protocol_scmr_v5_10_100.yaml",
-        "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh"
+        "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
+        "src/ismrm_v2/io/validate_subject_id.py"
       ]
     },
     "04": {
@@ -9847,7 +9919,8 @@
         "common/trad/third_party/nesvor/nesvor/utils/misc.py",
         "common/trad/third_party/nesvor/nesvor/utils/psf.py",
         "common/trad/third_party/nesvor/nesvor/utils/types.py",
-        "pipeline/04_SPARSE_PROFILES/run_stage.sh"
+        "pipeline/04_SPARSE_PROFILES/run_stage.sh",
+        "src/ismrm_v2/io/validate_subject_id.py"
       ]
     },
     "05": {
@@ -9899,7 +9972,8 @@
         "common/trad/third_party/nesvor/nesvor/utils/misc.py",
         "common/trad/third_party/nesvor/nesvor/utils/psf.py",
         "common/trad/third_party/nesvor/nesvor/utils/types.py",
-        "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh"
+        "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
+        "src/ismrm_v2/io/validate_subject_id.py"
       ]
     },
     "06": {
@@ -9974,7 +10048,8 @@
         "configs/models_manifest.json",
         "configs/protocol_scmr_v5_10_100.yaml",
         "pipeline/06_PROPOSED/run_stage.sh",
-        "runtime/runtime_contract.json"
+        "runtime/runtime_contract.json",
+        "src/ismrm_v2/io/validate_subject_id.py"
       ]
     },
     "07": {
@@ -10071,7 +10146,8 @@
         "common/trad/third_party/nesvor/nesvor/utils/misc.py",
         "common/trad/third_party/nesvor/nesvor/utils/psf.py",
         "common/trad/third_party/nesvor/nesvor/utils/types.py",
-        "pipeline/07_FINAL_POSE/run_stage.sh"
+        "pipeline/07_FINAL_POSE/run_stage.sh",
+        "src/ismrm_v2/io/validate_subject_id.py"
       ]
     },
     "08": {
@@ -10145,7 +10221,8 @@
         "common/trad/third_party/nesvor/nesvor/utils/misc.py",
         "common/trad/third_party/nesvor/nesvor/utils/psf.py",
         "common/trad/third_party/nesvor/nesvor/utils/types.py",
-        "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh"
+        "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
+        "src/ismrm_v2/io/validate_subject_id.py"
       ]
     },
     "09": {

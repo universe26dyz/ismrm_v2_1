@@ -37,3 +37,21 @@ def test_duplicate_implementations_are_marked_for_later_merge() -> None:
     duplicates = [item for item in manifest["duplicate_implementation_plan"] if item["relationship"] == "DUPLICATE_IMPLEMENTATION"]
     assert len(duplicates) == 2
     assert all(item["phase1_action"] == "MERGE_LATER" and item["future_action"] == "MERGE_LATER" for item in duplicates)
+
+
+def test_phase2a_subject_admission_moves_are_recorded_without_old_inventory_nodes() -> None:
+    manifest = json.loads((ROOT / "docs/clean_code_migration_manifest.json").read_text(encoding="utf-8"))
+    entries = {entry["current_path"]: entry for entry in manifest["entries"]}
+    moved = {
+        "scripts/validate_subject_id.py": ("src/ismrm_v2/io/validate_subject_id.py", "MOVE"),
+        "scripts/build_subject_deployment_manifest.py": ("src/ismrm_v2/io/build_subject_deployment_manifest.py", "MOVE_WITH_IMPORT_ADAPTATION"),
+    }
+    for old_path, (new_path, kind) in moved.items():
+        assert old_path not in entries
+        assert entries[new_path]["migration_status"] == "MIGRATED_PHASE_2A"
+        assert entries[new_path]["future_target_path"] == new_path
+        record = next(item for item in manifest["completed_migrations"] if item["from_path"] == old_path)
+        assert record["to_path"] == new_path
+        assert record["kind"] == kind
+        assert record["pre_move_source_sha256"]
+        assert record["post_move_source_sha256"]
