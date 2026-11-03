@@ -10,13 +10,14 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VALIDATOR = ROOT / "scripts" / "validate_subject_id.py"
+VALIDATOR = "ismrm_v2.io.validate_subject_id"
 STAGE01 = ROOT / "pipeline" / "01_RAW_DICOM" / "run_stage.sh"
 
 
 def test_generic_subject_validator_accepts_new_subject_and_rejects_traversal() -> None:
-    accepted = subprocess.run([sys.executable, str(VALIDATOR), "NEW_SUBJECT_001"], capture_output=True, text=True)
-    rejected = subprocess.run([sys.executable, str(VALIDATOR), "../escape"], capture_output=True, text=True)
+    environment = dict(os.environ, PYTHONPATH=str(ROOT / "src"))
+    accepted = subprocess.run([sys.executable, "-m", VALIDATOR, "NEW_SUBJECT_001"], env=environment, capture_output=True, text=True)
+    rejected = subprocess.run([sys.executable, "-m", VALIDATOR, "../escape"], env=environment, capture_output=True, text=True)
     assert accepted.returncode == 0, accepted.stderr
     assert rejected.returncode != 0
 

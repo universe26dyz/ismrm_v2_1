@@ -36,8 +36,15 @@ STAGE_IO = {
 
 # (stage, source, destination, edge type, condition, evidence, classification)
 DECLARED_EDGES = [
-    ("01", STAGE_ENTRYPOINTS["01"], "scripts/validate_subject_id.py", "SHELL_PYTHON_SCRIPT", "always", "run_stage invokes validator", "ACTIVE_EXECUTED"),
-    ("01", STAGE_ENTRYPOINTS["01"], "scripts/build_subject_deployment_manifest.py", "SHELL_PYTHON_SCRIPT", "always", "run_stage builds manifest", "ACTIVE_EXECUTED"),
+    ("01", STAGE_ENTRYPOINTS["01"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
+    ("01", STAGE_ENTRYPOINTS["01"], "src/ismrm_v2/io/build_subject_deployment_manifest.py", "SHELL_PYTHON_MODULE", "always", "run_stage builds manifest module", "ACTIVE_EXECUTED"),
+    ("02", STAGE_ENTRYPOINTS["02"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
+    ("03", STAGE_ENTRYPOINTS["03"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
+    ("04", STAGE_ENTRYPOINTS["04"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
+    ("05", STAGE_ENTRYPOINTS["05"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
+    ("06", STAGE_ENTRYPOINTS["06"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
+    ("07", STAGE_ENTRYPOINTS["07"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
+    ("08", STAGE_ENTRYPOINTS["08"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
     ("02", STAGE_ENTRYPOINTS["02"], "common/trad/scripts/local_preprocess_all.m", "MATLAB_FUNCTION", "always", "MATLAB -batch local_preprocess_all", "ACTIVE_EXECUTED"),
     ("02", "common/trad/scripts/local_preprocess_all.m", "common/trad/scripts/local_preprocess_one.m", "MATLAB_FUNCTION", "per stack", "local_preprocess_all loop", "ACTIVE_EXECUTED"),
     ("02", "common/trad/scripts/local_preprocess_one.m", "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m", "MATLAB_FUNCTION", "per stack", "explicit preprocess call", "ACTIVE_EXECUTED"),
@@ -117,7 +124,7 @@ def _resolve_import(root: Path, module: str, source: Path, level: int) -> Path |
     base = source.parent
     for _ in range(max(level - 1, 0)):
         base = base.parent
-    stems = [base.joinpath(*module.split(".")), root / "common" / Path(*module.split(".")), root / "scripts" / Path(*module.split("."))]
+    stems = [base.joinpath(*module.split(".")), root / "src" / Path(*module.split(".")), root / "common" / Path(*module.split(".")), root / "scripts" / Path(*module.split("."))]
     for stem in stems:
         for candidate in (stem.with_suffix(".py"), stem / "__init__.py"):
             if candidate.is_file():
@@ -176,10 +183,11 @@ def _shell_modules(root: Path, path: Path) -> list[tuple[Path, str]]:
     modules = re.findall(r"(?:\"\$PY(?:THON)?\"|\$PY(?:THON)?|python(?:3)?)\s+-m\s+([A-Za-z_]\w*(?:\.\w+)*)", text)
     resolved: list[tuple[Path, str]] = []
     for module in sorted(set(modules)):
-        candidate = root / "common" / Path(*module.split("."))
-        target = candidate.with_suffix(".py")
-        if target.is_file():
-            resolved.append((target, f"shell python -m {module}"))
+        for package_root in (root / "src", root / "common"):
+            target = (package_root / Path(*module.split("."))).with_suffix(".py")
+            if target.is_file():
+                resolved.append((target, f"shell python -m {module}"))
+                break
     return resolved
 
 
@@ -217,7 +225,7 @@ def _generation_provenance(root: Path, nodes: dict[str, dict[str, Any]]) -> dict
 def scan(root: Path) -> dict[str, Any]:
     nodes: dict[str, dict[str, Any]] = {}; edges: list[dict[str, Any]] = []; direct: dict[tuple[str, str], str] = {}
     stage_paths: dict[str, set[str]] = defaultdict(set); queue: deque[tuple[str, str, str, str]] = deque()
-    def internal(path: str) -> bool: return path.startswith(("common/", "pipeline/", "scripts/", "configs/", "runtime/"))
+    def internal(path: str) -> bool: return path.startswith(("common/", "pipeline/", "scripts/", "configs/", "runtime/", "src/"))
     def add_node(path: str, stage: str, classification: str, reason: str, discovery: str) -> None:
         if internal(path) and not (root / path).exists():
             raise FileNotFoundError(f"declared active repository dependency does not exist: {path}")

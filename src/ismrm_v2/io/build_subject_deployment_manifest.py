@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
-from validate_subject_id import validate_subject_id
+from ismrm_v2.io.validate_subject_id import validate_subject_id
 
 
 STACKS = ("sax", "2ch", "4ch")

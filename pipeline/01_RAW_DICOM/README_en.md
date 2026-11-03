@@ -10,7 +10,7 @@ Inputs are three server-resident DICOM directories, with exactly ten weights per
 PROJECT_ROOT=/path/to/ismrm_v2_1
 SUBJECT=NEW_SUBJECT_001
 RAW_ROOT=/data/.../mapping_subject_dicom
-python "$PROJECT_ROOT/scripts/build_subject_deployment_manifest.py" \
+PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" python -m ismrm_v2.io.build_subject_deployment_manifest \
   --raw-root "$RAW_ROOT" --subject "$SUBJECT" \
   --output "$PROJECT_ROOT/subjects/$SUBJECT/manifest.json"
 ```

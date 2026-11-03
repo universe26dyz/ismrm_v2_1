@@ -65,7 +65,7 @@ def test_inventory_is_deterministic_and_has_no_missing_internal_active_nodes(tmp
         assert node["stage_roles"]
         assert node["classification"] == max(node["stage_roles"].values(), key=ROLE_PRIORITY.__getitem__)
         assert node["source_sha256"] == hashlib.sha256((ROOT / node["path"]).read_bytes()).hexdigest()
-        if node["classification"] in ACTIVE_INTERNAL and node["path"].startswith(("common/", "pipeline/", "scripts/", "configs/", "runtime/")):
+        if node["classification"] in ACTIVE_INTERNAL and node["path"].startswith(("common/", "pipeline/", "scripts/", "configs/", "runtime/", "src/")):
             assert (ROOT / node["path"]).exists(), node
 
 
@@ -104,6 +104,16 @@ def test_stage05_matcher_and_stage07_formal_shell_chain(tmp_path: Path) -> None:
     for path in STAGE07_CLIS:
         assert nodes[path]["stage_roles"]["07"] == "CONDITIONAL_ACTIVE"
         assert any(edge["from"] == wrapper and edge["to"] == path and edge["stage"] == "07" for edge in inventory["edges"])
+
+
+def test_phase2a_subject_admission_modules_have_direct_stage_roles(tmp_path: Path) -> None:
+    inventory = _inventory(tmp_path)
+    nodes = {node["path"]: node for node in inventory["nodes"]}
+    validator = nodes["src/ismrm_v2/io/validate_subject_id.py"]
+    assert validator["stage_roles"] == {f"{stage:02d}": "ACTIVE_EXECUTED" for stage in range(1, 9)}
+    assert nodes["src/ismrm_v2/io/build_subject_deployment_manifest.py"]["stage_roles"] == {"01": "ACTIVE_EXECUTED"}
+    assert "scripts/validate_subject_id.py" not in nodes
+    assert "scripts/build_subject_deployment_manifest.py" not in nodes
 
 
 def test_markdown_uses_the_stage_specific_role_not_global_role(tmp_path: Path) -> None:

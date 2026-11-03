@@ -6,7 +6,7 @@ SUBJECT=${2:?usage: $0 RUN_ROOT SUBJECT ROI_BUNDLE CASE}
 ROI_BUNDLE=${3:?usage: $0 RUN_ROOT SUBJECT ROI_BUNDLE CASE}
 CASE=${4:?usage: $0 RUN_ROOT SUBJECT ROI_BUNDLE CASE}
 PYTHON=${PYTHON:-python}
-"$PYTHON" "$PROJECT_ROOT/scripts/validate_subject_id.py" "$SUBJECT"
+PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m ismrm_v2.io.validate_subject_id "$SUBJECT"
 REPO="$PROJECT_ROOT/common" SUBJECT="$SUBJECT" \
   bash "$REPO/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh" \
   "$RUN_ROOT" "$RUN_ROOT" "$ROI_BUNDLE" "$CASE"

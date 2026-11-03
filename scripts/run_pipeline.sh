@@ -15,5 +15,5 @@ if [ "$DRY_RUN" = 1 ]; then
   echo "DRY-RUN: no MATLAB, CUDA or reconstruction command launched"
   exit 0
 fi
-python "$PROJECT_ROOT/scripts/validate_subject_id.py" "$SUBJECT"
+PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" python -m ismrm_v2.io.validate_subject_id "$SUBJECT"
 echo "Use the nine module manuals in order; full execution requires subject data and runtime assets."

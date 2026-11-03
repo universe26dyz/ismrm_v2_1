@@ -5,7 +5,7 @@ RUN_ROOT=${1:?usage: $0 RUN_ROOT SUBJECT CASE [PYTHON]}
 SUBJECT=${2:?usage: $0 RUN_ROOT SUBJECT CASE [PYTHON]}
 CASE=${3:?usage: $0 RUN_ROOT SUBJECT CASE [PYTHON]}
 PYTHON=${4:-python}
-"$PYTHON" "$PROJECT_ROOT/scripts/validate_subject_id.py" "$SUBJECT"
+PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m ismrm_v2.io.validate_subject_id "$SUBJECT"
 SPARSE="$RUN_ROOT/sparse_inputs/$SUBJECT/$CASE"
 MANIFEST="$SPARSE/sparse_manifest.json"
 OUT="$RUN_ROOT/reconstruction/proposed/$SUBJECT/$CASE"

@@ -38,15 +38,21 @@ def main(root: Path = ROOT) -> None:
     for entrypoint in inventory["entrypoints"]:
         if not (root / entrypoint).is_file():
             raise SystemExit(f"pipeline entrypoint missing: {entrypoint}")
-    skeleton = root / "src/ismrm_v2"
-    unexpected = [path.relative_to(skeleton).as_posix() for path in skeleton.rglob("*.py") if path.name != "__init__.py"]
+    package = root / "src/ismrm_v2"
+    migrated = {"io/validate_subject_id.py", "io/build_subject_deployment_manifest.py"}
+    unexpected = [path.relative_to(package).as_posix() for path in package.rglob("*.py") if path.name != "__init__.py" and path.relative_to(package).as_posix() not in migrated]
     if unexpected:
-        raise SystemExit(f"clean skeleton contains implementation: {unexpected}")
-    result = subprocess.run(["git", "grep", "-nE", r"(^|[[:space:]])(from|import)[[:space:]]+ismrm_v2|python[^\n]*-m[[:space:]]+ismrm_v2", "--", "pipeline", "common", "scripts"], cwd=root, text=True, capture_output=True)
-    if result.returncode == 0:
-        raise SystemExit(f"formal runtime imports clean skeleton:\n{result.stdout}")
-    if result.returncode != 1:
-        raise SystemExit(result.stderr)
+        raise SystemExit(f"unexpected clean-package implementation: {unexpected}")
+    manifest = json.loads((root / "docs/clean_code_migration_manifest.json").read_text(encoding="utf-8"))
+    entries = {entry["current_path"]: entry for entry in manifest["entries"]}
+    for relative in migrated:
+        entry = entries.get(f"src/ismrm_v2/{relative}")
+        if entry is None or entry.get("migration_status") != "MIGRATED_PHASE_2A":
+            raise SystemExit(f"Phase 2A package module is not recorded as migrated: {relative}")
+    for deferred in ("proposed", "fit_first", "evaluation"):
+        implementation = [path.relative_to(package).as_posix() for path in (package / deferred).rglob("*.py") if path.name != "__init__.py"]
+        if implementation:
+            raise SystemExit(f"Phase 2A unexpectedly migrated {deferred}: {implementation}")
     subprocess.check_call([sys.executable, str(root / "scripts/verify_server_local_state_policy.py"), str(root)])
     print("CLEAN REFACTOR INVARIANTS: PASS")
 

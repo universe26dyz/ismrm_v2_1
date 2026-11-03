@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -11,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FREEZE_CONTRACT = ROOT / "configs" / "scientific_freeze_contract.json"
 FREEZE_CHECKER = ROOT / "scripts" / "verify_scientific_freeze.py"
-SUBJECT_CHECKER = ROOT / "scripts" / "validate_subject_id.py"
+SUBJECT_VALIDATOR = "ismrm_v2.io.validate_subject_id"
 
 
 def test_scientific_freeze_checker_passes_for_the_active_tree():
@@ -47,8 +48,9 @@ def test_active_freeze_contract_is_the_corrected_hhz_q002s640_route():
 def test_submission_cohort_is_reporting_metadata_not_a_runtime_admission_gate():
     contract = json.loads(FREEZE_CONTRACT.read_text(encoding="utf-8"))
     assert contract["active_submission_cohort"] == ["CYJ", "DYL_2", "DYZ", "HHZ", "HJL"]
-    allowed = subprocess.run([sys.executable, str(SUBJECT_CHECKER), "DYL"], capture_output=True, text=True)
-    new_subject = subprocess.run([sys.executable, str(SUBJECT_CHECKER), "NEW_SUBJECT_001"], capture_output=True, text=True)
+    environment = dict(os.environ, PYTHONPATH=str(ROOT / "src"))
+    allowed = subprocess.run([sys.executable, "-m", SUBJECT_VALIDATOR, "DYL"], env=environment, capture_output=True, text=True)
+    new_subject = subprocess.run([sys.executable, "-m", SUBJECT_VALIDATOR, "NEW_SUBJECT_001"], env=environment, capture_output=True, text=True)
     assert allowed.returncode == 0, allowed.stderr
     assert new_subject.returncode == 0, new_subject.stderr
 

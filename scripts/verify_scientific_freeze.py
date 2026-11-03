@@ -125,7 +125,7 @@ def verify(root: Path) -> dict[str, Any]:
     for stage in active_stages:
         script = root / "pipeline" / stage / "run_stage.sh"
         _require_absent(script, "standardiz", "active sparse route")
-        _require_contains(script, "validate_subject_id.py", "generic subject validation")
+        _require_contains(script, "ismrm_v2.io.validate_subject_id", "generic subject validation")
         _require_absent(script, "validate_active_subject.py", "legacy cohort admission")
     preprocessor = root / "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m"
     for text in ("TI = [50, 150]", "T2_prep =", "protocol_version = 'hhz_v1'"):
