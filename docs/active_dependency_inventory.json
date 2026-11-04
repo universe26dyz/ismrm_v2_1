@@ -1309,10 +1309,10 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse_profile_manifest import",
+      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
       "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
       "condition": "import-time",
@@ -2181,26 +2181,26 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse_profile_manifest import",
+      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
       "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse_profile_manifest import",
+      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
       "stage": "07",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse_profile_manifest import",
+      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
       "stage": "08",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
       "condition": "import-time",
@@ -2237,10 +2237,10 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse_profile_manifest import",
+      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
       "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
       "condition": "import-time",
@@ -2373,18 +2373,18 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse_profile_manifest import",
+      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py",
       "stage": "07",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse_profile_manifest import",
+      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py",
       "stage": "08",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
       "condition": "import-time",
@@ -2613,18 +2613,18 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
-      "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
       "evidence": "from .standardize_subject_slices import",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
       "stage": "05",
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.sampling.sparse import",
+      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/sampling/sparse.py"
     },
     {
       "condition": "import-time",
@@ -2696,15 +2696,15 @@
       "evidence": "profile builder",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
       "stage": "04",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
+      "to": "src/ismrm_v2/sampling/sparse.py"
     },
     {
       "condition": "shell command",
       "edge_type": "SHELL_PYTHON_MODULE",
-      "evidence": "shell python -m paper_experiments.joint_vs_2dfit.phase2_clean.sparse",
+      "evidence": "shell python -m ismrm_v2.sampling.sparse",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
       "stage": "04",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
+      "to": "src/ismrm_v2/sampling/sparse.py"
     },
     {
       "condition": "per case",
@@ -2870,150 +2870,6 @@
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
       "evidence": "from .contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "stage": "04",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "stage": "06",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "stage": "07",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "stage": "08",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "stage": "04",
-      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "stage": "05",
-      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "stage": "06",
-      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "stage": "07",
-      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "stage": "08",
-      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
-      "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
-      "stage": "06",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
-      "stage": "07",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
-      "stage": "08",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
-      "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
-      "stage": "06",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
-      "stage": "07",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
-      "stage": "08",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .contracts import",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
       "stage": "05",
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
@@ -3021,10 +2877,10 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .sparse import",
+      "evidence": "from ismrm_v2.sampling.sparse import",
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
       "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py"
+      "to": "src/ismrm_v2/sampling/sparse.py"
     },
     {
       "condition": "import-time",
@@ -3077,10 +2933,10 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest import",
+      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
       "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py",
       "stage": "06",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
       "condition": "import-time",
@@ -3097,14 +2953,6 @@
       "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
       "stage": "06",
       "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest import",
-      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
-      "stage": "06",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
     },
     {
       "condition": "import-time",
@@ -3185,6 +3033,14 @@
       "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
       "stage": "06",
       "to": "common/trad/modules/module_08_inference_export/reprojection.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
+      "from": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "stage": "06",
+      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
       "condition": "import-time",
@@ -3469,22 +3325,6 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .geometry import",
-      "from": "common/trad/modules/module_02_data_bridge/build_manifest.py",
-      "stage": "03",
-      "to": "common/trad/modules/module_02_data_bridge/geometry.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .timing import",
-      "from": "common/trad/modules/module_02_data_bridge/build_manifest.py",
-      "stage": "03",
-      "to": "common/trad/modules/module_02_data_bridge/timing.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
       "evidence": "from trad.third_party.nesvor.nesvor.transform import",
       "from": "common/trad/modules/module_02_data_bridge/geometry.py",
       "stage": "03",
@@ -3529,22 +3369,6 @@
       "from": "common/trad/modules/module_02_data_bridge/geometry.py",
       "stage": "08",
       "to": "common/trad/third_party/nesvor/nesvor/transform/__init__.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .build_manifest import",
-      "from": "common/trad/modules/module_02_data_bridge/prepare_observations.py",
-      "stage": "03",
-      "to": "common/trad/modules/module_02_data_bridge/build_manifest.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .mat_v73 import",
-      "from": "common/trad/modules/module_02_data_bridge/prepare_observations.py",
-      "stage": "03",
-      "to": "common/trad/modules/module_02_data_bridge/mat_v73.py"
     },
     {
       "condition": "import-time",
@@ -3929,46 +3753,6 @@
       "from": "common/trad/scripts/local_preprocess_one.m",
       "stage": "02",
       "to": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from trad.modules.module_02_data_bridge.prepare_observations import",
-      "from": "common/trad/scripts/prepare_all_observations.py",
-      "stage": "03",
-      "to": "common/trad/modules/module_02_data_bridge/prepare_observations.py"
-    },
-    {
-      "condition": "always",
-      "edge_type": "CONFIG_READ",
-      "evidence": "Stage 03 --protocol",
-      "from": "common/trad/scripts/prepare_all_observations.py",
-      "stage": "03",
-      "to": "configs/protocol_scmr_v5_10_100.yaml"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.io.deployment_manifest import",
-      "from": "common/trad/scripts/prepare_all_observations.py",
-      "stage": "03",
-      "to": "src/ismrm_v2/io/deployment_manifest.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from trad.modules.module_02_data_bridge.mat_v73 import",
-      "from": "common/trad/scripts/validate_transferred_preprocessed.py",
-      "stage": "02",
-      "to": "common/trad/modules/module_02_data_bridge/mat_v73.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.io.deployment_manifest import",
-      "from": "common/trad/scripts/validate_transferred_preprocessed.py",
-      "stage": "02",
-      "to": "src/ismrm_v2/io/deployment_manifest.py"
     },
     {
       "condition": "import-time",
@@ -5179,14 +4963,6 @@
       "to": "common/trad/scripts/local_preprocess_all.m"
     },
     {
-      "condition": "always",
-      "edge_type": "SHELL_PYTHON_SCRIPT",
-      "evidence": "post-transfer validator",
-      "from": "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
-      "stage": "02",
-      "to": "common/trad/scripts/validate_transferred_preprocessed.py"
-    },
-    {
       "condition": "runtime",
       "edge_type": "EXTERNAL_RUNTIME",
       "evidence": "MATLAB argument or PATH",
@@ -5204,11 +4980,11 @@
     },
     {
       "condition": "always",
-      "edge_type": "SHELL_PYTHON_SCRIPT",
-      "evidence": "explicit --protocol",
-      "from": "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
-      "stage": "03",
-      "to": "common/trad/scripts/prepare_all_observations.py"
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "post-transfer validator",
+      "from": "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
+      "stage": "02",
+      "to": "src/ismrm_v2/preprocessing/validation.py"
     },
     {
       "condition": "always",
@@ -5217,6 +4993,14 @@
       "from": "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
       "stage": "03",
       "to": "src/ismrm_v2/io/validate_subject_id.py"
+    },
+    {
+      "condition": "always",
+      "edge_type": "SHELL_PYTHON_MODULE",
+      "evidence": "explicit --protocol",
+      "from": "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
+      "stage": "03",
+      "to": "src/ismrm_v2/observations/prepare_all.py"
     },
     {
       "condition": "always",
@@ -5417,6 +5201,222 @@
       "from": "src/ismrm_v2/io/build_subject_deployment_manifest.py",
       "stage": "01",
       "to": "src/ismrm_v2/io/validate_subject_id.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_02_data_bridge.geometry import",
+      "from": "src/ismrm_v2/observations/build_manifest.py",
+      "stage": "03",
+      "to": "common/trad/modules/module_02_data_bridge/geometry.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .timing import",
+      "from": "src/ismrm_v2/observations/build_manifest.py",
+      "stage": "03",
+      "to": "src/ismrm_v2/observations/timing.py"
+    },
+    {
+      "condition": "always",
+      "edge_type": "CONFIG_READ",
+      "evidence": "Stage 03 --protocol",
+      "from": "src/ismrm_v2/observations/prepare_all.py",
+      "stage": "03",
+      "to": "configs/protocol_scmr_v5_10_100.yaml"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.io.deployment_manifest import",
+      "from": "src/ismrm_v2/observations/prepare_all.py",
+      "stage": "03",
+      "to": "src/ismrm_v2/io/deployment_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.observations.prepare_observations import",
+      "from": "src/ismrm_v2/observations/prepare_all.py",
+      "stage": "03",
+      "to": "src/ismrm_v2/observations/prepare_observations.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .build_manifest import",
+      "from": "src/ismrm_v2/observations/prepare_observations.py",
+      "stage": "03",
+      "to": "src/ismrm_v2/observations/build_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .mat_v73 import",
+      "from": "src/ismrm_v2/observations/prepare_observations.py",
+      "stage": "03",
+      "to": "src/ismrm_v2/observations/mat_v73.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.io.deployment_manifest import",
+      "from": "src/ismrm_v2/preprocessing/validation.py",
+      "stage": "02",
+      "to": "src/ismrm_v2/io/deployment_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.observations.mat_v73 import",
+      "from": "src/ismrm_v2/preprocessing/validation.py",
+      "stage": "02",
+      "to": "src/ismrm_v2/observations/mat_v73.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
+      "from": "src/ismrm_v2/sampling/sparse.py",
+      "stage": "04",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
+      "from": "src/ismrm_v2/sampling/sparse.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
+      "from": "src/ismrm_v2/sampling/sparse.py",
+      "stage": "06",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
+      "from": "src/ismrm_v2/sampling/sparse.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
+      "from": "src/ismrm_v2/sampling/sparse.py",
+      "stage": "08",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
+      "from": "src/ismrm_v2/sampling/sparse.py",
+      "stage": "04",
+      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
+      "from": "src/ismrm_v2/sampling/sparse.py",
+      "stage": "05",
+      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
+      "from": "src/ismrm_v2/sampling/sparse.py",
+      "stage": "06",
+      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
+      "from": "src/ismrm_v2/sampling/sparse.py",
+      "stage": "07",
+      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from trad.modules.module_06_rigid_psf.hb1_stack_adapter import",
+      "from": "src/ismrm_v2/sampling/sparse.py",
+      "stage": "08",
+      "to": "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
+      "from": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "stage": "05",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
+      "from": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "stage": "06",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
+      "from": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "stage": "07",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
+      "from": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "stage": "08",
+      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.sampling.sparse import",
+      "from": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/sampling/sparse.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.sampling.sparse import",
+      "from": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "stage": "06",
+      "to": "src/ismrm_v2/sampling/sparse.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.sampling.sparse import",
+      "from": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "stage": "07",
+      "to": "src/ismrm_v2/sampling/sparse.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.sampling.sparse import",
+      "from": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "stage": "08",
+      "to": "src/ismrm_v2/sampling/sparse.py"
     }
   ],
   "entrypoints": [
@@ -5480,10 +5480,10 @@
     }
   ],
   "generation_provenance": {
-    "generator_sha256": "aa6acc04ea923ce23501f391392f3fc115c839d8c292a298887cf5751abe5e94",
+    "generator_sha256": "3619000ec826c9a9ceb205ccb6d60401b543bcb83e3d8679e97283696bd18132",
     "inventory_schema": "active-dependency-inventory/v3",
     "source_file_count": 153,
-    "source_runtime_fingerprint_sha256": "b5eaf200e19c67b6b45d1c6f7826b90226562b8cbcf14f175f7e18147fcfb4b0"
+    "source_runtime_fingerprint_sha256": "74c0793635083660cf7d6c3db1544bf57e159dafd5b37b851d0b25ff2d63aebd"
   },
   "nodes": [
     {
@@ -6464,7 +6464,7 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
       "reason": "baseline CLI",
-      "source_sha256": "4b26792b22f59462a03d166be9b97cd4441c1d0b0c5a5eafe56b6610f0f2c585",
+      "source_sha256": "d85e8f72123a0b09c93d03cbf5b329f3725c2b54c77162e3989c79560b613a7c",
       "stage_roles": {
         "05": "CONDITIONAL_ACTIVE"
       },
@@ -6490,7 +6490,7 @@
       "language": "python",
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
-      "reason": "from .contracts import",
+      "reason": "from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import",
       "source_sha256": "3d0d15a97d8c62a9677821e819f6b0951da0b2d55e5866e331f636c5d03d73ab",
       "stage_roles": {
         "04": "ACTIVE_TRANSITIVE",
@@ -6826,7 +6826,7 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
       "reason": "from .fit_first import",
-      "source_sha256": "bd4772d307920e5cfc319ea85800181ed7bca1234bd80897e7949194eff71675",
+      "source_sha256": "f8246dd521cc9779402e3268a4bf33643828ee85f83af9d2d2768b57eebf21ae",
       "stage_roles": {
         "05": "ACTIVE_TRANSITIVE",
         "07": "ACTIVE_TRANSITIVE",
@@ -6856,7 +6856,7 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
       "reason": "baseline imports it, but Stage 05 supplies SCMR-v5 prebuilt/reuse flags, never intensity-preserving flags",
-      "source_sha256": "5b423af482abb4b0a110670d2806e9b301656849b2edf59ec33407336ae25d01",
+      "source_sha256": "0dca8791f16ab5c3a855fbf3b8ac003e300f3c7071ba12e8ba625ca46744485b",
       "stage_roles": {
         "05": "COMPATIBILITY_IMPORT_ONLY"
       },
@@ -6988,7 +6988,7 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py",
       "reason": "from .formal_l100_sparse_manifest import",
-      "source_sha256": "8bc3b4d1c9cd9d4083b03e564ed2b06254873198f7b88cf109f2a6560d93c2bf",
+      "source_sha256": "91fa0a9d3909a80673fd8542aa85d4d6c68f1d16d08ab923da6fbeb1755e7e98",
       "stage_roles": {
         "07": "ACTIVE_TRANSITIVE",
         "08": "ACTIVE_TRANSITIVE"
@@ -7149,7 +7149,7 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
       "reason": "baseline imports it, but Stage 05 never supplies standardized reuse flags",
-      "source_sha256": "c2e1a93daa6593311e08f92906ab1f8663923d7e165e50c8f431f7feea95e3bf",
+      "source_sha256": "18f35dd827d954077f38c6c5ca75322b5c668f00b5224cc85237c7f85a6075da",
       "stage_roles": {
         "05": "COMPATIBILITY_IMPORT_ONLY"
       },
@@ -7201,7 +7201,7 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
       "reason": "stage wrapper",
-      "source_sha256": "70abf6e7b8542b325ad3facea0488e07802e534b06c8fdd7774a1f5f3b2971a6",
+      "source_sha256": "ad409ef323c8d64815dd1dbd9e83700115b90d10f68c3382fc71d84c84d83b81",
       "stage_roles": {
         "04": "ACTIVE_EXECUTED"
       },
@@ -7316,75 +7316,6 @@
       ]
     },
     {
-      "classification": "CONDITIONAL_ACTIVE",
-      "discovery_methods": [
-        "MANUAL_DYNAMIC_OVERRIDE",
-        "PYTHON_IMPORT",
-        "SHELL_MODULE_SCAN"
-      ],
-      "evidence": [
-        "from .sparse import",
-        "profile builder",
-        "shell python -m paper_experiments.joint_vs_2dfit.phase2_clean.sparse"
-      ],
-      "functional_area": "stage_04",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "reason": "profile builder",
-      "source_sha256": "04d030ca77e2ecbcb5e6744bdbc18e0e518734a4655adb0e38428d9326abfec6",
-      "stage_roles": {
-        "04": "CONDITIONAL_ACTIVE",
-        "05": "ACTIVE_TRANSITIVE",
-        "06": "ACTIVE_TRANSITIVE",
-        "07": "ACTIVE_TRANSITIVE",
-        "08": "ACTIVE_TRANSITIVE"
-      },
-      "stages": [
-        "04",
-        "05",
-        "06",
-        "07",
-        "08"
-      ]
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
-      "discovery_methods": [
-        "PYTHON_IMPORT"
-      ],
-      "evidence": [
-        "from .sparse_profile_manifest import",
-        "from paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest import"
-      ],
-      "functional_area": "stage_05",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
-      "reason": "from .sparse_profile_manifest import",
-      "source_sha256": "ef903d6649dcb8be7f3f3eaeaf4935c6e1ec1dde489bfaff497e6dc00e65e497",
-      "stage_roles": {
-        "05": "ACTIVE_TRANSITIVE",
-        "06": "ACTIVE_TRANSITIVE",
-        "07": "ACTIVE_TRANSITIVE",
-        "08": "ACTIVE_TRANSITIVE"
-      },
-      "stages": [
-        "05",
-        "06",
-        "07",
-        "08"
-      ]
-    },
-    {
       "classification": "COMPATIBILITY_IMPORT_ONLY",
       "discovery_methods": [
         "AUDIT_EXCLUSION",
@@ -7402,7 +7333,7 @@
       "outputs": [],
       "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
       "reason": "standardization route is not selected by Stage 05",
-      "source_sha256": "e834771e853b35c0d83588a1d1d670db82661bc150d2c08cddf301ed94ce1cd0",
+      "source_sha256": "cc452b61e5baf8f0fd8656a87914dffcdd9b992e75140093883334064212b2fa",
       "stage_roles": {
         "05": "COMPATIBILITY_IMPORT_ONLY"
       },
@@ -7511,7 +7442,7 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py",
       "reason": "from .contracts import",
-      "source_sha256": "9dbf4b148011d46c580c13601ba5ac84055bef8ac2a291e5154c86144271a8dd",
+      "source_sha256": "8b0aa374ce7f4db2127e5cccc39e253324c7de2e5c90862891425554a89e50a5",
       "stage_roles": {
         "06": "ACTIVE_TRANSITIVE"
       },
@@ -7586,7 +7517,7 @@
       "outputs": [],
       "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
       "reason": "Q002 formal reconstruction call",
-      "source_sha256": "1c166265bab8163aef8aad6ad3c2b004367ffd0c90756ef652f0cba40e4eb81e",
+      "source_sha256": "b0898e37b929be05b8c49b7e71dcaa903a62497f6ac3f3fa3246b377cd3c0d6d",
       "stage_roles": {
         "06": "ACTIVE_EXECUTED"
       },
@@ -8128,32 +8059,6 @@
         "PYTHON_IMPORT"
       ],
       "evidence": [
-        "from .build_manifest import"
-      ],
-      "functional_area": "stage_03",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/trad/modules/module_02_data_bridge/build_manifest.py",
-      "reason": "from .build_manifest import",
-      "source_sha256": "f6eec3c122ef699abfcc100ccf24708107fbe25d47c23088bb224e736bb08b5a",
-      "stage_roles": {
-        "03": "ACTIVE_TRANSITIVE"
-      },
-      "stages": [
-        "03"
-      ]
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
-      "discovery_methods": [
-        "PYTHON_IMPORT"
-      ],
-      "evidence": [
-        "from .geometry import",
         "from trad.modules.module_02_data_bridge.geometry import"
       ],
       "functional_area": "stage_04",
@@ -8181,84 +8086,6 @@
         "06",
         "07",
         "08"
-      ]
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
-      "discovery_methods": [
-        "PYTHON_IMPORT"
-      ],
-      "evidence": [
-        "from .mat_v73 import",
-        "from trad.modules.module_02_data_bridge.mat_v73 import"
-      ],
-      "functional_area": "stage_02",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/trad/modules/module_02_data_bridge/mat_v73.py",
-      "reason": "from trad.modules.module_02_data_bridge.mat_v73 import",
-      "source_sha256": "6b6ea2922fdd3b2f306263acb25a96b2bbcbf5972e0dd29d558075ea45ea9e23",
-      "stage_roles": {
-        "02": "ACTIVE_TRANSITIVE",
-        "03": "ACTIVE_TRANSITIVE"
-      },
-      "stages": [
-        "02",
-        "03"
-      ]
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
-      "discovery_methods": [
-        "PYTHON_IMPORT"
-      ],
-      "evidence": [
-        "from trad.modules.module_02_data_bridge.prepare_observations import"
-      ],
-      "functional_area": "stage_03",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/trad/modules/module_02_data_bridge/prepare_observations.py",
-      "reason": "from trad.modules.module_02_data_bridge.prepare_observations import",
-      "source_sha256": "53bc69ea6d5d2053518f00bdee7fde2c92856d1a1da9573a7ae51745642a6e85",
-      "stage_roles": {
-        "03": "ACTIVE_TRANSITIVE"
-      },
-      "stages": [
-        "03"
-      ]
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
-      "discovery_methods": [
-        "PYTHON_IMPORT"
-      ],
-      "evidence": [
-        "from .timing import"
-      ],
-      "functional_area": "stage_03",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/trad/modules/module_02_data_bridge/timing.py",
-      "reason": "from .timing import",
-      "source_sha256": "4670dce30fe404fd0e1811c8aad56b9b1aa981c7223a4f3c046aa14a25c60c8f",
-      "stage_roles": {
-        "03": "ACTIVE_TRANSITIVE"
-      },
-      "stages": [
-        "03"
       ]
     },
     {
@@ -8581,56 +8408,6 @@
       "path": "common/trad/scripts/local_preprocess_one.m",
       "reason": "local_preprocess_all loop",
       "source_sha256": "be987fa85aa18b7f9714fb16c45aa1725574b6d7ff7100fcebbe7e7872ca1e43",
-      "stage_roles": {
-        "02": "ACTIVE_EXECUTED"
-      },
-      "stages": [
-        "02"
-      ]
-    },
-    {
-      "classification": "ACTIVE_EXECUTED",
-      "discovery_methods": [
-        "MANUAL_DYNAMIC_OVERRIDE"
-      ],
-      "evidence": [
-        "explicit --protocol"
-      ],
-      "functional_area": "stage_03",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/trad/scripts/prepare_all_observations.py",
-      "reason": "explicit --protocol",
-      "source_sha256": "43175da3871b7cf28f198d620387a52355cd1fc82425d83c1ed398b70467741b",
-      "stage_roles": {
-        "03": "ACTIVE_EXECUTED"
-      },
-      "stages": [
-        "03"
-      ]
-    },
-    {
-      "classification": "ACTIVE_EXECUTED",
-      "discovery_methods": [
-        "MANUAL_DYNAMIC_OVERRIDE"
-      ],
-      "evidence": [
-        "post-transfer validator"
-      ],
-      "functional_area": "stage_02",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/trad/scripts/validate_transferred_preprocessed.py",
-      "reason": "post-transfer validator",
-      "source_sha256": "93400c8fda77a8dbd1f5b46c827b11765743e88e45b45df771775b2a60be2450",
       "stage_roles": {
         "02": "ACTIVE_EXECUTED"
       },
@@ -9354,7 +9131,7 @@
       ],
       "path": "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "900a4a26640fc9420479c4e989dc0df4e0beb404a9c03f0096798419dffbfddb",
+      "source_sha256": "f97bfed1ed211e6468761374147eb3c84431254118231e574dd26b603fad8269",
       "stage_roles": {
         "02": "ACTIVE_ENTRYPOINT"
       },
@@ -9388,7 +9165,7 @@
       ],
       "path": "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "83e6cda1935d4d8b423a3a73d4e14f326bbb0840df7134a89e526856cd1ba842",
+      "source_sha256": "c589f4a7b972203302de3879b7af6fa539ae9b08a34a1afc26624b26066c5974",
       "stage_roles": {
         "03": "ACTIVE_ENTRYPOINT"
       },
@@ -9418,7 +9195,7 @@
       ],
       "path": "pipeline/04_SPARSE_PROFILES/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "a9d2f2337d734d46a81d091baeaa24f24f2230f252a146ccb4751ab754b63dc8",
+      "source_sha256": "5c0f9ad1fd06a3d9f91d7346040eb65d52d825c61193ae655db15b510726c234",
       "stage_roles": {
         "04": "ACTIVE_ENTRYPOINT"
       },
@@ -9486,7 +9263,7 @@
       ],
       "path": "pipeline/06_PROPOSED/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "812033ecd496b06be58fba2f855b1936a67471ad0bd991db2afd9d49cc5efb30",
+      "source_sha256": "c4f148795e14ca71452ff371b4f5d38fc1daf472bb97f30274b39f180940ee75",
       "stage_roles": {
         "06": "ACTIVE_ENTRYPOINT"
       },
@@ -9703,7 +9480,7 @@
       "outputs": [],
       "path": "scripts/verify_scientific_freeze.py",
       "reason": "freeze checker",
-      "source_sha256": "03f350f4bb84092d0be6adeef32c8a4981fa5efd8b5bd0e16e4728f42c850491",
+      "source_sha256": "35686b4e606773debb2ec6064b89071c67c114f36b223f39b23dce929296c163",
       "stage_roles": {
         "09": "ACTIVE_EXECUTED"
       },
@@ -9803,6 +9580,227 @@
         "07",
         "08"
       ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
+      "evidence": [
+        "from .build_manifest import"
+      ],
+      "functional_area": "stage_03",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/observations/build_manifest.py",
+      "reason": "from .build_manifest import",
+      "source_sha256": "934e43c4b4e3ce90bb2354fa631625be8c21c41e8803cd75d750f0b9d476d437",
+      "stage_roles": {
+        "03": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
+      "evidence": [
+        "from .mat_v73 import",
+        "from ismrm_v2.observations.mat_v73 import"
+      ],
+      "functional_area": "stage_02",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/observations/mat_v73.py",
+      "reason": "from ismrm_v2.observations.mat_v73 import",
+      "source_sha256": "6b6ea2922fdd3b2f306263acb25a96b2bbcbf5972e0dd29d558075ea45ea9e23",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE",
+        "03": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "02",
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
+      "evidence": [
+        "explicit --protocol"
+      ],
+      "functional_area": "stage_03",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/observations/prepare_all.py",
+      "reason": "explicit --protocol",
+      "source_sha256": "af03e2f0b9d097e368527a440d0d2b4c43e2a16da7eb685d63bf0b7d839d3a33",
+      "stage_roles": {
+        "03": "ACTIVE_EXECUTED"
+      },
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
+      "evidence": [
+        "from ismrm_v2.observations.prepare_observations import"
+      ],
+      "functional_area": "stage_03",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/observations/prepare_observations.py",
+      "reason": "from ismrm_v2.observations.prepare_observations import",
+      "source_sha256": "53bc69ea6d5d2053518f00bdee7fde2c92856d1a1da9573a7ae51745642a6e85",
+      "stage_roles": {
+        "03": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
+      "evidence": [
+        "from .timing import"
+      ],
+      "functional_area": "stage_03",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/observations/timing.py",
+      "reason": "from .timing import",
+      "source_sha256": "4670dce30fe404fd0e1811c8aad56b9b1aa981c7223a4f3c046aa14a25c60c8f",
+      "stage_roles": {
+        "03": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "03"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
+      "evidence": [
+        "post-transfer validator"
+      ],
+      "functional_area": "stage_02",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/preprocessing/validation.py",
+      "reason": "post-transfer validator",
+      "source_sha256": "541d86a5d86dc9bdecc361423bf699bb536e1faf3bcca2e453f57d7f1d6a6b07",
+      "stage_roles": {
+        "02": "ACTIVE_EXECUTED"
+      },
+      "stages": [
+        "02"
+      ]
+    },
+    {
+      "classification": "CONDITIONAL_ACTIVE",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE",
+        "PYTHON_IMPORT",
+        "SHELL_MODULE_SCAN"
+      ],
+      "evidence": [
+        "from ismrm_v2.sampling.sparse import",
+        "profile builder",
+        "shell python -m ismrm_v2.sampling.sparse"
+      ],
+      "functional_area": "stage_04",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/sampling/sparse.py",
+      "reason": "profile builder",
+      "source_sha256": "f95be554f97d4795b5f5d8c56fd1bfaa9f0ba0414a50c011bf6ccbab889ae0c4",
+      "stage_roles": {
+        "04": "CONDITIONAL_ACTIVE",
+        "05": "ACTIVE_TRANSITIVE",
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "04",
+        "05",
+        "06",
+        "07",
+        "08"
+      ]
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "discovery_methods": [
+        "PYTHON_IMPORT"
+      ],
+      "evidence": [
+        "from ismrm_v2.sampling.sparse_profile_manifest import"
+      ],
+      "functional_area": "stage_05",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "reason": "from ismrm_v2.sampling.sparse_profile_manifest import",
+      "source_sha256": "53b31de20fa60d424fc4a8479e5cb748d81ef6a66e76c26158c6d3b3ceeca0bd",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE",
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
+      "stages": [
+        "05",
+        "06",
+        "07",
+        "08"
+      ]
     }
   ],
   "schema_version": "active-dependency-inventory/v3",
@@ -9837,13 +9835,13 @@
         "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m",
         "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m",
         "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m",
-        "common/trad/modules/module_02_data_bridge/mat_v73.py",
         "common/trad/scripts/local_preprocess_all.m",
         "common/trad/scripts/local_preprocess_one.m",
-        "common/trad/scripts/validate_transferred_preprocessed.py",
         "pipeline/02_PREPROCESS_MATLAB/run_stage.sh",
         "src/ismrm_v2/io/deployment_manifest.py",
-        "src/ismrm_v2/io/validate_subject_id.py"
+        "src/ismrm_v2/io/validate_subject_id.py",
+        "src/ismrm_v2/observations/mat_v73.py",
+        "src/ismrm_v2/preprocessing/validation.py"
       ]
     },
     "03": {
@@ -9860,12 +9858,7 @@
         "qc_summary.json"
       ],
       "paths": [
-        "common/trad/modules/module_02_data_bridge/build_manifest.py",
         "common/trad/modules/module_02_data_bridge/geometry.py",
-        "common/trad/modules/module_02_data_bridge/mat_v73.py",
-        "common/trad/modules/module_02_data_bridge/prepare_observations.py",
-        "common/trad/modules/module_02_data_bridge/timing.py",
-        "common/trad/scripts/prepare_all_observations.py",
         "common/trad/third_party/nesvor/nesvor/transform/__init__.py",
         "common/trad/third_party/nesvor/nesvor/transform/transform.py",
         "common/trad/third_party/nesvor/nesvor/transform/transform_convert.py",
@@ -9879,7 +9872,12 @@
         "configs/protocol_scmr_v5_10_100.yaml",
         "pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh",
         "src/ismrm_v2/io/deployment_manifest.py",
-        "src/ismrm_v2/io/validate_subject_id.py"
+        "src/ismrm_v2/io/validate_subject_id.py",
+        "src/ismrm_v2/observations/build_manifest.py",
+        "src/ismrm_v2/observations/mat_v73.py",
+        "src/ismrm_v2/observations/prepare_all.py",
+        "src/ismrm_v2/observations/prepare_observations.py",
+        "src/ismrm_v2/observations/timing.py"
       ]
     },
     "04": {
@@ -9899,7 +9897,6 @@
         "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/SAX100_2CH100_4CH0.json",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
         "common/trad/modules/module_02_data_bridge/geometry.py",
         "common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py",
         "common/trad/third_party/nesvor/nesvor/image/__init__.py",
@@ -9920,7 +9917,8 @@
         "common/trad/third_party/nesvor/nesvor/utils/psf.py",
         "common/trad/third_party/nesvor/nesvor/utils/types.py",
         "pipeline/04_SPARSE_PROFILES/run_stage.sh",
-        "src/ismrm_v2/io/validate_subject_id.py"
+        "src/ismrm_v2/io/validate_subject_id.py",
+        "src/ismrm_v2/sampling/sparse.py"
       ]
     },
     "05": {
@@ -9945,8 +9943,6 @@
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
         "common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py",
         "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m",
@@ -9973,7 +9969,9 @@
         "common/trad/third_party/nesvor/nesvor/utils/psf.py",
         "common/trad/third_party/nesvor/nesvor/utils/types.py",
         "pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh",
-        "src/ismrm_v2/io/validate_subject_id.py"
+        "src/ismrm_v2/io/validate_subject_id.py",
+        "src/ismrm_v2/sampling/sparse.py",
+        "src/ismrm_v2/sampling/sparse_profile_manifest.py"
       ]
     },
     "06": {
@@ -10001,8 +9999,6 @@
         "common/mlp/modules/module_07_objective_training/mlp_trainer.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
         "common/quality_experiments/Q001_recon/config.py",
         "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py",
         "common/quality_experiments/Q002_B6_roi_same_anchor_mse/evaluate_q003_s640_10k.py",
@@ -10049,7 +10045,9 @@
         "configs/protocol_scmr_v5_10_100.yaml",
         "pipeline/06_PROPOSED/run_stage.sh",
         "runtime/runtime_contract.json",
-        "src/ismrm_v2/io/validate_subject_id.py"
+        "src/ismrm_v2/io/validate_subject_id.py",
+        "src/ismrm_v2/sampling/sparse.py",
+        "src/ismrm_v2/sampling/sparse_profile_manifest.py"
       ]
     },
     "07": {
@@ -10110,8 +10108,6 @@
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py",
         "common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py",
         "common/reconstruction_core/orchestration.py",
@@ -10147,7 +10143,9 @@
         "common/trad/third_party/nesvor/nesvor/utils/psf.py",
         "common/trad/third_party/nesvor/nesvor/utils/types.py",
         "pipeline/07_FINAL_POSE/run_stage.sh",
-        "src/ismrm_v2/io/validate_subject_id.py"
+        "src/ismrm_v2/io/validate_subject_id.py",
+        "src/ismrm_v2/sampling/sparse.py",
+        "src/ismrm_v2/sampling/sparse_profile_manifest.py"
       ]
     },
     "08": {
@@ -10196,8 +10194,6 @@
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py",
         "common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py",
         "common/trad/evaluation/scmr/quality_control.py",
@@ -10222,7 +10218,9 @@
         "common/trad/third_party/nesvor/nesvor/utils/psf.py",
         "common/trad/third_party/nesvor/nesvor/utils/types.py",
         "pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh",
-        "src/ismrm_v2/io/validate_subject_id.py"
+        "src/ismrm_v2/io/validate_subject_id.py",
+        "src/ismrm_v2/sampling/sparse.py",
+        "src/ismrm_v2/sampling/sparse_profile_manifest.py"
       ]
     },
     "09": {

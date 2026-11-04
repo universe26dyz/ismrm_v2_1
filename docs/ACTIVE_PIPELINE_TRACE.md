@@ -1,6 +1,6 @@
 # Active pipeline dependency trace
 
-Generated deterministically from runtime-source fingerprint `b5eaf200e19c67b6b45d1c6f7826b90226562b8cbcf14f175f7e18147fcfb4b0` (generator `aa6acc04ea923ce23501f391392f3fc115c839d8c292a298887cf5751abe5e94`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
+Generated deterministically from runtime-source fingerprint `74c0793635083660cf7d6c3db1544bf57e159dafd5b37b851d0b25ff2d63aebd` (generator `3619000ec826c9a9ceb205ccb6d60401b543bcb83e3d8679e97283696bd18132`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
 
 ## Stage 01
 
@@ -45,8 +45,8 @@ Direct execution chain:
 - `common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m`
 - `common/trad/scripts/local_preprocess_all.m`
 - `common/trad/scripts/local_preprocess_one.m`
-- `common/trad/scripts/validate_transferred_preprocessed.py`
 - `src/ismrm_v2/io/validate_subject_id.py`
+- `src/ismrm_v2/preprocessing/validation.py`
 
 Conditional direct execution:
 
@@ -56,8 +56,8 @@ Transitive implementation dependencies:
 - `common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m`
 - `common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m`
 - `common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m`
-- `common/trad/modules/module_02_data_bridge/mat_v73.py`
 - `src/ismrm_v2/io/deployment_manifest.py`
+- `src/ismrm_v2/observations/mat_v73.py`
 
 Compatibility import closure:
 
@@ -89,18 +89,18 @@ Outputs:
 - `qc_summary.json`
 
 Direct execution chain:
-- `common/trad/scripts/prepare_all_observations.py`
 - `src/ismrm_v2/io/validate_subject_id.py`
+- `src/ismrm_v2/observations/prepare_all.py`
 
 Conditional direct execution:
 
 Transitive implementation dependencies:
-- `common/trad/modules/module_02_data_bridge/build_manifest.py`
 - `common/trad/modules/module_02_data_bridge/geometry.py`
-- `common/trad/modules/module_02_data_bridge/mat_v73.py`
-- `common/trad/modules/module_02_data_bridge/prepare_observations.py`
-- `common/trad/modules/module_02_data_bridge/timing.py`
 - `src/ismrm_v2/io/deployment_manifest.py`
+- `src/ismrm_v2/observations/build_manifest.py`
+- `src/ismrm_v2/observations/mat_v73.py`
+- `src/ismrm_v2/observations/prepare_observations.py`
+- `src/ismrm_v2/observations/timing.py`
 
 Compatibility import closure:
 
@@ -139,7 +139,7 @@ Direct execution chain:
 - `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
+- `src/ismrm_v2/sampling/sparse.py`
 
 Transitive implementation dependencies:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py`
@@ -206,14 +206,14 @@ Transitive implementation dependencies:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_pose_audit.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py`
 - `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
 - `common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m`
 - `common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m`
 - `common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m`
 - `common/trad/modules/module_02_data_bridge/geometry.py`
 - `common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py`
+- `src/ismrm_v2/sampling/sparse.py`
+- `src/ismrm_v2/sampling/sparse_profile_manifest.py`
 
 Compatibility import closure:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py`
@@ -283,8 +283,6 @@ Transitive implementation dependencies:
 - `common/mlp/modules/module_05_signal_decoder/trad_teacher/trad_signal_simulator.py`
 - `common/mlp/modules/module_07_objective_training/mlp_trainer.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py`
 - `common/quality_experiments/Q001_recon/config.py`
 - `common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py`
 - `common/quality_experiments/Q002_B6_roi_same_anchor_mse/joint_dataset.py`
@@ -301,6 +299,8 @@ Transitive implementation dependencies:
 - `common/trad/modules/module_07_objective_training/training_space.py`
 - `common/trad/modules/module_08_inference_export/export_quantitative.py`
 - `common/trad/modules/module_08_inference_export/reprojection.py`
+- `src/ismrm_v2/sampling/sparse.py`
+- `src/ismrm_v2/sampling/sparse_profile_manifest.py`
 
 Compatibility import closure:
 
@@ -401,8 +401,6 @@ Transitive implementation dependencies:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py`
 - `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
 - `common/reconstruction_core/orchestration.py`
@@ -419,6 +417,8 @@ Transitive implementation dependencies:
 - `common/trad/modules/module_07_objective_training/experiment_infrastructure.py`
 - `common/trad/modules/module_07_objective_training/training_space.py`
 - `common/trad/modules/module_08_inference_export/export_quantitative.py`
+- `src/ismrm_v2/sampling/sparse.py`
+- `src/ismrm_v2/sampling/sparse_profile_manifest.py`
 
 Compatibility import closure:
 
@@ -519,14 +519,14 @@ Transitive implementation dependencies:
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py`
 - `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
 - `common/trad/evaluation/scmr/quality_control.py`
 - `common/trad/evaluation/scmr/reference_2d.py`
 - `common/trad/modules/module_02_data_bridge/geometry.py`
 - `common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py`
+- `src/ismrm_v2/sampling/sparse.py`
+- `src/ismrm_v2/sampling/sparse_profile_manifest.py`
 
 Compatibility import closure:
 

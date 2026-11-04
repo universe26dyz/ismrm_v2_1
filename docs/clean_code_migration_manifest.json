@@ -26,6 +26,78 @@
       "pre_move_source_sha256": "f438ea530ccba4a32a42a0c9edd2afd572fb9986d5e98766c6cd46ede543470c",
       "reason": "Deployment-manifest loader moved unchanged into the clean I/O package.",
       "to_path": "src/ismrm_v2/io/deployment_manifest.py"
+    },
+    {
+      "from_path": "common/trad/scripts/validate_transferred_preprocessed.py",
+      "kind": "MOVE_WITH_IMPORT_ADAPTATION",
+      "phase": "2C",
+      "pre_move_source_sha256": "93400c8fda77a8dbd1f5b46c827b11765743e88e45b45df771775b2a60be2450",
+      "post_move_source_sha256": "541d86a5d86dc9bdecc361423bf699bb536e1faf3bcca2e453f57d7f1d6a6b07",
+      "reason": "Stage 02 post-transfer validation moved into preprocessing; its MAT loader import was adapted to the clean observations package.",
+      "to_path": "src/ismrm_v2/preprocessing/validation.py"
+    },
+    {
+      "from_path": "common/trad/scripts/prepare_all_observations.py",
+      "kind": "MOVE_WITH_IMPORT_ADAPTATION",
+      "phase": "2C",
+      "pre_move_source_sha256": "43175da3871b7cf28f198d620387a52355cd1fc82425d83c1ed398b70467741b",
+      "post_move_source_sha256": "af03e2f0b9d097e368527a440d0d2b4c43e2a16da7eb685d63bf0b7d839d3a33",
+      "reason": "Stage 03 deployment-manifest preparation entrypoint moved into observations; its preparation import was adapted to the clean package.",
+      "to_path": "src/ismrm_v2/observations/prepare_all.py"
+    },
+    {
+      "from_path": "common/trad/modules/module_02_data_bridge/build_manifest.py",
+      "kind": "MOVE_WITH_IMPORT_ADAPTATION",
+      "phase": "2C",
+      "pre_move_source_sha256": "f6eec3c122ef699abfcc100ccf24708107fbe25d47c23088bb224e736bb08b5a",
+      "post_move_source_sha256": "934e43c4b4e3ce90bb2354fa631625be8c21c41e8803cd75d750f0b9d476d437",
+      "reason": "Observation manifest builder moved into observations; the retained geometry import was adapted without changing manifest behavior.",
+      "to_path": "src/ismrm_v2/observations/build_manifest.py"
+    },
+    {
+      "from_path": "common/trad/modules/module_02_data_bridge/mat_v73.py",
+      "kind": "MOVE",
+      "phase": "2C",
+      "pre_move_source_sha256": "6b6ea2922fdd3b2f306263acb25a96b2bbcbf5972e0dd29d558075ea45ea9e23",
+      "post_move_source_sha256": "6b6ea2922fdd3b2f306263acb25a96b2bbcbf5972e0dd29d558075ea45ea9e23",
+      "reason": "MAT v7.3 loader moved unchanged into observations.",
+      "to_path": "src/ismrm_v2/observations/mat_v73.py"
+    },
+    {
+      "from_path": "common/trad/modules/module_02_data_bridge/timing.py",
+      "kind": "MOVE",
+      "phase": "2C",
+      "pre_move_source_sha256": "4670dce30fe404fd0e1811c8aad56b9b1aa981c7223a4f3c046aa14a25c60c8f",
+      "post_move_source_sha256": "4670dce30fe404fd0e1811c8aad56b9b1aa981c7223a4f3c046aa14a25c60c8f",
+      "reason": "TR/VPS/timing parser moved unchanged into observations.",
+      "to_path": "src/ismrm_v2/observations/timing.py"
+    },
+    {
+      "from_path": "common/trad/modules/module_02_data_bridge/prepare_observations.py",
+      "kind": "MOVE",
+      "phase": "2C",
+      "pre_move_source_sha256": "53bc69ea6d5d2053518f00bdee7fde2c92856d1a1da9573a7ae51745642a6e85",
+      "post_move_source_sha256": "53bc69ea6d5d2053518f00bdee7fde2c92856d1a1da9573a7ae51745642a6e85",
+      "reason": "Observation preparation implementation moved unchanged into observations.",
+      "to_path": "src/ismrm_v2/observations/prepare_observations.py"
+    },
+    {
+      "from_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
+      "kind": "MOVE_WITH_IMPORT_ADAPTATION",
+      "phase": "2C",
+      "pre_move_source_sha256": "04d030ca77e2ecbcb5e6744bdbc18e0e518734a4655adb0e38428d9326abfec6",
+      "post_move_source_sha256": "f95be554f97d4795b5f5d8c56fd1bfaa9f0ba0414a50c011bf6ccbab889ae0c4",
+      "reason": "Stage 04 sparse-profile selection moved into sampling; its shared-contract import was adapted without changing selection behavior.",
+      "to_path": "src/ismrm_v2/sampling/sparse.py"
+    },
+    {
+      "from_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
+      "kind": "MOVE_WITH_IMPORT_ADAPTATION",
+      "phase": "2C",
+      "pre_move_source_sha256": "ef903d6649dcb8be7f3f3eaeaf4935c6e1ec1dde489bfaff497e6dc00e65e497",
+      "post_move_source_sha256": "53b31de20fa60d424fc4a8479e5cb748d81ef6a66e76c26158c6d3b3ceeca0bd",
+      "reason": "Sparse-profile manifest validation moved into sampling; imports were adapted to the clean sparse authority without changing validation behavior.",
+      "to_path": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     }
   ],
   "duplicate_implementation_plan": [
@@ -543,7 +615,7 @@
       "phase1_action": "RENAME_LATER",
       "reason": "historical active name is not a deletion signal",
       "safe_to_delete_now": false,
-      "source_sha256": "4b26792b22f59462a03d166be9b97cd4441c1d0b0c5a5eafe56b6610f0f2c585",
+      "source_sha256": "d85e8f72123a0b09c93d03cbf5b329f3725c2b54c77162e3989c79560b613a7c",
       "stage_roles": {
         "05": "CONDITIONAL_ACTIVE"
       }
@@ -725,7 +797,7 @@
       "phase1_action": "RENAME_LATER",
       "reason": "historical active name is not a deletion signal",
       "safe_to_delete_now": false,
-      "source_sha256": "bd4772d307920e5cfc319ea85800181ed7bca1234bd80897e7949194eff71675",
+      "source_sha256": "f8246dd521cc9779402e3268a4bf33643828ee85f83af9d2d2768b57eebf21ae",
       "stage_roles": {
         "05": "ACTIVE_TRANSITIVE",
         "07": "ACTIVE_TRANSITIVE",
@@ -740,7 +812,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "compatibility import remains until callers are decoupled",
       "safe_to_delete_now": false,
-      "source_sha256": "5b423af482abb4b0a110670d2806e9b301656849b2edf59ec33407336ae25d01",
+      "source_sha256": "0dca8791f16ab5c3a855fbf3b8ac003e300f3c7071ba12e8ba625ca46744485b",
       "stage_roles": {
         "05": "COMPATIBILITY_IMPORT_ONLY"
       }
@@ -808,7 +880,7 @@
       "phase1_action": "RENAME_LATER",
       "reason": "historical active name is not a deletion signal",
       "safe_to_delete_now": false,
-      "source_sha256": "8bc3b4d1c9cd9d4083b03e564ed2b06254873198f7b88cf109f2a6560d93c2bf",
+      "source_sha256": "91fa0a9d3909a80673fd8542aa85d4d6c68f1d16d08ab923da6fbeb1755e7e98",
       "stage_roles": {
         "07": "ACTIVE_TRANSITIVE",
         "08": "ACTIVE_TRANSITIVE"
@@ -891,7 +963,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "compatibility import remains until callers are decoupled",
       "safe_to_delete_now": false,
-      "source_sha256": "c2e1a93daa6593311e08f92906ab1f8663923d7e165e50c8f431f7feea95e3bf",
+      "source_sha256": "18f35dd827d954077f38c6c5ca75322b5c668f00b5224cc85237c7f85a6075da",
       "stage_roles": {
         "05": "COMPATIBILITY_IMPORT_ONLY"
       }
@@ -917,7 +989,7 @@
       "phase1_action": "RENAME_LATER",
       "reason": "historical active name is not a deletion signal",
       "safe_to_delete_now": false,
-      "source_sha256": "70abf6e7b8542b325ad3facea0488e07802e534b06c8fdd7774a1f5f3b2971a6",
+      "source_sha256": "ad409ef323c8d64815dd1dbd9e83700115b90d10f68c3382fc71d84c84d83b81",
       "stage_roles": {
         "04": "ACTIVE_EXECUTED"
       }
@@ -975,39 +1047,6 @@
       }
     },
     {
-      "classification": "CONDITIONAL_ACTIVE",
-      "current_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py",
-      "future_action": "RENAME_LATER",
-      "future_target_path": null,
-      "phase1_action": "RENAME_LATER",
-      "reason": "historical active name is not a deletion signal",
-      "safe_to_delete_now": false,
-      "source_sha256": "04d030ca77e2ecbcb5e6744bdbc18e0e518734a4655adb0e38428d9326abfec6",
-      "stage_roles": {
-        "04": "CONDITIONAL_ACTIVE",
-        "05": "ACTIVE_TRANSITIVE",
-        "06": "ACTIVE_TRANSITIVE",
-        "07": "ACTIVE_TRANSITIVE",
-        "08": "ACTIVE_TRANSITIVE"
-      }
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
-      "current_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py",
-      "future_action": "RENAME_LATER",
-      "future_target_path": null,
-      "phase1_action": "RENAME_LATER",
-      "reason": "historical active name is not a deletion signal",
-      "safe_to_delete_now": false,
-      "source_sha256": "ef903d6649dcb8be7f3f3eaeaf4935c6e1ec1dde489bfaff497e6dc00e65e497",
-      "stage_roles": {
-        "05": "ACTIVE_TRANSITIVE",
-        "06": "ACTIVE_TRANSITIVE",
-        "07": "ACTIVE_TRANSITIVE",
-        "08": "ACTIVE_TRANSITIVE"
-      }
-    },
-    {
       "classification": "COMPATIBILITY_IMPORT_ONLY",
       "current_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
       "future_action": "REMOVE_AFTER_IMPORT_DECOUPLING",
@@ -1015,7 +1054,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "compatibility import remains until callers are decoupled",
       "safe_to_delete_now": false,
-      "source_sha256": "e834771e853b35c0d83588a1d1d670db82661bc150d2c08cddf301ed94ce1cd0",
+      "source_sha256": "cc452b61e5baf8f0fd8656a87914dffcdd9b992e75140093883334064212b2fa",
       "stage_roles": {
         "05": "COMPATIBILITY_IMPORT_ONLY"
       }
@@ -1070,7 +1109,7 @@
       "phase1_action": "MOVE_LATER",
       "reason": "active implementation maps to future src package after import migration",
       "safe_to_delete_now": false,
-      "source_sha256": "9dbf4b148011d46c580c13601ba5ac84055bef8ac2a291e5154c86144271a8dd",
+      "source_sha256": "8b0aa374ce7f4db2127e5cccc39e253324c7de2e5c90862891425554a89e50a5",
       "stage_roles": {
         "06": "ACTIVE_TRANSITIVE"
       }
@@ -1109,7 +1148,7 @@
       "phase1_action": "MOVE_LATER",
       "reason": "active implementation maps to future src package after import migration",
       "safe_to_delete_now": false,
-      "source_sha256": "1c166265bab8163aef8aad6ad3c2b004367ffd0c90756ef652f0cba40e4eb81e",
+      "source_sha256": "b0898e37b929be05b8c49b7e71dcaa903a62497f6ac3f3fa3246b377cd3c0d6d",
       "stage_roles": {
         "06": "ACTIVE_EXECUTED"
       }
@@ -1380,19 +1419,6 @@
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
-      "current_path": "common/trad/modules/module_02_data_bridge/build_manifest.py",
-      "future_action": "MOVE_LATER",
-      "future_target_path": null,
-      "phase1_action": "MOVE_LATER",
-      "reason": "active implementation maps to future src package after import migration",
-      "safe_to_delete_now": false,
-      "source_sha256": "f6eec3c122ef699abfcc100ccf24708107fbe25d47c23088bb224e736bb08b5a",
-      "stage_roles": {
-        "03": "ACTIVE_TRANSITIVE"
-      }
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
       "current_path": "common/trad/modules/module_02_data_bridge/geometry.py",
       "future_action": "MOVE_LATER",
       "future_target_path": null,
@@ -1407,46 +1433,6 @@
         "06": "ACTIVE_TRANSITIVE",
         "07": "ACTIVE_TRANSITIVE",
         "08": "ACTIVE_TRANSITIVE"
-      }
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
-      "current_path": "common/trad/modules/module_02_data_bridge/mat_v73.py",
-      "future_action": "MOVE_LATER",
-      "future_target_path": null,
-      "phase1_action": "MOVE_LATER",
-      "reason": "active implementation maps to future src package after import migration",
-      "safe_to_delete_now": false,
-      "source_sha256": "6b6ea2922fdd3b2f306263acb25a96b2bbcbf5972e0dd29d558075ea45ea9e23",
-      "stage_roles": {
-        "02": "ACTIVE_TRANSITIVE",
-        "03": "ACTIVE_TRANSITIVE"
-      }
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
-      "current_path": "common/trad/modules/module_02_data_bridge/prepare_observations.py",
-      "future_action": "MOVE_LATER",
-      "future_target_path": null,
-      "phase1_action": "MOVE_LATER",
-      "reason": "active implementation maps to future src package after import migration",
-      "safe_to_delete_now": false,
-      "source_sha256": "53bc69ea6d5d2053518f00bdee7fde2c92856d1a1da9573a7ae51745642a6e85",
-      "stage_roles": {
-        "03": "ACTIVE_TRANSITIVE"
-      }
-    },
-    {
-      "classification": "ACTIVE_TRANSITIVE",
-      "current_path": "common/trad/modules/module_02_data_bridge/timing.py",
-      "future_action": "MOVE_LATER",
-      "future_target_path": null,
-      "phase1_action": "MOVE_LATER",
-      "reason": "active implementation maps to future src package after import migration",
-      "safe_to_delete_now": false,
-      "source_sha256": "4670dce30fe404fd0e1811c8aad56b9b1aa981c7223a4f3c046aa14a25c60c8f",
-      "stage_roles": {
-        "03": "ACTIVE_TRANSITIVE"
       }
     },
     {
@@ -1613,32 +1599,6 @@
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
       "source_sha256": "be987fa85aa18b7f9714fb16c45aa1725574b6d7ff7100fcebbe7e7872ca1e43",
-      "stage_roles": {
-        "02": "ACTIVE_EXECUTED"
-      }
-    },
-    {
-      "classification": "ACTIVE_EXECUTED",
-      "current_path": "common/trad/scripts/prepare_all_observations.py",
-      "future_action": "KEEP_CURRENT",
-      "future_target_path": "common/trad/scripts/prepare_all_observations.py",
-      "phase1_action": "KEEP_CURRENT",
-      "reason": "active path remains authoritative during Phase 1",
-      "safe_to_delete_now": false,
-      "source_sha256": "43175da3871b7cf28f198d620387a52355cd1fc82425d83c1ed398b70467741b",
-      "stage_roles": {
-        "03": "ACTIVE_EXECUTED"
-      }
-    },
-    {
-      "classification": "ACTIVE_EXECUTED",
-      "current_path": "common/trad/scripts/validate_transferred_preprocessed.py",
-      "future_action": "KEEP_CURRENT",
-      "future_target_path": "common/trad/scripts/validate_transferred_preprocessed.py",
-      "phase1_action": "KEEP_CURRENT",
-      "reason": "active path remains authoritative during Phase 1",
-      "safe_to_delete_now": false,
-      "source_sha256": "93400c8fda77a8dbd1f5b46c827b11765743e88e45b45df771775b2a60be2450",
       "stage_roles": {
         "02": "ACTIVE_EXECUTED"
       }
@@ -2004,7 +1964,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
-      "source_sha256": "900a4a26640fc9420479c4e989dc0df4e0beb404a9c03f0096798419dffbfddb",
+      "source_sha256": "f97bfed1ed211e6468761374147eb3c84431254118231e574dd26b603fad8269",
       "stage_roles": {
         "02": "ACTIVE_ENTRYPOINT"
       }
@@ -2017,7 +1977,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
-      "source_sha256": "83e6cda1935d4d8b423a3a73d4e14f326bbb0840df7134a89e526856cd1ba842",
+      "source_sha256": "c589f4a7b972203302de3879b7af6fa539ae9b08a34a1afc26624b26066c5974",
       "stage_roles": {
         "03": "ACTIVE_ENTRYPOINT"
       }
@@ -2030,7 +1990,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
-      "source_sha256": "a9d2f2337d734d46a81d091baeaa24f24f2230f252a146ccb4751ab754b63dc8",
+      "source_sha256": "5c0f9ad1fd06a3d9f91d7346040eb65d52d825c61193ae655db15b510726c234",
       "stage_roles": {
         "04": "ACTIVE_ENTRYPOINT"
       }
@@ -2056,7 +2016,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
-      "source_sha256": "812033ecd496b06be58fba2f855b1936a67471ad0bd991db2afd9d49cc5efb30",
+      "source_sha256": "c4f148795e14ca71452ff371b4f5d38fc1daf472bb97f30274b39f180940ee75",
       "stage_roles": {
         "06": "ACTIVE_ENTRYPOINT"
       }
@@ -2160,7 +2120,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
-      "source_sha256": "03f350f4bb84092d0be6adeef32c8a4981fa5efd8b5bd0e16e4728f42c850491",
+      "source_sha256": "35686b4e606773debb2ec6064b89071c67c114f36b223f39b23dce929296c163",
       "stage_roles": {
         "09": "ACTIVE_EXECUTED"
       }
@@ -2214,10 +2174,196 @@
         "07": "ACTIVE_EXECUTED",
         "08": "ACTIVE_EXECUTED"
       }
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "current_path": "src/ismrm_v2/observations/build_manifest.py",
+      "safe_to_delete_now": false,
+      "source_sha256": "934e43c4b4e3ce90bb2354fa631625be8c21c41e8803cd75d750f0b9d476d437",
+      "stage_roles": {
+        "03": "ACTIVE_TRANSITIVE"
+      },
+      "future_action": "MIGRATED_PHASE_2C",
+      "future_target_path": "src/ismrm_v2/observations/build_manifest.py",
+      "migration_status": "MIGRATED_PHASE_2C",
+      "phase1_action": "MIGRATED_PHASE_2C",
+      "reason": "Observation manifest builder moved into observations; the retained geometry import was adapted without changing manifest behavior."
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "current_path": "src/ismrm_v2/observations/mat_v73.py",
+      "safe_to_delete_now": false,
+      "source_sha256": "6b6ea2922fdd3b2f306263acb25a96b2bbcbf5972e0dd29d558075ea45ea9e23",
+      "stage_roles": {
+        "02": "ACTIVE_TRANSITIVE",
+        "03": "ACTIVE_TRANSITIVE"
+      },
+      "future_action": "MIGRATED_PHASE_2C",
+      "future_target_path": "src/ismrm_v2/observations/mat_v73.py",
+      "migration_status": "MIGRATED_PHASE_2C",
+      "phase1_action": "MIGRATED_PHASE_2C",
+      "reason": "MAT v7.3 loader moved unchanged into observations."
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "current_path": "src/ismrm_v2/observations/prepare_all.py",
+      "safe_to_delete_now": false,
+      "source_sha256": "af03e2f0b9d097e368527a440d0d2b4c43e2a16da7eb685d63bf0b7d839d3a33",
+      "stage_roles": {
+        "03": "ACTIVE_EXECUTED"
+      },
+      "future_action": "MIGRATED_PHASE_2C",
+      "future_target_path": "src/ismrm_v2/observations/prepare_all.py",
+      "migration_status": "MIGRATED_PHASE_2C",
+      "phase1_action": "MIGRATED_PHASE_2C",
+      "reason": "Stage 03 deployment-manifest preparation entrypoint moved into observations; its preparation import was adapted to the clean package."
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "current_path": "src/ismrm_v2/observations/prepare_observations.py",
+      "safe_to_delete_now": false,
+      "source_sha256": "53bc69ea6d5d2053518f00bdee7fde2c92856d1a1da9573a7ae51745642a6e85",
+      "stage_roles": {
+        "03": "ACTIVE_TRANSITIVE"
+      },
+      "future_action": "MIGRATED_PHASE_2C",
+      "future_target_path": "src/ismrm_v2/observations/prepare_observations.py",
+      "migration_status": "MIGRATED_PHASE_2C",
+      "phase1_action": "MIGRATED_PHASE_2C",
+      "reason": "Observation preparation implementation moved unchanged into observations."
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "current_path": "src/ismrm_v2/observations/timing.py",
+      "safe_to_delete_now": false,
+      "source_sha256": "4670dce30fe404fd0e1811c8aad56b9b1aa981c7223a4f3c046aa14a25c60c8f",
+      "stage_roles": {
+        "03": "ACTIVE_TRANSITIVE"
+      },
+      "future_action": "MIGRATED_PHASE_2C",
+      "future_target_path": "src/ismrm_v2/observations/timing.py",
+      "migration_status": "MIGRATED_PHASE_2C",
+      "phase1_action": "MIGRATED_PHASE_2C",
+      "reason": "TR/VPS/timing parser moved unchanged into observations."
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "current_path": "src/ismrm_v2/preprocessing/validation.py",
+      "safe_to_delete_now": false,
+      "source_sha256": "541d86a5d86dc9bdecc361423bf699bb536e1faf3bcca2e453f57d7f1d6a6b07",
+      "stage_roles": {
+        "02": "ACTIVE_EXECUTED"
+      },
+      "future_action": "MIGRATED_PHASE_2C",
+      "future_target_path": "src/ismrm_v2/preprocessing/validation.py",
+      "migration_status": "MIGRATED_PHASE_2C",
+      "phase1_action": "MIGRATED_PHASE_2C",
+      "reason": "Stage 02 post-transfer validation moved into preprocessing; its MAT loader import was adapted to the clean observations package."
+    },
+    {
+      "classification": "CONDITIONAL_ACTIVE",
+      "current_path": "src/ismrm_v2/sampling/sparse.py",
+      "safe_to_delete_now": false,
+      "source_sha256": "f95be554f97d4795b5f5d8c56fd1bfaa9f0ba0414a50c011bf6ccbab889ae0c4",
+      "stage_roles": {
+        "04": "CONDITIONAL_ACTIVE",
+        "05": "ACTIVE_TRANSITIVE",
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
+      "future_action": "MIGRATED_PHASE_2C",
+      "future_target_path": "src/ismrm_v2/sampling/sparse.py",
+      "migration_status": "MIGRATED_PHASE_2C",
+      "phase1_action": "MIGRATED_PHASE_2C",
+      "reason": "Stage 04 sparse-profile selection moved into sampling; its shared-contract import was adapted without changing selection behavior."
+    },
+    {
+      "classification": "ACTIVE_TRANSITIVE",
+      "current_path": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "safe_to_delete_now": false,
+      "source_sha256": "53b31de20fa60d424fc4a8479e5cb748d81ef6a66e76c26158c6d3b3ceeca0bd",
+      "stage_roles": {
+        "05": "ACTIVE_TRANSITIVE",
+        "06": "ACTIVE_TRANSITIVE",
+        "07": "ACTIVE_TRANSITIVE",
+        "08": "ACTIVE_TRANSITIVE"
+      },
+      "future_action": "MIGRATED_PHASE_2C",
+      "future_target_path": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+      "migration_status": "MIGRATED_PHASE_2C",
+      "phase1_action": "MIGRATED_PHASE_2C",
+      "reason": "Sparse-profile manifest validation moved into sampling; imports were adapted to the clean sparse authority without changing validation behavior."
     }
   ],
   "entry_count": 153,
   "inventory_schema": "active-dependency-inventory/v3",
-  "inventory_source_runtime_fingerprint_sha256": "b5eaf200e19c67b6b45d1c6f7826b90226562b8cbcf14f175f7e18147fcfb4b0",
-  "schema_version": "clean-code-migration/v1"
+  "inventory_source_runtime_fingerprint_sha256": "74c0793635083660cf7d6c3db1544bf57e159dafd5b37b851d0b25ff2d63aebd",
+  "schema_version": "clean-code-migration/v1",
+  "import_path_adaptations": [
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "from_import": "paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest",
+      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py",
+      "phase": "2C",
+      "reason": "Q002 imports the migrated sparse-profile-manifest authority; constants and scientific semantics are unchanged.",
+      "to_import": "ismrm_v2.sampling.sparse_profile_manifest"
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "from_import": "paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest",
+      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py",
+      "phase": "2C",
+      "reason": "Q002 runtime imports the migrated sparse-profile-manifest authority; function behavior is unchanged.",
+      "to_import": "ismrm_v2.sampling.sparse_profile_manifest"
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "from_import": "paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest",
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py",
+      "phase": "2C",
+      "reason": "Compatibility caller imports the migrated sampling authority; function behavior is unchanged.",
+      "to_import": "ismrm_v2.sampling.sparse_profile_manifest"
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "from_import": "paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest",
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py",
+      "phase": "2C",
+      "reason": "Compatibility caller imports the migrated sampling authority; function behavior is unchanged.",
+      "to_import": "ismrm_v2.sampling.sparse_profile_manifest"
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "from_import": "paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest",
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
+      "phase": "2C",
+      "reason": "Compatibility caller imports the migrated sampling authority; function behavior is unchanged.",
+      "to_import": "ismrm_v2.sampling.sparse_profile_manifest"
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "from_import": "paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest",
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py",
+      "phase": "2C",
+      "reason": "Compatibility caller imports the migrated sampling authority; function behavior is unchanged.",
+      "to_import": "ismrm_v2.sampling.sparse_profile_manifest"
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "from_import": "paper_experiments.joint_vs_2dfit.phase2_clean.sparse",
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
+      "phase": "2C",
+      "reason": "Compatibility caller imports the migrated sampling authority; function behavior is unchanged.",
+      "to_import": "ismrm_v2.sampling.sparse"
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "from_import": "paper_experiments.joint_vs_2dfit.phase2_clean.sparse",
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
+      "phase": "2C",
+      "reason": "Compatibility caller imports the migrated sampling authority; function behavior is unchanged.",
+      "to_import": "ismrm_v2.sampling.sparse"
+    }
+  ]
 }

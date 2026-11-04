@@ -69,3 +69,30 @@ def test_phase2b_deployment_manifest_move_is_recorded_without_old_inventory_node
     assert record["to_path"] == new_path
     assert record["kind"] == "MOVE"
     assert record["pre_move_source_sha256"] == record["post_move_source_sha256"]
+
+
+def test_phase2c_foundation_moves_and_import_only_adaptations_are_recorded() -> None:
+    manifest = json.loads((ROOT / "docs/clean_code_migration_manifest.json").read_text(encoding="utf-8"))
+    entries = {entry["current_path"]: entry for entry in manifest["entries"]}
+    moved = {
+        "common/trad/scripts/validate_transferred_preprocessed.py": "src/ismrm_v2/preprocessing/validation.py",
+        "common/trad/scripts/prepare_all_observations.py": "src/ismrm_v2/observations/prepare_all.py",
+        "common/trad/modules/module_02_data_bridge/build_manifest.py": "src/ismrm_v2/observations/build_manifest.py",
+        "common/trad/modules/module_02_data_bridge/mat_v73.py": "src/ismrm_v2/observations/mat_v73.py",
+        "common/trad/modules/module_02_data_bridge/timing.py": "src/ismrm_v2/observations/timing.py",
+        "common/trad/modules/module_02_data_bridge/prepare_observations.py": "src/ismrm_v2/observations/prepare_observations.py",
+        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse.py": "src/ismrm_v2/sampling/sparse.py",
+        "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py": "src/ismrm_v2/sampling/sparse_profile_manifest.py",
+    }
+    for old_path, new_path in moved.items():
+        assert old_path not in entries
+        assert entries[new_path]["migration_status"] == "MIGRATED_PHASE_2C"
+        record = next(item for item in manifest["completed_migrations"] if item["from_path"] == old_path)
+        assert record["phase"] == "2C"
+        assert record["to_path"] == new_path
+        assert record["pre_move_source_sha256"]
+        assert record["post_move_source_sha256"]
+    adapted = {item["path"] for item in manifest["import_path_adaptations"]}
+    assert "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py" in adapted
+    assert "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py" in adapted
+    assert all(item["classification"] == "IMPORT_PATH_ADAPTATION_ONLY" for item in manifest["import_path_adaptations"])
