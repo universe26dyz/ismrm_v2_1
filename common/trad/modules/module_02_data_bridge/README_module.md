@@ -6,7 +6,7 @@ MAT、显式当前 `--dicom-dir` 和 `--stack`，使用唯一的 `h5py` loader �
 fallback loader。
 
 ```bash
-conda run -n knesvr_torch python -m modules.module_02_data_bridge.prepare_observations \
+PYTHONPATH="$PROJECT_ROOT/src:$PROJECT_ROOT/common${PYTHONPATH:+:$PYTHONPATH}" conda run -n knesvr_torch python -m ismrm_v2.observations.prepare_observations \
   --preprocessed-mat /path/to/stack_v1.mat \
   --dicom-dir /path/to/stack \
   --stack sax --output-dir /path/to/prepared_case --max-groups 1

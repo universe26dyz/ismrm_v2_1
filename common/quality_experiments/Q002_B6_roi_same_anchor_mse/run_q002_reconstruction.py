@@ -22,7 +22,7 @@ from .joint_dataset import JointAnchorDataset
 from .training import train_q002_reconstruction
 from .training_curves import generate_convergence_artifacts, generate_q004_convergence_artifacts
 from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import APPROVED_DECODER_SHA256, B6_CONFIG_SOURCE_SHA256
-from paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest import validate_sparse_profile_manifest
+from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
 
 
 def _sha256(path: Path) -> str:

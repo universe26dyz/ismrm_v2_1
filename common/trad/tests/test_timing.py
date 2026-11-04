@@ -1,6 +1,11 @@
 import numpy as np
+import sys
+from pathlib import Path
 
-from modules.module_02_data_bridge.timing import compute_duration_before_acq
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "src"))
+
+from ismrm_v2.observations.timing import compute_duration_before_acq
 
 
 def test_duration_before_acq_matches_hhz_indexed_delays():

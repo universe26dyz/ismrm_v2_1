@@ -18,7 +18,7 @@ for import_root in reversed((PROJECT_ROOT / "src", COMMON_ROOT)):
 # repository-local roots keep that mode independent of the caller's current
 # working directory.
 from ismrm_v2.io.deployment_manifest import load_deployment_manifest
-from trad.modules.module_02_data_bridge.mat_v73 import load_preprocessed_v73
+from ismrm_v2.observations.mat_v73 import load_preprocessed_v73
 
 
 def _mat_path(root: Path, subject_id: str, stack: str) -> Path:

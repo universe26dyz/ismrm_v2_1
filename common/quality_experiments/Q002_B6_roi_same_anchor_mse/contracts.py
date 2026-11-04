@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Any, Mapping
 
-from paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest import LEGACY_SCHEMA_VERSION, SCHEMA_VERSION
+from ismrm_v2.sampling.sparse_profile_manifest import LEGACY_SCHEMA_VERSION, SCHEMA_VERSION
 
 
 Q002_EXPERIMENT_ID = "Q002_B6_roi_same_anchor_mse"

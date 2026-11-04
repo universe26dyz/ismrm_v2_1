@@ -9,7 +9,7 @@ from .fit_first import (fit_native, reuse_native_maps, export_nesvor_native_inpu
                         require_scmr_v5_native_cache_manifest)
 from .fit_first_intensity_preserving import _selected_standardized_maps
 from .reuse_standardized_native_dictionary_maps import validate_standardized_native_dictionary_reuse
-from .sparse_profile_manifest import SCHEMA_VERSION, validate_sparse_profile_manifest
+from ismrm_v2.sampling.sparse_profile_manifest import SCHEMA_VERSION, validate_sparse_profile_manifest
 
 def _copy_verified_full_native_maps(source_root: Path, prepared: Path, target: Path, *, require_scmr_v5: bool = False) -> dict[str, object]:
     if target.exists():

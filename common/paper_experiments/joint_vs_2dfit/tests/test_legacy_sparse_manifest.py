@@ -1,8 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 
 import numpy as np
+
+
+ROOT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "common"))
 
 
 STACKS = ("sax", "2ch", "4ch")
@@ -47,8 +53,8 @@ def _audit(path: Path) -> dict[str, object]:
 
 def test_legacy_l50_manifest_is_formally_validated_without_changing_group_id_selection(tmp_path: Path) -> None:
     from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import sha256
-    from paper_experiments.joint_vs_2dfit.phase2_clean.sparse import build_sparse_condition
-    from paper_experiments.joint_vs_2dfit.phase2_clean.sparse_profile_manifest import validate_sparse_profile_manifest
+    from ismrm_v2.sampling.sparse import build_sparse_condition
+    from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
     from quality_experiments.Q002_B6_roi_same_anchor_mse.contracts import profiled_observation_paths
 
     source_root = tmp_path / "prepared"

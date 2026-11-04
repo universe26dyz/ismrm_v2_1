@@ -15,7 +15,7 @@ from typing import Any, Callable, Mapping
 
 import numpy as np
 
-from .contracts import sha256, write_immutable_json
+from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import sha256, write_immutable_json
 
 CONDITIONS = {"L100": 1, "L50": 2, "L33": 3, "L25": 4}
 REQUIRED_FIELDS = (

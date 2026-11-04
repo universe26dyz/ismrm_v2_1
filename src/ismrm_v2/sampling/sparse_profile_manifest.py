@@ -13,8 +13,8 @@ from typing import Any
 
 import numpy as np
 
-from .contracts import sha256
-from .sparse import _json_sha256, _resolve_profile, load_sparse_profile
+from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import sha256
+from ismrm_v2.sampling.sparse import _json_sha256, _resolve_profile, load_sparse_profile
 
 
 STACKS = ("sax", "2ch", "4ch")

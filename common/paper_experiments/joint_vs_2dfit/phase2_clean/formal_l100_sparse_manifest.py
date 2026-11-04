@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .sparse_profile_manifest import SCHEMA_VERSION, validate_sparse_profile_manifest
+from ismrm_v2.sampling.sparse_profile_manifest import SCHEMA_VERSION, validate_sparse_profile_manifest
 
 LEGACY_SCHEMA_VERSION = "phase4r_sparse_v1"
 

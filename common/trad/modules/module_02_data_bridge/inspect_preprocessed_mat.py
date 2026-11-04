@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 
-from .mat_v73 import load_preprocessed_v73
+from ismrm_v2.observations.mat_v73 import load_preprocessed_v73
 
 
 def main() -> None:

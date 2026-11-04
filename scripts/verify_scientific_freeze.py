@@ -117,7 +117,7 @@ def verify(root: Path) -> dict[str, Any]:
     for profile_name in ("SAX100_2CH0_4CH0", "SAX100_2CH0_4CH100", "SAX100_2CH100_4CH0", "S2CH100_4CH50", "S2CH50_4CH100"):
         profile = _read_json(profile_root / f"{profile_name}.json")
         _require_equal(profile["stacks"]["sax"]["mode"], "all", f"{profile_name} SAX retention")
-    sparse_manifest = root / "common/paper_experiments/joint_vs_2dfit/phase2_clean/sparse_profile_manifest.py"
+    sparse_manifest = root / "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     _require_contains(sparse_manifest, 'if stack == "sax"', "L100/L50/L25 SAX retention")
     _require_contains(sparse_manifest, "retained and held-out groups must form an exhaustive disjoint source partition", "sparse physical selection")
 
@@ -130,7 +130,7 @@ def verify(root: Path) -> dict[str, Any]:
     preprocessor = root / "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m"
     for text in ("TI = [50, 150]", "T2_prep =", "protocol_version = 'hhz_v1'"):
         _require_absent(preprocessor, text, "preprocessing MAT legacy protocol metadata")
-    bridge = root / "common/trad/modules/module_02_data_bridge/mat_v73.py"
+    bridge = root / "src/ismrm_v2/observations/mat_v73.py"
     for text in ('"FA"', '"TI"', '"T2_prep"'):
         _require_absent(bridge, text, "bridge legacy protocol metadata")
     final_pose = root / "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh"

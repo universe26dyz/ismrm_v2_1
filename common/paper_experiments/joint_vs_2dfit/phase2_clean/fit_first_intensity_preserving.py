@@ -23,7 +23,7 @@ from .contracts import HISTORICAL_NESVOR_EXECUTABLE_DEFAULT, sha256, write_immut
 from .fit_first import STACKS, export_nesvor_native_inputs
 from .fit_first_native_pose_audit import _GEOMETRY_EQUIVALENCE_TOL_MM, _VALUE_CORRESPONDENCE_TOL
 from .reuse_standardized_native_dictionary_maps import validate_standardized_native_dictionary_reuse
-from .sparse_profile_manifest import validate_sparse_profile_manifest
+from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
 
 PARAMETERS = ("t1", "t2")
 SCALES = {"t1": 2500.0, "t2": 200.0}

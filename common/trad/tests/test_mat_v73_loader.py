@@ -1,7 +1,12 @@
 import h5py
 import numpy as np
+import sys
+from pathlib import Path
 
-from modules.module_02_data_bridge.mat_v73 import load_preprocessed_v73
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "src"))
+
+from ismrm_v2.observations.mat_v73 import load_preprocessed_v73
 
 
 def _write_matlab_numeric(handle, name, array):

@@ -17,7 +17,7 @@ for import_root in reversed((PROJECT_ROOT / "src", COMMON_ROOT)):
     sys.path.insert(0, str(import_root))
 
 from ismrm_v2.io.deployment_manifest import load_deployment_manifest
-from trad.modules.module_02_data_bridge.prepare_observations import prepare_observations
+from ismrm_v2.observations.prepare_observations import prepare_observations
 
 
 def prepare_all_observations(manifest_path: str | Path, preprocessed_root: str | Path, prepared_root: str | Path, protocol_path: str | Path) -> dict[str, object]:

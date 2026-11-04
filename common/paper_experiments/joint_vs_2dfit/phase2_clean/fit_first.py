@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 from .contracts import BASELINE_POSE_POLICY, FROZEN_GRID, HISTORICAL_NESVOR_EXECUTABLE_DEFAULT, sha256, write_immutable_json
 from .dictionary import frozen_dictionary, match_fingerprints
-from .sparse_profile_manifest import SCHEMA_VERSION, validate_sparse_profile_manifest
+from ismrm_v2.sampling.sparse_profile_manifest import SCHEMA_VERSION, validate_sparse_profile_manifest
 
 STACKS = ('sax', '2ch', '4ch')
 NATIVE_FIT_METHOD = 'current-protocol HHZ/TRAD dictionary matching; normalized 10D inner product; no interpolation/refinement'

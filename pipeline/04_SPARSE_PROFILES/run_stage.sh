@@ -5,6 +5,6 @@ RUN_ROOT=${1:?usage: $0 RUN_ROOT SUBJECT [PYTHON]}
 SUBJECT=${2:?usage: $0 RUN_ROOT SUBJECT [PYTHON]}
 PYTHON=${3:-python}
 PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m ismrm_v2.io.validate_subject_id "$SUBJECT"
-REPO="$PROJECT_ROOT/common" \
+PYTHONPATH="$PROJECT_ROOT/src:$PROJECT_ROOT/common${PYTHONPATH:+:$PYTHONPATH}" REPO="$PROJECT_ROOT/common" \
   bash "$REPO/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh" \
   "$RUN_ROOT/prepared" "$SUBJECT" "$RUN_ROOT/sparse_inputs" "$PYTHON"

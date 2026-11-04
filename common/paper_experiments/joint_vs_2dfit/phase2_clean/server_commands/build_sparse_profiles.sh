@@ -31,12 +31,12 @@ done
 mkdir -p "$OUTPUT_ROOT"
 cd "$REPO"
 for CONDITION in L100 L25 L50; do
-  "$PY" -m paper_experiments.joint_vs_2dfit.phase2_clean.sparse \
+  "$PY" -m ismrm_v2.sampling.sparse \
     --prepared-root "$PREPARED_ROOT" --subject "$SUBJECT" \
     --condition "$CONDITION" --phase 0 --output-root "$OUTPUT_ROOT"
 done
 for PROFILE in SAX100_2CH0_4CH0 SAX100_2CH0_4CH100 SAX100_2CH100_4CH0 S2CH100_4CH50 S2CH50_4CH100; do
-  "$PY" -m paper_experiments.joint_vs_2dfit.phase2_clean.sparse \
+  "$PY" -m ismrm_v2.sampling.sparse \
     --prepared-root "$PREPARED_ROOT" --subject "$SUBJECT" \
     --profile "$PROFILE_ROOT/$PROFILE.json" --fold 0 --output-root "$OUTPUT_ROOT"
 done

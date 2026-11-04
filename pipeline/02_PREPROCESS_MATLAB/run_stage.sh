@@ -11,8 +11,7 @@ PREPROCESSED_ROOT="$RUN_ROOT/preprocessed"
 mkdir -p "$RUN_ROOT"
 "$MATLAB" -batch "addpath('$PROJECT_ROOT/common/trad/scripts'); local_preprocess_all('$MANIFEST','$PREPROCESSED_ROOT');" \
   2>&1 | tee "$RUN_ROOT/01_server_preprocess.log"
-PYTHONPATH="$PROJECT_ROOT/common${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" \
-  "$PROJECT_ROOT/common/trad/scripts/validate_transferred_preprocessed.py" \
+PYTHONPATH="$PROJECT_ROOT/src:$PROJECT_ROOT/common${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m ismrm_v2.preprocessing.validation \
   --manifest "$MANIFEST" --preprocessed-root "$PREPROCESSED_ROOT" \
   --output "$PREPROCESSED_ROOT/$SUBJECT/preprocess_validation.json" \
   2>&1 | tee "$RUN_ROOT/02_preprocessed_validation.log"
