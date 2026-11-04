@@ -396,7 +396,7 @@ def train_reconstruction(dataset: QuantPointDataset, config: Mapping[str, Any], 
     if bool(training["require_clean_git"]) and git_provenance(repo_root)["git_dirty"]:
         raise RuntimeError("require_clean_git=true but the repository has uncommitted changes.")
     stack_group_counts = {f"stack_{stack}": int(torch.unique(dataset.group_idx[dataset.stack_idx == stack]).numel()) for stack in dataset.stack_idx.unique().tolist()}
-    write_experiment_manifest(output, route=route, subject_id=subject_id, repo_root=repo_root, method_root=repo_root / "trad", config_resolved=output / "config_resolved.yaml", prepared_inputs=list(prepared_inputs or ()), protocol={"tr_ms": protocol.tr_ms, "vps": protocol.vps}, stack_group_counts=stack_group_counts, seed=seed, command=command, intensity_normalization=intensity_normalization)
+    write_experiment_manifest(output, route=route, subject_id=subject_id, repo_root=repo_root, method_root=repo_root, config_resolved=output / "config_resolved.yaml", prepared_inputs=list(prepared_inputs or ()), protocol={"tr_ms": protocol.tr_ms, "vps": protocol.vps}, stack_group_counts=stack_group_counts, seed=seed, command=command, intensity_normalization=intensity_normalization)
     log_path = output / "training_log.csv"
     global_iter = 0
     stage_a_axisangle_final: torch.Tensor | None = None

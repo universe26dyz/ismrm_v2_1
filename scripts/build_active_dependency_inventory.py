@@ -45,22 +45,22 @@ DECLARED_EDGES = [
     ("06", STAGE_ENTRYPOINTS["06"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
     ("07", STAGE_ENTRYPOINTS["07"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
     ("08", STAGE_ENTRYPOINTS["08"], "src/ismrm_v2/io/validate_subject_id.py", "SHELL_PYTHON_MODULE", "always", "run_stage invokes validator module", "ACTIVE_EXECUTED"),
-    ("02", STAGE_ENTRYPOINTS["02"], "common/trad/scripts/local_preprocess_all.m", "MATLAB_FUNCTION", "always", "MATLAB -batch local_preprocess_all", "ACTIVE_EXECUTED"),
-    ("02", "common/trad/scripts/local_preprocess_all.m", "common/trad/scripts/local_preprocess_one.m", "MATLAB_FUNCTION", "per stack", "local_preprocess_all loop", "ACTIVE_EXECUTED"),
-    ("02", "common/trad/scripts/local_preprocess_one.m", "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m", "MATLAB_FUNCTION", "per stack", "explicit preprocess call", "ACTIVE_EXECUTED"),
-    ("02", "common/trad/scripts/local_preprocess_one.m", "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m", "MATLAB_FUNCTION", "per stack", "explicit options construction", "ACTIVE_TRANSITIVE"),
+    ("02", STAGE_ENTRYPOINTS["02"], "matlab/preprocessing/local_preprocess_all.m", "MATLAB_FUNCTION", "always", "MATLAB -batch local_preprocess_all", "ACTIVE_EXECUTED"),
+    ("02", "matlab/preprocessing/local_preprocess_all.m", "matlab/preprocessing/local_preprocess_one.m", "MATLAB_FUNCTION", "per stack", "local_preprocess_all loop", "ACTIVE_EXECUTED"),
+    ("02", "matlab/preprocessing/local_preprocess_one.m", "matlab/preprocessing/preprocessing_v1/preprocess_stack_v1.m", "MATLAB_FUNCTION", "per stack", "explicit preprocess call", "ACTIVE_EXECUTED"),
+    ("02", "matlab/preprocessing/local_preprocess_one.m", "matlab/preprocessing/preprocessing_v1/preprocess_options_v1.m", "MATLAB_FUNCTION", "per stack", "explicit options construction", "ACTIVE_TRANSITIVE"),
     ("02", STAGE_ENTRYPOINTS["02"], "src/ismrm_v2/preprocessing/validation.py", "SHELL_PYTHON_MODULE", "always", "post-transfer validator", "ACTIVE_EXECUTED"),
     ("03", STAGE_ENTRYPOINTS["03"], "src/ismrm_v2/observations/prepare_all.py", "SHELL_PYTHON_MODULE", "always", "explicit --protocol", "ACTIVE_EXECUTED"),
     ("03", "src/ismrm_v2/observations/prepare_all.py", "configs/protocol_scmr_v5_10_100.yaml", "CONFIG_READ", "always", "Stage 03 --protocol", "CONFIG_RUNTIME_ASSET"),
-    ("04", STAGE_ENTRYPOINTS["04"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh", "SHELL_BASH", "always", "stage wrapper", "ACTIVE_EXECUTED"),
-    ("04", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh", "src/ismrm_v2/sampling/sparse.py", "SHELL_PYTHON_MODULE", "per selected sparse profile", "profile builder", "CONDITIONAL_ACTIVE"),
-    ("05", STAGE_ENTRYPOINTS["05"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "SHELL_BASH", "always", "stage wrapper", "ACTIVE_EXECUTED"),
-    ("05", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "src/ismrm_v2/fit_first/scmr_v5_native_cache.py", "SHELL_PYTHON_MODULE", "always", "SCMR-v5 native cache", "ACTIVE_EXECUTED"),
-    ("05", "src/ismrm_v2/fit_first/scmr_v5_native_cache.py", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "MATLAB_FUNCTION", "per stack", "MATLAB mapper subprocess", "ACTIVE_EXECUTED"),
-    ("05", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths matcher", "ACTIVE_TRANSITIVE"),
-    ("05", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths simulator", "ACTIVE_TRANSITIVE"),
-    ("05", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths utility", "ACTIVE_TRANSITIVE"),
-    ("05", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "src/ismrm_v2/fit_first/baseline.py", "SHELL_PYTHON_MODULE", "L100 and sparse cases", "baseline CLI", "CONDITIONAL_ACTIVE"),
+    ("04", STAGE_ENTRYPOINTS["04"], "pipeline/04_SPARSE_PROFILES/internal/build_sparse_profiles.sh", "SHELL_BASH", "always", "stage wrapper", "ACTIVE_EXECUTED"),
+    ("04", "pipeline/04_SPARSE_PROFILES/internal/build_sparse_profiles.sh", "src/ismrm_v2/sampling/sparse.py", "SHELL_PYTHON_MODULE", "per selected sparse profile", "profile builder", "CONDITIONAL_ACTIVE"),
+    ("05", STAGE_ENTRYPOINTS["05"], "pipeline/05_SCMR_V5_FIT_FIRST/internal/run_scmr_v5_fit_first.sh", "SHELL_BASH", "always", "stage wrapper", "ACTIVE_EXECUTED"),
+    ("05", "pipeline/05_SCMR_V5_FIT_FIRST/internal/run_scmr_v5_fit_first.sh", "src/ismrm_v2/fit_first/scmr_v5_native_cache.py", "SHELL_PYTHON_MODULE", "always", "SCMR-v5 native cache", "ACTIVE_EXECUTED"),
+    ("05", "src/ismrm_v2/fit_first/scmr_v5_native_cache.py", "matlab/scmr_v5/build_scmr_v5_native_maps.m", "MATLAB_FUNCTION", "per stack", "MATLAB mapper subprocess", "ACTIVE_EXECUTED"),
+    ("05", "matlab/scmr_v5/build_scmr_v5_native_maps.m", "matlab/scmr_v5/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths matcher", "ACTIVE_TRANSITIVE"),
+    ("05", "matlab/scmr_v5/build_scmr_v5_native_maps.m", "matlab/scmr_v5/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths simulator", "ACTIVE_TRANSITIVE"),
+    ("05", "matlab/scmr_v5/build_scmr_v5_native_maps.m", "matlab/scmr_v5/scmr_v5_matcher/matlab/utils/d2r.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths utility", "ACTIVE_TRANSITIVE"),
+    ("05", "pipeline/05_SCMR_V5_FIT_FIRST/internal/run_scmr_v5_fit_first.sh", "src/ismrm_v2/fit_first/baseline.py", "SHELL_PYTHON_MODULE", "L100 and sparse cases", "baseline CLI", "CONDITIONAL_ACTIVE"),
     ("06", STAGE_ENTRYPOINTS["06"], "src/ismrm_v2/proposed/proposed.py", "SHELL_PYTHON_MODULE", "always", "python -m proposed", "ACTIVE_EXECUTED"),
     ("06", "src/ismrm_v2/proposed/proposed.py", "src/ismrm_v2/proposed/q002/run_q002_reconstruction.py", "PYTHON_CALL", "formal Q002S640", "Q002 formal reconstruction call", "ACTIVE_EXECUTED"),
     ("06", "src/ismrm_v2/proposed/q002/run_q002_reconstruction.py", "src/ismrm_v2/proposed/q002/training.py", "PYTHON_CALL", "formal Q002S640", "Q002 training call", "ACTIVE_EXECUTED"),
@@ -68,24 +68,24 @@ DECLARED_EDGES = [
     ("06", STAGE_ENTRYPOINTS["06"], "configs/protocol_scmr_v5_10_100.yaml", "CONFIG_READ", "always", "--protocol", "CONFIG_RUNTIME_ASSET"),
     ("06", STAGE_ENTRYPOINTS["06"], "configs/models_manifest.json", "CONFIG_READ", "always", "model provenance", "CONFIG_RUNTIME_ASSET"),
     ("06", STAGE_ENTRYPOINTS["06"], "runtime/runtime_contract.json", "CONFIG_READ", "always", "runtime contract", "CONFIG_RUNTIME_ASSET"),
-    ("07", STAGE_ENTRYPOINTS["07"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "SHELL_BASH", "always", "stage wrapper", "ACTIVE_EXECUTED"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/cyj11_r3_direct_final_pose_bundle.py", "SHELL_PYTHON_MODULE", "per case", "Proposed final-pose bundle", "CONDITIONAL_ACTIVE"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/current_fit_first_final_pose_bundle.py", "SHELL_PYTHON_MODULE", "per case", "Fit-first final-pose bundle", "CONDITIONAL_ACTIVE"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/derive_final_pose_mapping.py", "SHELL_PYTHON_MODULE", "per case", "ROI mapping", "CONDITIONAL_ACTIVE"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/paired_final_pose_postprocess.py", "SHELL_PYTHON_MODULE", "per case", "paired AHA metrics", "CONDITIONAL_ACTIVE"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/paired_aha_sd.py", "SHELL_PYTHON_MODULE", "twice per case", "AHA SD CLI for 1px and legacy cores", "CONDITIONAL_ACTIVE"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/paired_final_pose_through_plane.py", "SHELL_PYTHON_MODULE", "per case", "through-plane QC CLI", "CONDITIONAL_ACTIVE"),
-    ("08", STAGE_ENTRYPOINTS["08"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh", "SHELL_BASH", "always", "first evaluation wrapper", "ACTIVE_EXECUTED"),
-    ("08", STAGE_ENTRYPOINTS["08"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh", "SHELL_BASH", "always", "second evaluation wrapper", "ACTIVE_EXECUTED"),
-    ("08", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh", "src/ismrm_v2/evaluation/aha/common_native_metrics_qc.py", "SHELL_PYTHON_MODULE", "per case", "common-native metrics CLI", "CONDITIONAL_ACTIVE"),
-    ("08", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh", "src/ismrm_v2/evaluation/aha/common_native_all_stack_roi_metrics.py", "SHELL_PYTHON_MODULE", "per case", "all-stack ROI CLI", "CONDITIONAL_ACTIVE"),
+    ("07", STAGE_ENTRYPOINTS["07"], "pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh", "SHELL_BASH", "always", "stage wrapper", "ACTIVE_EXECUTED"),
+    ("07", "pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/cyj11_r3_direct_final_pose_bundle.py", "SHELL_PYTHON_MODULE", "per case", "Proposed final-pose bundle", "CONDITIONAL_ACTIVE"),
+    ("07", "pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/current_fit_first_final_pose_bundle.py", "SHELL_PYTHON_MODULE", "per case", "Fit-first final-pose bundle", "CONDITIONAL_ACTIVE"),
+    ("07", "pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/derive_final_pose_mapping.py", "SHELL_PYTHON_MODULE", "per case", "ROI mapping", "CONDITIONAL_ACTIVE"),
+    ("07", "pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/paired_final_pose_postprocess.py", "SHELL_PYTHON_MODULE", "per case", "paired AHA metrics", "CONDITIONAL_ACTIVE"),
+    ("07", "pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/paired_aha_sd.py", "SHELL_PYTHON_MODULE", "twice per case", "AHA SD CLI for 1px and legacy cores", "CONDITIONAL_ACTIVE"),
+    ("07", "pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/paired_final_pose_through_plane.py", "SHELL_PYTHON_MODULE", "per case", "through-plane QC CLI", "CONDITIONAL_ACTIVE"),
+    ("08", STAGE_ENTRYPOINTS["08"], "pipeline/08_EVALUATION_AND_VISUALIZATION/internal/hhz_common_native_metrics_qc.sh", "SHELL_BASH", "always", "first evaluation wrapper", "ACTIVE_EXECUTED"),
+    ("08", STAGE_ENTRYPOINTS["08"], "pipeline/08_EVALUATION_AND_VISUALIZATION/internal/hhz_common_native_all_stack_roi_metrics.sh", "SHELL_BASH", "always", "second evaluation wrapper", "ACTIVE_EXECUTED"),
+    ("08", "pipeline/08_EVALUATION_AND_VISUALIZATION/internal/hhz_common_native_metrics_qc.sh", "src/ismrm_v2/evaluation/aha/common_native_metrics_qc.py", "SHELL_PYTHON_MODULE", "per case", "common-native metrics CLI", "CONDITIONAL_ACTIVE"),
+    ("08", "pipeline/08_EVALUATION_AND_VISUALIZATION/internal/hhz_common_native_all_stack_roi_metrics.sh", "src/ismrm_v2/evaluation/aha/common_native_all_stack_roi_metrics.py", "SHELL_PYTHON_MODULE", "per case", "all-stack ROI CLI", "CONDITIONAL_ACTIVE"),
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_project_integrity.py", "SHELL_PYTHON_SCRIPT", "always", "integrity checker", "ACTIVE_EXECUTED"),
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_no_legacy_code_path.py", "SHELL_PYTHON_SCRIPT", "always", "legacy checker", "ACTIVE_EXECUTED"),
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_runtime_contract.py", "SHELL_PYTHON_SCRIPT", "always", "runtime checker", "ACTIVE_EXECUTED"),
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_scientific_freeze.py", "SHELL_PYTHON_SCRIPT", "always", "freeze checker", "ACTIVE_EXECUTED"),
 ]
 KNOWN_RUNTIME_ASSETS = [
-    ("04", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh", f"common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/{name}.json", "always within Stage 04 batch", "PROFILE loop and --profile path")
+    ("04", "pipeline/04_SPARSE_PROFILES/internal/build_sparse_profiles.sh", f"configs/sparse_profiles/{name}.json", "always within Stage 04 batch", "PROFILE loop and --profile path")
     for name in ("SAX100_2CH0_4CH0", "SAX100_2CH0_4CH100", "SAX100_2CH100_4CH0", "S2CH100_4CH50", "S2CH50_4CH100")
 ]
 ROLE_PRIORITY = {"ACTIVE_ENTRYPOINT": 9, "ACTIVE_EXECUTED": 8, "CONDITIONAL_ACTIVE": 7, "ACTIVE_TRANSITIVE": 6, "COMPATIBILITY_IMPORT_ONLY": 5, "CONFIG_RUNTIME_ASSET": 4, "THIRD_PARTY_ACTIVE": 3, "TEST_ONLY": 2, "LEGACY_UNUSED_BY_PIPELINE": 1}
@@ -96,8 +96,6 @@ COMPATIBILITY = {
 }
 AUDITED_UNUSED = {
     "src/ismrm_v2/proposed/q002/run_q004_s640_k1_reconstruction.py": "Q004/K1 experiment is not reached by formal Q002S640 command",
-    "common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q005s640_k4.py": "Q005/K4 is test-only, not a Stage 06 runtime dependency",
-    "common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q002s640_k256.py": "K256 is test-only, not a Stage 06 runtime dependency",
 }
 EXTERNAL = [
     {"id": "matlab", "kind": "executable", "required_by_stages": ["02", "05"], "resolution": "MATLAB argument or PATH", "locally_available": False},
@@ -108,9 +106,7 @@ EXTERNAL = [
 ]
 PROXIES = [
     {"wrapper": "src/ismrm_v2/proposed/mlp_trainer.py", "implementation": "src/ismrm_v2/proposed/reconstruction/orchestration.py", "relationship": "FACADE", "evidence": "imports and re-exports the sole reconstruction engine", "active_caller": "MLP compatibility route", "cleanup_candidate": True},
-    {"wrapper": "common/mlp/modules/module_04_quantitative_inr/quantitative_inr.py", "implementation": "src/ismrm_v2/proposed/trad_quantitative_inr.py", "relationship": "DUPLICATE_IMPLEMENTATION", "evidence": "parallel source implementations with package-local imports", "active_caller": "Q002 uses MLP copy", "cleanup_candidate": True},
     {"wrapper": "src/ismrm_v2/proposed/signal_decoder/frozen_decoder.py", "implementation": "src/ismrm_v2/proposed/trad_signal_decoder/decoder_factory.py", "relationship": "INDEPENDENT_IMPLEMENTATION", "evidence": "frozen MLP decoder class is not a forwarding proxy", "active_caller": "Q002 frozen decoder", "cleanup_candidate": False},
-    {"wrapper": "common/mlp/modules/module_06_rigid_psf/rigid_psf_forward.py", "implementation": "src/ismrm_v2/proposed/rigid_psf/rigid_psf_forward.py", "relationship": "DUPLICATE_IMPLEMENTATION", "evidence": "parallel source implementations with package-local imports", "active_caller": "MLP/TRAD compatibility packages", "cleanup_candidate": True},
 ]
 
 
@@ -122,7 +118,7 @@ def _resolve_import(root: Path, module: str, source: Path, level: int) -> Path |
     base = source.parent
     for _ in range(max(level - 1, 0)):
         base = base.parent
-    stems = [base.joinpath(*module.split(".")), root / "src" / Path(*module.split(".")), root / "common" / Path(*module.split(".")), root / "scripts" / Path(*module.split("."))]
+    stems = [base.joinpath(*module.split(".")), root / "src" / Path(*module.split(".")), root / "third_party/nesvor" / Path(*module.split(".")), root / "scripts" / Path(*module.split("."))]
     for stem in stems:
         for candidate in (stem.with_suffix(".py"), stem / "__init__.py"):
             if candidate.is_file():
@@ -161,14 +157,14 @@ def _matlab_calls(root: Path, path: Path) -> list[tuple[Path, str]]:
     text = re.sub(r"%.*$", "", path.read_text(encoding="utf-8", errors="ignore"), flags=re.M)
     local = _matlab_local_functions(path)
     canonical = {
-        "deformableReg2Dmind_asym_nodisplay": "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m",
-        "MIND_descriptor2D": "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/MIND_descriptor2D.m",
-        "HHMMSS2Sec": "common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m",
-        "mppca_denoise_multimap_stack": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m",
-        "sim_T1T2_10HB_bssfp": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m",
-        "d2r": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m",
+        "deformableReg2Dmind_asym_nodisplay": "matlab/preprocessing/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m",
+        "MIND_descriptor2D": "matlab/preprocessing/hhz_original/MIND_registration/MIND_descriptor2D.m",
+        "HHMMSS2Sec": "matlab/preprocessing/hhz_original/Utility/HHMMSS2Sec.m",
+        "mppca_denoise_multimap_stack": "matlab/preprocessing/preprocessing_v1/mppca_denoise_multimap_stack.m",
+        "sim_T1T2_10HB_bssfp": "matlab/scmr_v5/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m",
+        "d2r": "matlab/scmr_v5/scmr_v5_matcher/matlab/utils/d2r.m",
     }
-    index = {candidate.stem: candidate for candidate in sorted((root / "common/trad").glob("**/*.m"))}
+    index = {candidate.stem: candidate for candidate in sorted((root / "matlab").glob("**/*.m"))}
     for name, relative in canonical.items():
         candidate = root / relative
         if candidate.is_file():
@@ -193,7 +189,7 @@ def _shell_modules(root: Path, path: Path) -> list[tuple[Path, str]]:
     modules = re.findall(r"(?:\"\$PY(?:THON)?\"|\$PY(?:THON)?|python(?:3)?)\s+-m\s+([A-Za-z_]\w*(?:\.\w+)*)", text)
     resolved: list[tuple[Path, str]] = []
     for module in sorted(set(modules)):
-        for package_root in (root / "src", root / "common"):
+        for package_root in (root / "src", root / "third_party/nesvor"):
             target = (package_root / Path(*module.split("."))).with_suffix(".py")
             if target.is_file():
                 resolved.append((target, f"shell python -m {module}"))
@@ -235,7 +231,7 @@ def _generation_provenance(root: Path, nodes: dict[str, dict[str, Any]]) -> dict
 def scan(root: Path) -> dict[str, Any]:
     nodes: dict[str, dict[str, Any]] = {}; edges: list[dict[str, Any]] = []; direct: dict[tuple[str, str], str] = {}
     stage_paths: dict[str, set[str]] = defaultdict(set); queue: deque[tuple[str, str, str, str]] = deque()
-    def internal(path: str) -> bool: return path.startswith(("common/", "pipeline/", "scripts/", "configs/", "runtime/", "src/"))
+    def internal(path: str) -> bool: return path.startswith(("pipeline/", "scripts/", "configs/", "runtime/", "src/", "matlab/", "third_party/"))
     def add_node(path: str, stage: str, classification: str, reason: str, discovery: str) -> None:
         if internal(path) and not (root / path).exists():
             raise FileNotFoundError(f"declared active repository dependency does not exist: {path}")
@@ -275,7 +271,7 @@ def scan(root: Path) -> dict[str, Any]:
                     classification = "COMPATIBILITY_IMPORT_ONLY"
                 elif (stage, dest) in direct:
                     classification = direct[(stage, dest)]
-                elif "/third_party/" in dest:
+                elif dest.startswith("third_party/") or "/third_party/" in dest:
                     classification = "THIRD_PARTY_ACTIVE"
                 elif dest.startswith(("configs/", "runtime/")) or "/configs/" in dest:
                     classification = "CONFIG_RUNTIME_ASSET"

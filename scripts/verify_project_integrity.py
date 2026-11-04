@@ -20,7 +20,7 @@ def main() -> None:
         for name in ("README_zh-CN.md", "README_en.md"):
             if not (path / name).is_file():
                 raise SystemExit(f"missing module manual: {path / name}")
-    for directory in ("configs", "common", "runtime", "docs", "tests"):
+    for directory in ("configs", "src", "matlab", "third_party", "runtime", "docs", "tests"):
         if not (root / directory).is_dir():
             raise SystemExit(f"missing project directory: {root / directory}")
     # These paths are deliberately ignored server-local state.  A source-only

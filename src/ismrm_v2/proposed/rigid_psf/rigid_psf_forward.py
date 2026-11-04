@@ -7,8 +7,8 @@ from torch import nn
 from contextlib import nullcontext
 from typing import Callable, ContextManager
 
-from trad.third_party.nesvor.nesvor.transform import RigidTransform, ax_transform_points
-from trad.third_party.nesvor.nesvor.utils.psf import resolution2sigma
+from nesvor.transform import RigidTransform, ax_transform_points
+from nesvor.utils.psf import resolution2sigma
 
 
 class GroupRigidPSF(nn.Module):

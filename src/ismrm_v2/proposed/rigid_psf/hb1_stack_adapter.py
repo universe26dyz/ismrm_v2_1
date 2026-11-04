@@ -9,9 +9,9 @@ import numpy as np
 import torch
 
 from ismrm_v2.observations.geometry import apply_affine_rc, cropped_affine_lps_rc_to_initial_rigid, lps_to_ras
-from trad.third_party.nesvor.nesvor.image import Stack
-from trad.third_party.nesvor.nesvor.svr.registration import stack_registration
-from trad.third_party.nesvor.nesvor.transform import RigidTransform, ax_transform_points
+from nesvor.image import Stack
+from nesvor.svr.registration import stack_registration
+from nesvor.transform import RigidTransform, ax_transform_points
 
 
 @dataclass(frozen=True)

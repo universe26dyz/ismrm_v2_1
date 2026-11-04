@@ -15,17 +15,13 @@ GENERATOR = ROOT / "scripts" / "build_active_dependency_inventory.py"
 ACTIVE_INTERNAL = {"ACTIVE_ENTRYPOINT", "ACTIVE_EXECUTED", "ACTIVE_TRANSITIVE", "CONDITIONAL_ACTIVE", "CONFIG_RUNTIME_ASSET", "THIRD_PARTY_ACTIVE"}
 ALLOWED = ACTIVE_INTERNAL | {"COMPATIBILITY_IMPORT_ONLY", "TEST_ONLY", "DOCUMENTATION_ONLY", "LEGACY_UNUSED_BY_PIPELINE", "EXTERNAL_RUNTIME_BOUNDARY", "UNRESOLVED_DYNAMIC"}
 STAGE02_MATLAB = {
-    "common/trad/scripts/local_preprocess_all.m",
-    "common/trad/scripts/local_preprocess_one.m",
-    "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_options_v1.m",
-    "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m",
-    "common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m",
-    "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m",
-    "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/MIND_descriptor2D.m",
-    "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m",
+    "matlab/preprocessing/local_preprocess_all.m", "matlab/preprocessing/local_preprocess_one.m",
+    "matlab/preprocessing/preprocessing_v1/preprocess_options_v1.m", "matlab/preprocessing/preprocessing_v1/preprocess_stack_v1.m",
+    "matlab/preprocessing/hhz_original/Utility/HHMMSS2Sec.m", "matlab/preprocessing/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m",
+    "matlab/preprocessing/hhz_original/MIND_registration/MIND_descriptor2D.m", "matlab/preprocessing/preprocessing_v1/mppca_denoise_multimap_stack.m",
 }
 STAGE04_PROFILES = {
-    f"common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles/{name}.json"
+    f"configs/sparse_profiles/{name}.json"
     for name in ("SAX100_2CH0_4CH0", "SAX100_2CH0_4CH100", "SAX100_2CH100_4CH0", "S2CH100_4CH50", "S2CH50_4CH100")
 }
 STAGE07_CLIS = {
@@ -65,7 +61,7 @@ def test_inventory_is_deterministic_and_has_no_missing_internal_active_nodes(tmp
         assert node["stage_roles"]
         assert node["classification"] == max(node["stage_roles"].values(), key=ROLE_PRIORITY.__getitem__)
         assert node["source_sha256"] == hashlib.sha256((ROOT / node["path"]).read_bytes()).hexdigest()
-        if node["classification"] in ACTIVE_INTERNAL and node["path"].startswith(("common/", "pipeline/", "scripts/", "configs/", "runtime/", "src/")):
+        if node["classification"] in ACTIVE_INTERNAL and node["path"].startswith(("pipeline/", "scripts/", "configs/", "runtime/", "src/", "matlab/", "third_party/")):
             assert (ROOT / node["path"]).exists(), node
 
 
@@ -96,11 +92,11 @@ def test_stage02_matlab_closure_and_stage04_profiles_are_active(tmp_path: Path) 
 def test_stage05_matcher_and_stage07_formal_shell_chain(tmp_path: Path) -> None:
     inventory = _inventory(tmp_path)
     nodes = {node["path"]: node for node in inventory["nodes"]}
-    matcher_root = ROOT / "common/trad/evaluation/scmr/matlab/scmr_v5_matcher"
+    matcher_root = ROOT / "matlab/scmr_v5/scmr_v5_matcher"
     for source in matcher_root.rglob("*.m"):
         path = source.relative_to(ROOT).as_posix()
         assert nodes[path]["stage_roles"]["05"] == "ACTIVE_TRANSITIVE"
-    wrapper = "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh"
+    wrapper = "pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh"
     for path in STAGE07_CLIS:
         assert nodes[path]["stage_roles"]["07"] == "CONDITIONAL_ACTIVE"
         assert any(edge["from"] == wrapper and edge["to"] == path and edge["stage"] == "07" for edge in inventory["edges"])
@@ -160,6 +156,6 @@ def test_declared_missing_repository_path_fails_closed() -> None:
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(module)
-    module.DECLARED_EDGES.append(("01", module.STAGE_ENTRYPOINTS["01"], "common/does_not_exist.py", "PYTHON_CALL", "always", "test missing path", "ACTIVE_EXECUTED"))
+    module.DECLARED_EDGES.append(("01", module.STAGE_ENTRYPOINTS["01"], "src/does_not_exist.py", "PYTHON_CALL", "always", "test missing path", "ACTIVE_EXECUTED"))
     with pytest.raises(FileNotFoundError, match="declared active repository dependency does not exist"):
         module.scan(ROOT)

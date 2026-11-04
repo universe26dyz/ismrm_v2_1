@@ -68,7 +68,7 @@ def test_active_pipeline_cannot_reconnect_slice_standardization():
 
 
 def test_final_pose_preserves_l100_full_prepared_root_semantics():
-    source = (ROOT / "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh").read_text(encoding="utf-8")
+    source = (ROOT / "pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh").read_text(encoding="utf-8")
     assert 'if [ "$CASE" = "L100_fold0" ]; then' in source
     assert 'PREPARED_FOR_CASE=$FIT_BASE/prepared/$SUBJECT' in source
     assert 'PREPARED_FOR_CASE=$CASE_ROOT' in source

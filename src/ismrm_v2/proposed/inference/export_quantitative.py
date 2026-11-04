@@ -12,8 +12,8 @@ import numpy as np
 import torch
 
 from ismrm_v2.proposed.training.training_space import TrainingSpace
-from trad.third_party.nesvor.nesvor.transform import RigidTransform, ax_transform_points
-from trad.third_party.nesvor.nesvor.utils import resolution2sigma
+from nesvor.transform import RigidTransform, ax_transform_points
+from nesvor.utils import resolution2sigma
 
 
 FORMAL_PSF128_SEED = 20260911
@@ -124,7 +124,7 @@ def sample_quantitative_fields_psf(model: torch.nn.Module, space: TrainingSpace,
 
 def _git_provenance(repo_root: Path, reconstruction_code_git_commit: str) -> dict[str, object]:
     status = subprocess.check_output(["git", "status", "--porcelain"], cwd=repo_root, text=True)
-    vendored_tree = subprocess.check_output(["git", "rev-parse", f"{reconstruction_code_git_commit}:trad/third_party/nesvor"], cwd=repo_root, text=True).strip()
+    vendored_tree = subprocess.check_output(["git", "rev-parse", f"{reconstruction_code_git_commit}:third_party/nesvor"], cwd=repo_root, text=True).strip()
     return {
         "reconstruction_code_git_commit": reconstruction_code_git_commit,
         "git_dirty": bool(status.strip()),

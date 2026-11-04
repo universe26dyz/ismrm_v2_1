@@ -16,7 +16,7 @@ from ismrm_v2.proposed.inference.export_quantitative import (
     FORMAL_PSF128_SEED,
     FORMAL_PSF128_SAMPLES,
 )
-from trad.third_party.nesvor.nesvor.utils import resolution2sigma
+from nesvor.utils import resolution2sigma
 
 from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
 from ismrm_v2.evaluation.direct_native_endpoint_audit import STACKS, _load_model, _paths, _record, direct_native_world_grid

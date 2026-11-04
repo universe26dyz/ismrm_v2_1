@@ -18,7 +18,7 @@ DECODER="$PROJECT_ROOT/runtime/model_assets/decoder_scmr_v5_10_100.pth"
 B6="$PROJECT_ROOT/runtime/model_assets/b6_model.pt"
 PROTOCOL="$PROJECT_ROOT/configs/protocol_scmr_v5_10_100.yaml"
 mkdir -p "$(dirname "$OUT")"
-PYTHONPATH="$PROJECT_ROOT/src:$PROJECT_ROOT/common${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m ismrm_v2.proposed.proposed \
+PYTHONPATH="$PROJECT_ROOT/src:$PROJECT_ROOT/third_party/nesvor${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m ismrm_v2.proposed.proposed \
   --prepared-root "$INPUT" --subject-id "$SUBJECT" --decoder "$DECODER" --b6-model "$B6" \
   --protocol "$PROTOCOL" --sparse-manifest "$MANIFEST" \
   --expected-sparse-generator-git-sha "$GENERATOR_SHA" --expected-sparse-manifest-sha256 "$MANIFEST_SHA" \

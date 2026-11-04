@@ -7,7 +7,7 @@ import subprocess
 from pathlib import Path
 
 
-RUNTIME_SURFACES = ("common/", "pipeline/", "scripts/", "configs/", "runtime/", "src/")
+RUNTIME_SURFACES = ("pipeline/", "scripts/", "configs/", "runtime/", "src/", "matlab/", "third_party/")
 RUNTIME_SUFFIXES = {".py", ".sh", ".m", ".json", ".yaml", ".yml"}
 FORBIDDEN = "/data/" + "dengyz/code/Code_10w"
 SELF = "scripts/verify_no_legacy_code_path.py"

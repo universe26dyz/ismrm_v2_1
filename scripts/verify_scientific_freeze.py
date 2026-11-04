@@ -73,7 +73,7 @@ def verify(root: Path) -> dict[str, Any]:
         _require_contains(q002_training, text, "Q002 formal training controls")
     _require_absent(proposed, "fingerprint_cosine", "active Proposed loss")
 
-    resolved = yaml.safe_load((root / "common/mlp/configs/recon_server_train_scmr_v5.yaml").read_text(encoding="utf-8"))
+    resolved = yaml.safe_load((root / "configs/proposed/reconstruction/recon_server_train_scmr_v5.yaml").read_text(encoding="utf-8"))
     for key, expected in contract["inr"].items():
         if key in resolved["inr"]:
             _require_equal(resolved["inr"][key], expected, f"resolved INR {key}")
@@ -87,7 +87,7 @@ def verify(root: Path) -> dict[str, Any]:
     _require_equal(resolved["training"]["scheduler_gamma"], 0.5, "scheduler gamma")
     _require_equal(resolved["spatial_regularization"]["n_points"], 256, "regularization points")
 
-    inr_source = root / "common/mlp/modules/module_04_quantitative_inr/quantitative_inr.py"
+    inr_source = root / "src/ismrm_v2/proposed/trad_quantitative_inr.py"
     decoder_source = root / "src/ismrm_v2/proposed/signal_decoder/frozen_decoder.py"
     for text in ("t2_ms = (5.0 + 195.0", "2500.0 - t2_ms", "b1 = (0.1 + 1.1", "F.softplus(raw[..., 3])"):
         _require_contains(inr_source, text, "quantitative INR bounds")
@@ -100,7 +100,7 @@ def verify(root: Path) -> dict[str, Any]:
     baseline = contract["baseline_fit_first"]
     baseline_source = root / "src/ismrm_v2/fit_first/baseline.py"
     fit_first_source = root / "src/ismrm_v2/fit_first/fit_first.py"
-    native_cache = root / "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh"
+    native_cache = root / "pipeline/05_SCMR_V5_FIT_FIRST/internal/run_scmr_v5_fit_first.sh"
     for text in ("--prebuilt-native-maps-root", "--reuse-native-maps-root", "--require-scmr-v5-native-maps"):
         _require_contains(native_cache, text, "fit-first active route")
     _require_absent(native_cache, "standardiz", "fit-first active route")
@@ -113,7 +113,7 @@ def verify(root: Path) -> dict[str, Any]:
     if baseline["matching"] != protocol["matching"] or baseline["interpolation_refinement"] != protocol["interpolation_refinement"]:
         raise ValueError("fit-first matching contract disagrees with active protocol")
 
-    profile_root = root / "common/paper_experiments/joint_vs_2dfit/configs/sparse_profiles"
+    profile_root = root / "configs/sparse_profiles"
     for profile_name in ("SAX100_2CH0_4CH0", "SAX100_2CH0_4CH100", "SAX100_2CH100_4CH0", "S2CH100_4CH50", "S2CH50_4CH100"):
         profile = _read_json(profile_root / f"{profile_name}.json")
         _require_equal(profile["stacks"]["sax"]["mode"], "all", f"{profile_name} SAX retention")
@@ -127,13 +127,13 @@ def verify(root: Path) -> dict[str, Any]:
         _require_absent(script, "standardiz", "active sparse route")
         _require_contains(script, "ismrm_v2.io.validate_subject_id", "generic subject validation")
         _require_absent(script, "validate_active_subject.py", "legacy cohort admission")
-    preprocessor = root / "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/preprocess_stack_v1.m"
+    preprocessor = root / "matlab/preprocessing/preprocessing_v1/preprocess_stack_v1.m"
     for text in ("TI = [50, 150]", "T2_prep =", "protocol_version = 'hhz_v1'"):
         _require_absent(preprocessor, text, "preprocessing MAT legacy protocol metadata")
     bridge = root / "src/ismrm_v2/observations/mat_v73.py"
     for text in ('"FA"', '"TI"', '"T2_prep"'):
         _require_absent(bridge, text, "bridge legacy protocol metadata")
-    final_pose = root / "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh"
+    final_pose = root / "pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh"
     _require_contains(final_pose, 'PREPARED_FOR_CASE=$FIT_BASE/prepared/$SUBJECT', "L100 final-pose input")
     _require_contains(final_pose, 'PREPARED_FOR_CASE=$CASE_ROOT', "sparse final-pose input")
     stage09 = root / "pipeline/09_INTEGRITY_AND_REPORTING/run_stage.sh"

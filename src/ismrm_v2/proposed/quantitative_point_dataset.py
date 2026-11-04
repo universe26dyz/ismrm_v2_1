@@ -10,7 +10,7 @@ import numpy as np
 import torch
 
 from ismrm_v2.observations.geometry import cropped_affine_lps_rc_to_initial_rigid
-from trad.third_party.nesvor.nesvor.transform import RigidTransform, ax_transform_points
+from nesvor.transform import RigidTransform, ax_transform_points
 
 
 def _exact_linear_quantile_kthvalue(cpu_values: torch.Tensor, q: float) -> torch.Tensor:

@@ -16,7 +16,7 @@ from ismrm_v2.evaluation.scmr.reference_2d import NativeReference, STACKS
 DISPLAY_RANGES_MS = {"T1": (0.0, 2500.0), "T2": (0.0, 200.0)}
 RESIDUAL_RANGES_MS = {"T1": (0.0, 300.0), "T2": (0.0, 30.0)}
 _LEGACY_ASSET_RELATIVE = Path("python/visualization/assets/colormaps")
-_VENDORED_ASSET_ROOT = Path(__file__).resolve().parents[4] / "common/trad/evaluation/scmr/assets/colormaps"
+_VENDORED_ASSET_ROOT = Path(__file__).resolve().parents[4] / "matlab/scmr_v5/assets/colormaps"
 _LEGACY_FILES = {
     "T1": ("Lipari", "lipari.txt"),
     "T2": ("Navia", "navia.txt"),

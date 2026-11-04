@@ -7,8 +7,8 @@ from typing import Any
 import numpy as np
 import torch
 
-from trad.third_party.nesvor.nesvor.image import load_slices, load_stack
-from trad.third_party.nesvor.nesvor.transform import transform_points
+from nesvor.image import load_slices, load_stack
+from nesvor.transform import transform_points
 
 
 def load_initial_stack_slices(path: str | Path) -> list[Any]:

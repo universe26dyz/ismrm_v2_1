@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import torch
 
 from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
-from trad.third_party.nesvor.nesvor.transform import RigidTransform, ax_transform_points
+from nesvor.transform import RigidTransform, ax_transform_points
 
 
 @dataclass(frozen=True)
