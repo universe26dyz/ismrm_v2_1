@@ -24,19 +24,19 @@ def test_manifest_covers_inventory_without_premature_deletion() -> None:
     assert REQUIRED <= {entry["classification"] for entry in entries.values()}
 
 
-def test_compatibility_and_standardization_are_deferred_not_reactivated() -> None:
+def test_compatibility_and_standardization_are_migrated_without_reactivation() -> None:
     manifest = json.loads((ROOT / "docs/clean_code_migration_manifest.json").read_text(encoding="utf-8"))
     compatibility = [entry for entry in manifest["entries"] if entry["classification"] == "COMPATIBILITY_IMPORT_ONLY"]
     assert compatibility
-    assert {entry["future_action"] for entry in compatibility} == {"REMOVE_AFTER_IMPORT_DECOUPLING"}
+    assert {entry["future_action"] for entry in compatibility} == {"MIGRATED_PHASE_FINAL_CLEANUP"}
     assert not any("standard" in str(entry["future_target_path"]).lower() and entry["classification"] in REQUIRED - {"COMPATIBILITY_IMPORT_ONLY"} for entry in manifest["entries"])
 
 
-def test_duplicate_implementations_are_marked_for_later_merge() -> None:
+def test_duplicate_implementations_are_explicitly_deferred_until_numerical_merge_is_validated() -> None:
     manifest = json.loads((ROOT / "docs/clean_code_migration_manifest.json").read_text(encoding="utf-8"))
     duplicates = [item for item in manifest["duplicate_implementation_plan"] if item["relationship"] == "DUPLICATE_IMPLEMENTATION"]
     assert len(duplicates) == 2
-    assert all(item["phase1_action"] == "MERGE_LATER" and item["future_action"] == "MERGE_LATER" for item in duplicates)
+    assert all(item["phase1_action"] == "DEFER_FINAL_CLEANUP" and item["future_action"] == "DEFER_FINAL_CLEANUP" for item in duplicates)
 
 
 def test_phase2a_subject_admission_moves_are_recorded_without_old_inventory_nodes() -> None:

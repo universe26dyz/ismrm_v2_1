@@ -7,9 +7,9 @@ import numpy as np
 import pytest
 import torch
 
-from modules.module_07_objective_training.mlp_trainer import _quantitative_regularization, build_mlp_training_model, train_mlp_reconstruction
-from modules.module_07_objective_training.training_space import TrainingSpace
-from modules.module_08_inference_export.export_quantitative import sample_quantitative_fields
+from ismrm_v2.proposed.mlp_trainer import _quantitative_regularization, build_mlp_training_model, train_mlp_reconstruction
+from mlp.modules.module_07_objective_training.training_space import TrainingSpace
+from ismrm_v2.proposed.inference.export_quantitative import sample_quantitative_fields
 from online_helpers import recon_config, write_functional_checkpoint, write_observations
 
 

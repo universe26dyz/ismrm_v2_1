@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 
-from modules.module_02_data_bridge.mat_v73 import load_preprocessed_v73
+from ismrm_v2.observations.mat_v73 import load_preprocessed_v73
 
 
 def _write_matlab_numeric(handle, name, array):

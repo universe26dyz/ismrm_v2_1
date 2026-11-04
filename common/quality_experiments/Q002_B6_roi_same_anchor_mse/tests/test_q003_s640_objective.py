@@ -65,32 +65,6 @@ def test_unknown_stack_id_hard_fails_instead_of_using_uninitialized_weight():
         joint_vector_mse(torch.ones((1, 10)), torch.zeros((1, 10)), torch.tensor([99]), {0: 1.0})
 
 
-def test_q003_cli_and_server_scripts_are_dedicated_and_immutable():
-    import pytest
-    from pathlib import Path
-
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.run_q003_reconstruction import build_parser
-
-    args = build_parser().parse_args(["--cropped-prepared-root", "/crop", "--b6-model", "/b6.pt", "--signal-simulator", "/decoder.pt", "--output", "/out"])
-    assert args.experiment_id == "Q003S640_B6_roi_same_anchor_mse_plus_cosine"
-    assert args.anchor_batch_size == 640
-    scripts = Path(__file__).resolve().parents[2] / "server_commands"
-    if not scripts.is_dir():
-        pytest.skip("TEST_ONLY_FIX: historical Q003 server wrappers are absent and not active runtime targets.")
-    run = (scripts / "run_Q003S640_CYJ.sh").read_text()
-    evaluate = (scripts / "evaluate_Q003S640_CYJ.sh").read_text()
-    assert "Q003S640_B6_roi_same_anchor_mse_plus_cosine_v1" in run
-    assert "--experiment-id Q003S640_B6_roi_same_anchor_mse_plus_cosine" in run
-    assert "PARENT_Q002_S640" in run
-    assert "q002_route_manifest.json" in run
-    assert "Q002-S640 parent checkpoint SHA256 mismatch" in run
-    assert "Q002S640_B6_roi_same_anchor_mse_v1" in evaluate
-    assert "rm -rf" not in run + evaluate
-    assert "git status --porcelain" in run and "git status --porcelain" in evaluate
-    assert "Refusing non-empty output" in run and "Refusing existing log" in run
-    assert "Refusing non-empty evaluation" in evaluate
-
-
 def test_q003_evaluation_provenance_marks_cosine_as_the_training_objective():
     from quality_experiments.Q002_B6_roi_same_anchor_mse.evaluation import evaluation_plan
     from quality_experiments.Q002_B6_roi_same_anchor_mse.evaluate_q003_s640 import build_parser

@@ -6,10 +6,10 @@ import sys
 from pathlib import Path
 
 
-def test_dictionary_imports_from_standalone_common_tree():
+def test_dictionary_imports_from_the_clean_package_tree():
     project_root = Path(__file__).resolve().parents[1]
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(project_root / "common")
+    env["PYTHONPATH"] = os.pathsep.join((str(project_root / "src"), str(project_root / "common")))
     result = subprocess.run(
         [
             sys.executable,

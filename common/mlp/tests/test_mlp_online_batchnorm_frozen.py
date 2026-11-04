@@ -1,6 +1,6 @@
 import torch
 
-from modules.module_07_objective_training.mlp_trainer import build_mlp_training_model
+from ismrm_v2.proposed.mlp_trainer import build_mlp_training_model
 from online_helpers import recon_config, write_functional_checkpoint, write_observations
 
 

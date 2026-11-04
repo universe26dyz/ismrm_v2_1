@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from scripts.reconstruct_subject import resolve_subject_observations
-from scripts.run_training import load_training_config, reject_blocked_experiment
+from trad.scripts.reconstruct_subject import resolve_subject_observations
+from trad.scripts.run_training import load_training_config, reject_blocked_experiment
 
 
 def test_reconstruct_subject_resolves_exact_three_stacks_and_never_lax(tmp_path):

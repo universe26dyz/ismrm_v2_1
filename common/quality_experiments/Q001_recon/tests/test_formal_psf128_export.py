@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from trad.modules.module_08_inference_export import export_quantitative as exporter
+from ismrm_v2.proposed.inference import export_quantitative as exporter
 
 
 class _Space:

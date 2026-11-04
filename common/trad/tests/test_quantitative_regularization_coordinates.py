@@ -2,7 +2,7 @@ import copy
 
 import torch
 
-from modules.module_07_objective_training.trad_trainer import (
+from trad.modules.module_07_objective_training.trad_trainer import (
     _quantitative_regularization,
     _regularization_world_points,
     build_training_model,

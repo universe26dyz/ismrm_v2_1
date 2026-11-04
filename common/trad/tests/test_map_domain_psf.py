@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from evaluation.scmr.map_domain_psf import (
+from trad.evaluation.scmr.map_domain_psf import (
     NativeGrid,
     ReprojectionResult,
     grids_from_trad_prepared,
@@ -9,8 +9,8 @@ from evaluation.scmr.map_domain_psf import (
     reproject_trad_exported_maps,
     reproject_volume_to_native_map_psf,
 )
-from evaluation.scmr.metrics import agreement_metrics
-from evaluation.scmr.run_map_domain_psf_comparison import _reprojection_provenance, _write_reference_comparison, run
+from trad.evaluation.scmr.metrics import agreement_metrics
+from trad.evaluation.scmr.run_map_domain_psf_comparison import _reprojection_provenance, _write_reference_comparison, run
 
 
 def _grid(*, translation=(12.0, 12.0, 12.0), rotation=None):

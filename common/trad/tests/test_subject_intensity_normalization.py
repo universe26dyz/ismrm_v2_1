@@ -5,7 +5,7 @@ import math
 from pathlib import Path
 from types import SimpleNamespace
 
-from modules.module_03_dataset_geometry import quantitative_point_dataset as dataset_module
+from ismrm_v2.proposed import quantitative_point_dataset as dataset_module
 from ismrm_v2.proposed.quantitative_point_dataset import _exact_linear_quantile_kthvalue, robust_trimmed_mean_intensity
 from ismrm_v2.proposed.reconstruction.orchestration import _intensity_normalization_provenance
 from ismrm_v2.proposed.training.experiment_infrastructure import write_experiment_manifest

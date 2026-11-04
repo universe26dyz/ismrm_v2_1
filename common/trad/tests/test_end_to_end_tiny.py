@@ -3,10 +3,10 @@ import numpy as np
 import torch
 
 from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
-from modules.module_07_objective_training.trad_trainer import build_training_model, load_checkpoint, train_trad
+from trad.modules.module_07_objective_training.trad_trainer import build_training_model, load_checkpoint, train_trad
 from ismrm_v2.proposed.inference.export_quantitative import export_quantitative_outputs
 from ismrm_v2.proposed.inference.reprojection import export_native_plane_reprojections
-from modules.module_09_qc_benchmark.qc import validate_smoke_outputs
+from mlp.modules.module_09_qc_benchmark.qc import validate_smoke_outputs
 
 
 def _dataset(path):

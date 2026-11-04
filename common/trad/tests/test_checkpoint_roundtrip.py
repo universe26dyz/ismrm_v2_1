@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from modules.module_07_objective_training.trad_trainer import build_training_model, load_checkpoint, train_trad
+from trad.modules.module_07_objective_training.trad_trainer import build_training_model, load_checkpoint, train_trad
 
 
 def _dataset(path):

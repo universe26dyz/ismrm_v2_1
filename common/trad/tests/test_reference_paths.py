@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 def test_reference_path_config_warns_and_skips_when_bundles_are_absent(tmp_path):
-    from evaluation.scmr.reference_paths import load_reference_paths
+    from trad.evaluation.scmr.reference_paths import load_reference_paths
 
     config = tmp_path / "reference_paths.yaml"
     config.write_text(
@@ -22,7 +22,7 @@ def test_reference_path_config_warns_and_skips_when_bundles_are_absent(tmp_path)
 
 
 def test_reference_path_config_accepts_complete_bundles(tmp_path):
-    from evaluation.scmr.reference_paths import load_reference_paths
+    from trad.evaluation.scmr.reference_paths import load_reference_paths
 
     native = tmp_path / "native"; native.mkdir()
     masks = tmp_path / "masks"; masks.mkdir()

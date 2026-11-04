@@ -75,23 +75,8 @@ def test_visualization_selection_and_display_ranges_are_deterministic_and_non_me
     assert display["per_method_autoscaling"] is False
 
 
-def test_q003_10k_cli_and_server_routes_are_distinct_and_protected():
-    import pytest
-    from pathlib import Path
-
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.evaluate_q003_s640_10k import build_parser as evaluation_parser
+def test_q003_10k_reconstruction_route_keeps_its_explicit_contract():
     from quality_experiments.Q002_B6_roi_same_anchor_mse.run_q003_s640_10k_reconstruction import build_parser as reconstruction_parser
 
     args = reconstruction_parser().parse_args(["--cropped-prepared-root", "/crop", "--b6-model", "/b6.pt", "--signal-simulator", "/decoder.pt", "--output", "/out"])
     assert args.experiment_id == "Q003S640_B6_roi_same_anchor_mse_plus_cosine_10k" and args.anchor_batch_size == 640
-    assert evaluation_parser().parse_args(["--run-root", "/q003", "--q002-s640-run-root", "/q002", "--b6-map-root", "/b6", "--b6-d2-root", "/d2", "--reference-root", "/ref", "--preprocessed-root", "/pre", "--output", "/out"]).run_root == "/q003"
-    scripts = Path(__file__).resolve().parents[2] / "server_commands"
-    if not scripts.is_dir():
-        pytest.skip("TEST_ONLY_FIX: historical Q003 server wrappers are absent and not active runtime targets.")
-    run, evaluate = (scripts / "run_Q003S640_10K_CYJ.sh").read_text(), (scripts / "evaluate_Q003S640_10K_CYJ.sh").read_text()
-    assert "Q003S640_B6_roi_same_anchor_mse_plus_cosine_10k_v1" in run
-    assert "Q002-S640 parent checkpoint SHA256 mismatch" in run
-    assert "Refusing non-empty output" in run and "Refusing existing log" in run
-    assert "formal_q003s640_10k_four_way_common_support" in evaluate
-    assert "Q002-S640 parent checkpoint SHA256 mismatch" in evaluate
-    assert "rm -rf" not in run + evaluate

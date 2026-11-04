@@ -15,8 +15,8 @@ SRC = ROOT / "src"
 NEW_PATH = SRC / "ismrm_v2/io/deployment_manifest.py"
 OLD_PATH = ROOT / "common/scripts/deployment_manifest.py"
 CALLERS = (
-    ROOT / "common/trad/scripts/validate_transferred_preprocessed.py",
-    ROOT / "common/trad/scripts/prepare_all_observations.py",
+    ROOT / "src/ismrm_v2/preprocessing/validation.py",
+    ROOT / "src/ismrm_v2/observations/prepare_all.py",
 )
 
 

@@ -2,7 +2,7 @@ import pytest
 import torch
 from torch import nn
 
-from modules.module_07_objective_training.trad_trainer import _quantitative_regularization
+from trad.modules.module_07_objective_training.trad_trainer import _quantitative_regularization
 
 
 class _ZeroSpatialGradientINR(nn.Module):
@@ -36,7 +36,7 @@ def test_zero_spatial_gradient_regularization_backward_is_finite():
 
 
 def test_nonfinite_gradient_aborts_before_optimizer_step():
-    from modules.module_07_objective_training.trad_trainer import _assert_finite_gradients
+    from trad.modules.module_07_objective_training.trad_trainer import _assert_finite_gradients
 
     parameter = nn.Parameter(torch.tensor(1.0))
     optimizer = torch.optim.SGD([parameter], lr=0.5)
@@ -48,7 +48,7 @@ def test_nonfinite_gradient_aborts_before_optimizer_step():
 
 
 def test_nonfinite_parameter_guard_reports_parameter_name():
-    from modules.module_07_objective_training.trad_trainer import _assert_finite_parameters
+    from trad.modules.module_07_objective_training.trad_trainer import _assert_finite_parameters
 
     parameter = nn.Parameter(torch.tensor(float("inf")))
     with pytest.raises(FloatingPointError, match="stage B.*iteration 8.*parameter"):

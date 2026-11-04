@@ -59,7 +59,7 @@ def build_q004s640_command(condition: str, prepared_root: str | Path, *, subject
     if not isinstance(condition, str) or not condition:
         raise ValueError("condition must be an explicit case identity")
     args = [
-        sys.executable, "-m", "quality_experiments.Q002_B6_roi_same_anchor_mse.run_q004_s640_k1_reconstruction",
+        sys.executable, "-m", "ismrm_v2.proposed.q002.run_q004_s640_k1_reconstruction",
         "--cropped-prepared-root", str(Path(prepared_root)), "--subject-id", subject,
         "--b6-model", str(Path(b6_model)), "--signal-simulator", str(Path(decoder)), "--output", str(Path(output)),
         "--device", device, "--experiment-id", Q004_EXPERIMENT_ID, "--anchor-batch-size", "640",

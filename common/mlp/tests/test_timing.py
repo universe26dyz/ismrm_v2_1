@@ -1,6 +1,6 @@
 import numpy as np
 
-from modules.module_02_data_bridge.timing import compute_duration_before_acq
+from ismrm_v2.observations.timing import compute_duration_before_acq
 
 
 def test_duration_before_acq_matches_hhz_indexed_delays():

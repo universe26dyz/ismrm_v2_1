@@ -1,7 +1,7 @@
 import csv
 import json
 
-from evaluation.profiling.summarize_timing_profile import summarize_timing_profile
+from ismrm_v2.proposed.profiling.summarize_timing_profile import summarize_timing_profile
 
 
 def test_summary_reports_stage_section_statistics_and_estimate(tmp_path):

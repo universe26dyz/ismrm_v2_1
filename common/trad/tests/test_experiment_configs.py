@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from scripts.run_training import load_training_config
+from trad.scripts.run_training import load_training_config
 
 
 def test_b6_config_inherits_only_the_6k_stage_b_change():

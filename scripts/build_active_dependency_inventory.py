@@ -90,14 +90,12 @@ KNOWN_RUNTIME_ASSETS = [
 ]
 ROLE_PRIORITY = {"ACTIVE_ENTRYPOINT": 9, "ACTIVE_EXECUTED": 8, "CONDITIONAL_ACTIVE": 7, "ACTIVE_TRANSITIVE": 6, "COMPATIBILITY_IMPORT_ONLY": 5, "CONFIG_RUNTIME_ASSET": 4, "THIRD_PARTY_ACTIVE": 3, "TEST_ONLY": 2, "LEGACY_UNUSED_BY_PIPELINE": 1}
 COMPATIBILITY = {
-    "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py": "baseline imports it, but Stage 05 supplies SCMR-v5 prebuilt/reuse flags, never intensity-preserving flags",
-    "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py": "baseline imports it, but Stage 05 never supplies standardized reuse flags",
-    "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py": "standardization route is not selected by Stage 05",
+    "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py": "baseline imports it, but Stage 05 supplies SCMR-v5 prebuilt/reuse flags, never intensity-preserving flags",
+    "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py": "baseline imports it, but Stage 05 never supplies standardized reuse flags",
+    "src/ismrm_v2/fit_first/standardize_subject_slices.py": "standardization route is not selected by Stage 05",
 }
 AUDITED_UNUSED = {
-    "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q003_reconstruction.py": "Q003 experiment is not reached by formal Q002S640 command",
-    "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q004_s640_k1_reconstruction.py": "Q004/K1 experiment is not reached by formal Q002S640 command",
-    "common/quality_experiments/Q002_B6_roi_same_anchor_mse/evaluate_q003_s640_10k.py": "10k evaluation variant is not reached by formal Q002S640 command",
+    "src/ismrm_v2/proposed/q002/run_q004_s640_k1_reconstruction.py": "Q004/K1 experiment is not reached by formal Q002S640 command",
     "common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q005s640_k4.py": "Q005/K4 is test-only, not a Stage 06 runtime dependency",
     "common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q002s640_k256.py": "K256 is test-only, not a Stage 06 runtime dependency",
 }

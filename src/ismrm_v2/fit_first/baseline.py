@@ -7,8 +7,8 @@ from ismrm_v2.fit_first.contracts import HISTORICAL_NESVOR_EXECUTABLE_DEFAULT, s
 from ismrm_v2.fit_first.fit_first import (fit_native, reuse_native_maps, export_nesvor_native_inputs,
                         build_independent_nesvor_commands, _supported_native_cache_contract,
                         require_scmr_v5_native_cache_manifest)
-from paper_experiments.joint_vs_2dfit.phase2_clean.fit_first_intensity_preserving import _selected_standardized_maps
-from paper_experiments.joint_vs_2dfit.phase2_clean.reuse_standardized_native_dictionary_maps import validate_standardized_native_dictionary_reuse
+from ismrm_v2.fit_first.fit_first_intensity_preserving import _selected_standardized_maps
+from ismrm_v2.fit_first.reuse_standardized_native_dictionary_maps import validate_standardized_native_dictionary_reuse
 from ismrm_v2.sampling.sparse_profile_manifest import SCHEMA_VERSION, validate_sparse_profile_manifest
 
 def _copy_verified_full_native_maps(source_root: Path, prepared: Path, target: Path, *, require_scmr_v5: bool = False) -> dict[str, object]:

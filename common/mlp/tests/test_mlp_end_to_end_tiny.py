@@ -1,8 +1,8 @@
 import torch
 
-from modules.module_07_objective_training.mlp_trainer import build_mlp_training_model, load_mlp_reconstruction_checkpoint, train_mlp_reconstruction
-from modules.module_08_inference_export.export_quantitative import export_quantitative_outputs
-from modules.module_09_qc_benchmark.qc import validate_smoke_outputs
+from ismrm_v2.proposed.mlp_trainer import build_mlp_training_model, load_mlp_reconstruction_checkpoint, train_mlp_reconstruction
+from ismrm_v2.proposed.inference.export_quantitative import export_quantitative_outputs
+from mlp.modules.module_09_qc_benchmark.qc import validate_smoke_outputs
 from online_helpers import recon_config, write_functional_checkpoint, write_observations
 
 

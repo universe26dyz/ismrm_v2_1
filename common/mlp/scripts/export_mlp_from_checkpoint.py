@@ -9,12 +9,12 @@ from typing import Any, Mapping, Sequence
 
 import torch
 
-from modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
-from modules.module_05_signal_decoder.provenance import sha256_file
-from modules.module_07_objective_training.mlp_trainer import build_mlp_training_model, load_mlp_reconstruction_checkpoint
-from modules.module_07_objective_training.training_space import TrainingSpace
-from modules.module_08_inference_export.export_quantitative import export_quantitative_outputs
-from modules.module_08_inference_export.reprojection import export_native_plane_reprojections
+from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
+from ismrm_v2.proposed.signal_decoder.provenance import sha256_file
+from ismrm_v2.proposed.mlp_trainer import build_mlp_training_model, load_mlp_reconstruction_checkpoint
+from mlp.modules.module_07_objective_training.training_space import TrainingSpace
+from ismrm_v2.proposed.inference.export_quantitative import export_quantitative_outputs
+from ismrm_v2.proposed.inference.reprojection import export_native_plane_reprojections
 
 
 _REQUIRED_CHECKPOINT_FIELDS = {

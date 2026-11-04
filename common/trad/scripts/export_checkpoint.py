@@ -10,7 +10,7 @@ import torch
 import yaml
 
 from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
-from modules.module_07_objective_training.trad_trainer import build_training_model, load_checkpoint
+from trad.modules.module_07_objective_training.trad_trainer import build_training_model, load_checkpoint
 from ismrm_v2.proposed.training.training_space import TrainingSpace
 from ismrm_v2.proposed.inference.export_quantitative import export_quantitative_outputs
 from ismrm_v2.proposed.inference.reprojection import export_native_plane_reprojections

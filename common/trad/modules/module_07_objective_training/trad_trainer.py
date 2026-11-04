@@ -6,6 +6,7 @@ from ismrm_v2.proposed.reconstruction.orchestration import (
     _data_loss,
     _optimizer,
     _quantitative_regularization,
+    _regularization_world_points,
     build_protocol_from_dataset,
     build_training_model as _build_training_model,
     load_checkpoint,
@@ -23,4 +24,4 @@ def train_trad(*args, **kwargs):
     return train_reconstruction(*args, **kwargs, route="trad_bloch")
 
 
-__all__ = ["TradTrainingModel", "_balanced_mse", "_data_loss", "_optimizer", "_quantitative_regularization", "build_protocol_from_dataset", "build_training_model", "load_checkpoint", "save_checkpoint", "train_trad"]
+__all__ = ["TradTrainingModel", "_balanced_mse", "_data_loss", "_optimizer", "_quantitative_regularization", "_regularization_world_points", "build_protocol_from_dataset", "build_training_model", "load_checkpoint", "save_checkpoint", "train_trad"]

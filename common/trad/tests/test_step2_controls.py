@@ -8,7 +8,7 @@ import yaml
 import pytest
 
 from ismrm_v2.proposed.training.experiment_infrastructure import normalize_step1_config
-from modules.module_07_objective_training.trad_trainer import (
+from trad.modules.module_07_objective_training.trad_trainer import (
     _balanced_mse,
     _data_loss,
     _optimizer,

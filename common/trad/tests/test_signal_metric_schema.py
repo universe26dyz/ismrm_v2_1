@@ -1,6 +1,6 @@
 import numpy as np
 
-from evaluation.scmr.metrics import signal_agreement_metrics
+from trad.evaluation.scmr.metrics import signal_agreement_metrics
 
 
 def test_signal_metrics_are_explicitly_in_input_intensity_units():

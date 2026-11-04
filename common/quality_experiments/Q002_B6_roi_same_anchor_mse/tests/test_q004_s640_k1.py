@@ -138,7 +138,7 @@ def test_q004_derived_k1_comparators_write_only_under_new_evaluation_root(tmp_pa
 def test_q004_cli_and_server_scripts_are_dedicated_and_protected():
     import pytest
     from quality_experiments.Q002_B6_roi_same_anchor_mse.evaluate_q004_s640_k1 import build_parser as evaluator_parser
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.run_q004_s640_k1_reconstruction import build_parser
+    from ismrm_v2.proposed.q002.run_q004_s640_k1_reconstruction import build_parser
 
     args = build_parser().parse_args(["--cropped-prepared-root", "/crop", "--b6-model", "/b6.pt", "--signal-simulator", "/decoder.pt", "--output", "/out"])
     assert args.experiment_id == "Q004S640_K1_B6_roi_same_anchor_mse" and args.anchor_batch_size == 640
