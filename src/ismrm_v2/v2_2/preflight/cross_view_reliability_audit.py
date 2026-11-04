@@ -1,0 +1,552 @@
+"""Numerical primitives for the v2.2 cross-view reliability preflight."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import hashlib
+import json
+import os
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Sequence
+
+import numpy as np
+import torch
+
+from nesvor.transform import ax_transform_points
+
+
+def _points(name: str, value: np.ndarray) -> np.ndarray:
+    points = np.asarray(value, dtype=np.float64)
+    if points.ndim != 2 or points.shape[1] != 3 or not np.isfinite(points).all():
+        raise ValueError(f"{name} must be finite [N,3] physical RAS-mm points.")
+    return points
+
+
+def match_lax_to_sax(
+    sax_xyz_ras_mm: np.ndarray,
+    lax_xyz_ras_mm: np.ndarray,
+    *,
+    chunk_size: int = 8192,
+    reference_chunk_size: int = 8192,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the exact nearest SAX anchor for every LAX anchor, in millimetres."""
+
+    sax, lax = _points("sax_xyz_ras_mm", sax_xyz_ras_mm), _points("lax_xyz_ras_mm", lax_xyz_ras_mm)
+    if sax.shape[0] == 0:
+        raise ValueError("At least one SAX reference anchor is required.")
+    if chunk_size < 1 or reference_chunk_size < 1:
+        raise ValueError("chunk sizes must be positive.")
+    indices = np.empty(lax.shape[0], dtype=np.int64)
+    distances = np.empty(lax.shape[0], dtype=np.float64)
+    for start in range(0, lax.shape[0], chunk_size):
+        target = lax[start : start + chunk_size]
+        best_squared = np.full(target.shape[0], np.inf, dtype=np.float64)
+        best_indices = np.zeros(target.shape[0], dtype=np.int64)
+        for reference_start in range(0, sax.shape[0], reference_chunk_size):
+            reference = sax[reference_start : reference_start + reference_chunk_size]
+            squared = np.sum((target[:, None, :] - reference[None, :, :]) ** 2, axis=2)
+            local = np.argmin(squared, axis=1)
+            candidate = squared[np.arange(target.shape[0]), local]
+            replace = candidate < best_squared
+            best_squared[replace] = candidate[replace]
+            best_indices[replace] = reference_start + local[replace]
+        stop = start + target.shape[0]
+        indices[start:stop] = best_indices
+        distances[start:stop] = np.sqrt(best_squared)
+    return indices, distances
+
+
+def cosine_discrepancy(
+    target: np.ndarray,
+    reference: np.ndarray,
+    *,
+    epsilon: float = 1e-8,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute 1-cosine for matching 10-weight vectors and flag unusable rows."""
+
+    left, right = np.asarray(target, dtype=np.float64), np.asarray(reference, dtype=np.float64)
+    if left.shape != right.shape or left.ndim != 2 or left.shape[1] != 10:
+        raise ValueError("target and reference must be matching [N,10] arrays.")
+    if epsilon <= 0:
+        raise ValueError("epsilon must be positive.")
+    left_norm, right_norm = np.linalg.norm(left, axis=1), np.linalg.norm(right, axis=1)
+    valid = np.isfinite(left).all(axis=1) & np.isfinite(right).all(axis=1) & (left_norm >= epsilon) & (right_norm >= epsilon)
+    result = np.full(left.shape[0], np.nan, dtype=np.float64)
+    result[valid] = 1.0 - np.sum(left[valid] * right[valid], axis=1) / (left_norm[valid] * right_norm[valid] + epsilon)
+    return result, valid
+
+
+def _percentile(values: np.ndarray, value: float) -> float | None:
+    return None if values.size == 0 else float(np.percentile(values, value))
+
+
+def timing_statistics(delta_timing9_ms: np.ndarray) -> dict[str, Any]:
+    """Summarize signed timing deltas without changing their millisecond convention."""
+
+    delta = np.asarray(delta_timing9_ms, dtype=np.float64)
+    if delta.ndim != 2 or delta.shape[1] != 9 or not np.isfinite(delta).all():
+        raise ValueError("delta_timing9_ms must be finite [N,9].")
+    absolute = np.abs(delta)
+    per_pair_abs_mean = absolute.mean(axis=1)
+    per_pair_l2 = np.linalg.norm(delta, axis=1)
+    return {
+        "count": int(delta.shape[0]),
+        "per_dimension_mean_abs_ms": absolute.mean(axis=0).tolist() if delta.shape[0] else [None] * 9,
+        "per_dimension_median_abs_ms": np.median(absolute, axis=0).tolist() if delta.shape[0] else [None] * 9,
+        "per_dimension_p90_abs_ms": np.percentile(absolute, 90, axis=0).tolist() if delta.shape[0] else [None] * 9,
+        "per_dimension_p95_abs_ms": np.percentile(absolute, 95, axis=0).tolist() if delta.shape[0] else [None] * 9,
+        "per_pair_abs_mean_ms": per_pair_abs_mean.tolist(),
+        "per_pair_l2_ms": per_pair_l2.tolist(),
+        "per_pair_abs_mean_summary_ms": {"mean": float(per_pair_abs_mean.mean()) if per_pair_abs_mean.size else None, "median": _percentile(per_pair_abs_mean, 50), "p90": _percentile(per_pair_abs_mean, 90), "p95": _percentile(per_pair_abs_mean, 95)},
+        "per_pair_l2_summary_ms": {"mean": float(per_pair_l2.mean()) if per_pair_l2.size else None, "median": _percentile(per_pair_l2, 50), "p90": _percentile(per_pair_l2, 90), "p95": _percentile(per_pair_l2, 95)},
+    }
+
+
+def binned_cosine_statistics(
+    metric: np.ndarray,
+    discrepancy: np.ndarray,
+    edges: Sequence[float],
+) -> list[dict[str, Any]]:
+    """Return transparent half-open bins, with the final bin including its upper edge."""
+
+    metric_array, discrepancy_array, boundaries = np.asarray(metric, dtype=np.float64), np.asarray(discrepancy, dtype=np.float64), np.asarray(edges, dtype=np.float64)
+    if metric_array.shape != discrepancy_array.shape or metric_array.ndim != 1:
+        raise ValueError("metric and discrepancy must be matching one-dimensional arrays.")
+    if boundaries.ndim != 1 or boundaries.size < 2 or np.any(np.diff(boundaries) <= 0):
+        raise ValueError("edges must be strictly increasing with at least two values.")
+    valid = np.isfinite(metric_array) & np.isfinite(discrepancy_array)
+    results: list[dict[str, Any]] = []
+    for index, (lower, upper) in enumerate(zip(boundaries[:-1], boundaries[1:])):
+        mask = valid & (metric_array >= lower) & ((metric_array <= upper) if index == boundaries.size - 2 else (metric_array < upper))
+        values = discrepancy_array[mask]
+        results.append({
+            "lower": None if np.isneginf(lower) else float(lower),
+            "upper": None if np.isposinf(upper) else float(upper), "count": int(values.size),
+            "median_cosine_discrepancy": _percentile(values, 50),
+            "p90_cosine_discrepancy": _percentile(values, 90),
+        })
+    return results
+
+
+def timing_only_cosine_discrepancy(
+    decoder: torch.nn.Module,
+    t1_ms: torch.Tensor,
+    t2_ms: torch.Tensor,
+    b1: torch.Tensor,
+    timing_sax_ms: torch.Tensor,
+    timing_lax_ms: torch.Tensor,
+    *,
+    epsilon: float = 1e-8,
+) -> np.ndarray:
+    """Evaluate a frozen decoder twice with identical tissue parameters and changed timing only."""
+
+    if timing_sax_ms.shape != timing_lax_ms.shape or timing_sax_ms.ndim != 2 or timing_sax_ms.shape[1] != 9:
+        raise ValueError("timing inputs must be matching [N,9] tensors.")
+    if any(value.shape != timing_sax_ms.shape[:1] for value in (t1_ms, t2_ms, b1)):
+        raise ValueError("T1, T2 and B1 must be [N] and align with timing rows.")
+    with torch.no_grad():
+        fingerprint_sax = decoder(t1_ms, t2_ms, b1, timing_sax_ms)
+        fingerprint_lax = decoder(t1_ms, t2_ms, b1, timing_lax_ms)
+    values, _ = cosine_discrepancy(fingerprint_lax.detach().cpu().numpy(), fingerprint_sax.detach().cpu().numpy(), epsilon=epsilon)
+    return values
+
+
+STACK_NAMES = {0: "sax", 1: "2ch", 2: "4ch"}
+COVERAGE_THRESHOLDS_MM = (1.0, 2.0, 3.0, 5.0)
+
+
+def _summary(values: np.ndarray) -> dict[str, float | None]:
+    finite = np.asarray(values, dtype=np.float64)
+    finite = finite[np.isfinite(finite)]
+    return {
+        "mean": float(finite.mean()) if finite.size else None,
+        "std": float(finite.std()) if finite.size else None,
+        "median": _percentile(finite, 50),
+        "p75": _percentile(finite, 75),
+        "p90": _percentile(finite, 90),
+        "p95": _percentile(finite, 95),
+        "p99": _percentile(finite, 99),
+        "max": float(finite.max()) if finite.size else None,
+    }
+
+
+def _average_ranks(values: np.ndarray) -> np.ndarray:
+    order = np.argsort(values, kind="stable")
+    sorted_values = values[order]
+    ranks = np.empty(values.size, dtype=np.float64)
+    start = 0
+    while start < values.size:
+        stop = start + 1
+        while stop < values.size and sorted_values[stop] == sorted_values[start]:
+            stop += 1
+        ranks[order[start:stop]] = (start + stop - 1) / 2.0 + 1.0
+        start = stop
+    return ranks
+
+
+def _correlations(metric: np.ndarray, discrepancy: np.ndarray) -> dict[str, float | int | None]:
+    valid = np.isfinite(metric) & np.isfinite(discrepancy)
+    x, y = metric[valid], discrepancy[valid]
+    if x.size < 2 or np.ptp(x) == 0.0 or np.ptp(y) == 0.0:
+        return {"valid_count": int(x.size), "pearson": None, "spearman": None}
+    return {
+        "valid_count": int(x.size),
+        "pearson": float(np.corrcoef(x, y)[0, 1]),
+        "spearman": float(np.corrcoef(_average_ranks(x), _average_ranks(y))[0, 1]),
+    }
+
+
+def _quantile_bins(metric: np.ndarray, discrepancy: np.ndarray) -> dict[str, Any]:
+    valid = np.isfinite(metric) & np.isfinite(discrepancy)
+    values = metric[valid]
+    if values.size == 0:
+        return {"edges": [], "bins": []}
+    edges = np.unique(np.quantile(values, [0.0, 0.25, 0.5, 0.75, 1.0]))
+    if edges.size == 1:
+        selected = discrepancy[valid]
+        return {
+            "edges": [float(edges[0]), float(edges[0])],
+            "bins": [{"lower": float(edges[0]), "upper": float(edges[0]), "count": int(selected.size), "median_cosine_discrepancy": _percentile(selected, 50), "p90_cosine_discrepancy": _percentile(selected, 90)}],
+        }
+    return {"edges": edges.tolist(), "bins": binned_cosine_statistics(metric, discrepancy, edges)}
+
+
+def _dataset_arrays(joint_dataset: Any, group_axisangle_physical: torch.Tensor) -> dict[str, np.ndarray]:
+    required = ("xyz", "observed", "group_idx", "stack_idx", "timing", "row_col")
+    missing = [name for name in required if not hasattr(joint_dataset, name)]
+    if missing:
+        raise TypeError(f"joint_dataset lacks required fields: {missing}")
+    xyz = torch.as_tensor(joint_dataset.xyz, dtype=torch.float32)
+    groups = torch.as_tensor(joint_dataset.group_idx, dtype=torch.long, device=xyz.device)
+    poses = torch.as_tensor(group_axisangle_physical, dtype=xyz.dtype, device=xyz.device)
+    if poses.ndim != 2 or poses.shape[1] != 6 or groups.numel() != xyz.shape[0] or groups.numel() and int(groups.max()) >= poses.shape[0]:
+        raise ValueError("group_axisangle_physical must cover every joint anchor group with [G,6] poses.")
+    physical = ax_transform_points(poses[groups], xyz, trans_first=True).detach().cpu().numpy()
+    return {
+        "physical_xyz": physical,
+        "observed": torch.as_tensor(joint_dataset.observed).detach().cpu().numpy(),
+        "group_idx": groups.detach().cpu().numpy(),
+        "stack_idx": torch.as_tensor(joint_dataset.stack_idx).detach().cpu().numpy(),
+        "timing": torch.as_tensor(joint_dataset.timing).detach().cpu().numpy(),
+        "row_col": torch.as_tensor(joint_dataset.row_col).detach().cpu().numpy(),
+    }
+
+
+def _timing_only_values(
+    decoder: torch.nn.Module | None,
+    parameters: dict[str, Any] | None,
+    target_indices: np.ndarray,
+    reference_indices: np.ndarray,
+    timing: np.ndarray,
+    *,
+    epsilon: float,
+) -> tuple[np.ndarray | None, dict[str, Any]]:
+    if decoder is None:
+        return None, {"timing_only_simulator_status": "not_run", "reason": "no decoder was supplied"}
+    if parameters is None:
+        return None, {"timing_only_simulator_status": "not_run", "reason": "no anchor-aligned T1/T2/B1 parameters were supplied"}
+    missing = {"t1_ms", "t2_ms", "b1"}.difference(parameters)
+    if missing:
+        return None, {"timing_only_simulator_status": "not_run", "reason": f"parameter source lacks {sorted(missing)}"}
+    count = timing.shape[0]
+    decoder_device = next(decoder.parameters(), None)
+    device = decoder_device.device if decoder_device is not None else torch.device("cpu")
+    tensors = []
+    for name in ("t1_ms", "t2_ms", "b1"):
+        value = torch.as_tensor(parameters[name], dtype=torch.float32)
+        if value.shape != (count,):
+            raise ValueError(f"timing-only {name} must be anchor-aligned [N] with N={count}.")
+        tensors.append(value[target_indices].to(device))
+    timing_sax = torch.as_tensor(timing[reference_indices], dtype=torch.float32, device=device)
+    timing_lax = torch.as_tensor(timing[target_indices], dtype=torch.float32, device=device)
+    return timing_only_cosine_discrepancy(decoder, *tensors, timing_sax, timing_lax, epsilon=epsilon), {
+        "timing_only_simulator_status": "run",
+        "source": str(parameters.get("source", "explicit anchor-aligned parameters")),
+    }
+
+
+def run_cross_view_reliability_audit(
+    joint_dataset: Any,
+    *,
+    group_axisangle_physical: torch.Tensor,
+    subject: str,
+    case_id: str,
+    geometry_source: str,
+    timing_only_decoder: torch.nn.Module | None = None,
+    timing_only_parameters: dict[str, Any] | None = None,
+    cosine_epsilon: float = 1e-8,
+    provenance: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Audit fixed post-HB1 geometry; this function neither trains nor changes poses."""
+
+    arrays = _dataset_arrays(joint_dataset, group_axisangle_physical)
+    sax_indices = np.flatnonzero(arrays["stack_idx"] == 0)
+    if sax_indices.size == 0:
+        raise ValueError("The joint dataset has no SAX anchors (stack_idx=0).")
+    pairs: list[dict[str, Any]] = []
+    stack_payloads: dict[str, dict[str, Any]] = {}
+    timing_status: dict[str, Any] = {"timing_only_simulator_status": "not_run", "reason": "no LAX anchors"}
+    for stack_code, stack_name in ((1, "2ch"), (2, "4ch")):
+        target_indices = np.flatnonzero(arrays["stack_idx"] == stack_code)
+        if target_indices.size == 0:
+            stack_payloads[stack_name] = {"target_indices": target_indices, "reference_indices": np.empty(0, dtype=np.int64), "distance_mm": np.empty(0), "delta_timing9_ms": np.empty((0, 9)), "cosine": np.empty(0), "valid": np.empty(0, dtype=bool), "timing_only": None}
+            continue
+        local_reference, distance_mm = match_lax_to_sax(arrays["physical_xyz"][sax_indices], arrays["physical_xyz"][target_indices])
+        reference_indices = sax_indices[local_reference]
+        delta = arrays["timing"][target_indices] - arrays["timing"][reference_indices]
+        cosine, valid = cosine_discrepancy(arrays["observed"][target_indices], arrays["observed"][reference_indices], epsilon=cosine_epsilon)
+        timing_only, timing_status = _timing_only_values(timing_only_decoder, timing_only_parameters, target_indices, reference_indices, arrays["timing"], epsilon=cosine_epsilon)
+        stack_payloads[stack_name] = {"target_indices": target_indices, "reference_indices": reference_indices, "distance_mm": distance_mm, "delta_timing9_ms": delta, "cosine": cosine, "valid": valid, "timing_only": timing_only}
+        for offset, (target_index, reference_index) in enumerate(zip(target_indices, reference_indices)):
+            record = {
+                "subject": subject, "case_id": case_id, "target_stack": stack_name,
+                "target_anchor_index": int(target_index), "target_group_idx": int(arrays["group_idx"][target_index]),
+                "reference_stack": "sax", "reference_anchor_index": int(reference_index), "reference_group_idx": int(arrays["group_idx"][reference_index]),
+                "distance_mm": float(distance_mm[offset]),
+                "timing_abs_mean_ms": float(np.abs(delta[offset]).mean()), "timing_l2_ms": float(np.linalg.norm(delta[offset])),
+                "observed_cosine_discrepancy": float(cosine[offset]) if valid[offset] else None,
+                "timing_only_cosine_discrepancy": None if timing_only is None or not np.isfinite(timing_only[offset]) else float(timing_only[offset]),
+                "valid_observed_pair": bool(valid[offset]),
+                "target_row": int(arrays["row_col"][target_index, 0]), "target_col": int(arrays["row_col"][target_index, 1]),
+            }
+            for dimension in range(9):
+                record[f"delta_timing9_ms_{dimension}"] = float(delta[offset, dimension])
+                record[f"abs_delta_timing9_ms_{dimension}"] = float(abs(delta[offset, dimension]))
+            pairs.append(record)
+    coverage: dict[str, Any] = {}
+    timing_stats: dict[str, Any] = {}
+    fingerprint_stats: dict[str, Any] = {}
+    confounding: dict[str, Any] = {}
+    for stack_name, payload in stack_payloads.items():
+        distances, delta, cosine, valid = payload["distance_mm"], payload["delta_timing9_ms"], payload["cosine"], payload["valid"]
+        coverage[stack_name] = {f"<= {threshold:g} mm": int((distances <= threshold).sum()) for threshold in COVERAGE_THRESHOLDS_MM}
+        coverage[stack_name]["anchor_count"] = int(distances.size)
+        coverage[stack_name]["coverage_fraction"] = {f"<= {threshold:g} mm": (float((distances <= threshold).mean()) if distances.size else None) for threshold in COVERAGE_THRESHOLDS_MM}
+        timing_stats[stack_name] = timing_statistics(delta)
+        fingerprint_stats[stack_name] = _summary(cosine[valid]) | {"valid_count": int(valid.sum()), "invalid_count": int((~valid).sum())}
+        timing_metric = np.abs(delta).mean(axis=1) if delta.size else np.empty(0)
+        distance_edges = [0.0, 1.0, 2.0, 3.0, 5.0, np.inf]
+        confounding[stack_name] = {
+            "cosine_vs_distance": _correlations(distances, cosine),
+            "cosine_vs_timing_abs_mean": _correlations(timing_metric, cosine),
+            "distance_bins": binned_cosine_statistics(distances, cosine, distance_edges),
+            "timing_quantile_bins": _quantile_bins(timing_metric, cosine),
+        }
+    manifest = {
+        "schema": "ismrm_v2_2/cross_view_reliability_preflight/v1",
+        "subject": subject, "case": case_id, "case_id": case_id, "stack_mapping": STACK_NAMES,
+        "reference_stack": "sax", "geometry_source": geometry_source,
+        "post_hb1_fixed_geometry": geometry_source,
+        "nearest_neighbor_implementation": "chunked exact NumPy squared-distance search",
+        "coverage_thresholds_mm": list(COVERAGE_THRESHOLDS_MM), "cosine_epsilon": cosine_epsilon,
+        "timing_difference_definition": "timing_LAX - timing_SAX, in stored physical milliseconds",
+        "timing_only_simulator": timing_status,
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "joint_dataset_qc": getattr(joint_dataset, "qc", None),
+        **dict(provenance or {}),
+    }
+    return {
+        "manifest": manifest, "pairs": pairs, "coverage_statistics": coverage,
+        "timing_statistics": timing_stats, "fingerprint_statistics": fingerprint_stats,
+        "confounding_statistics": confounding, "timing_only_simulator": timing_status,
+        "summary": {
+            "subject": subject, "case_id": case_id,
+            "anchor_pairs": {name: int(payload["distance_mm"].size) for name, payload in stack_payloads.items()},
+            "coverage_statistics": coverage, "timing_statistics": timing_stats,
+            "fingerprint_statistics": fingerprint_stats, "confounding_statistics": confounding,
+            "timing_only_simulator": timing_status,
+        },
+    }
+
+
+def _write_json(path: Path, payload: Any) -> None:
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+
+
+def _write_pairs(path: Path, pairs: list[dict[str, Any]]) -> None:
+    base = ["subject", "case_id", "target_stack", "target_anchor_index", "target_group_idx", "reference_stack", "reference_anchor_index", "reference_group_idx", "distance_mm", "timing_abs_mean_ms", "timing_l2_ms", "observed_cosine_discrepancy", "timing_only_cosine_discrepancy", "valid_observed_pair", "target_row", "target_col"]
+    fields = base + [f"{prefix}{dimension}" for prefix in ("delta_timing9_ms_", "abs_delta_timing9_ms_") for dimension in range(9)]
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(pairs)
+
+
+def _write_csv(path: Path, rows: list[dict[str, Any]], fields: list[str]) -> None:
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _write_plots(result: dict[str, Any], output: Path) -> tuple[dict[str, Path], str | None]:
+    try:
+        os.environ["MPLCONFIGDIR"] = str(output / ".matplotlib-cache")
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except Exception as error:  # plotting is optional; numerical artifacts have already been written
+        return {}, f"{type(error).__name__}: {error}"
+    created: dict[str, Path] = {}
+    for stack in ("2ch", "4ch"):
+        rows = [item for item in result["pairs"] if item["target_stack"] == stack and item["valid_observed_pair"]]
+        cosine = np.asarray([item["observed_cosine_discrepancy"] for item in rows], dtype=float)
+        distance = np.asarray([item["distance_mm"] for item in rows], dtype=float)
+        timing = np.asarray([item["timing_abs_mean_ms"] for item in rows], dtype=float)
+        hist = output / f"hist_cosine_{stack}.png"
+        figure, axis = plt.subplots(); axis.hist(cosine, bins="auto" if cosine.size else 1); axis.set(xlabel="Observed cosine discrepancy (1 - cosine)", ylabel="Pair count", title=f"{stack}: observed fingerprint discrepancy"); figure.tight_layout(); figure.savefig(hist, dpi=150); plt.close(figure); created[hist.name] = hist
+        for metric, label, name in ((distance, "Physical nearest-SAX distance (mm)", "distance"), (timing, "Mean absolute timing difference (ms)", "timing")):
+            scatter = output / f"scatter_cosine_vs_{name}_{stack}.png"
+            figure, axis = plt.subplots(); axis.scatter(metric, cosine, s=10); axis.set(xlabel=label, ylabel="Observed cosine discrepancy (1 - cosine)", title=f"{stack}: cosine versus {name}"); figure.tight_layout(); figure.savefig(scatter, dpi=150); plt.close(figure); created[scatter.name] = scatter
+    return created, None
+
+
+def write_audit_outputs(result: dict[str, Any], output_dir: str | Path) -> dict[str, Path]:
+    """Write every audit artifact below one caller-provided new or empty directory."""
+
+    output = Path(output_dir).resolve()
+    if output.exists() and any(output.iterdir()):
+        raise FileExistsError(f"v2.2 audit output_dir must be absent or empty: {output}")
+    output.mkdir(parents=True, exist_ok=True)
+    paths = {
+        "manifest.json": output / "manifest.json", "summary.json": output / "summary.json",
+        "matched_pairs.csv": output / "matched_pairs.csv", "coverage_statistics.json": output / "coverage_statistics.json",
+        "timing_statistics.json": output / "timing_statistics.json", "fingerprint_statistics.json": output / "fingerprint_statistics.json",
+        "cosine_vs_distance.csv": output / "cosine_vs_distance.csv", "cosine_vs_timing.csv": output / "cosine_vs_timing.csv",
+        "timing_only_simulator.json": output / "timing_only_simulator.json",
+    }
+    _write_json(paths["manifest.json"], result["manifest"])
+    _write_json(paths["summary.json"], result["summary"])
+    _write_pairs(paths["matched_pairs.csv"], result["pairs"])
+    _write_json(paths["coverage_statistics.json"], result["coverage_statistics"])
+    _write_json(paths["timing_statistics.json"], result["timing_statistics"])
+    _write_json(paths["fingerprint_statistics.json"], result["fingerprint_statistics"])
+    _write_json(paths["timing_only_simulator.json"], result["timing_only_simulator"])
+    distance_rows = [{"target_stack": item["target_stack"], "distance_mm": item["distance_mm"], "observed_cosine_discrepancy": item["observed_cosine_discrepancy"], "valid_observed_pair": item["valid_observed_pair"]} for item in result["pairs"]]
+    timing_rows = [{"target_stack": item["target_stack"], "timing_abs_mean_ms": item["timing_abs_mean_ms"], "timing_l2_ms": item["timing_l2_ms"], "observed_cosine_discrepancy": item["observed_cosine_discrepancy"], "valid_observed_pair": item["valid_observed_pair"]} for item in result["pairs"]]
+    _write_csv(paths["cosine_vs_distance.csv"], distance_rows, ["target_stack", "distance_mm", "observed_cosine_discrepancy", "valid_observed_pair"])
+    _write_csv(paths["cosine_vs_timing.csv"], timing_rows, ["target_stack", "timing_abs_mean_ms", "timing_l2_ms", "observed_cosine_discrepancy", "valid_observed_pair"])
+    figures, plotting_error = _write_plots(result, output)
+    if plotting_error is not None:
+        manifest = dict(result["manifest"]); manifest["plotting_status"] = "not_run"; manifest["plotting_error"] = plotting_error; _write_json(paths["manifest.json"], manifest)
+    else:
+        manifest = dict(result["manifest"]); manifest["plotting_status"] = "written"; _write_json(paths["manifest.json"], manifest); paths.update(figures)
+    return paths
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for block in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _git_provenance() -> dict[str, str | None]:
+    def query(*command: str) -> str | None:
+        try:
+            return subprocess.check_output(command, text=True, stderr=subprocess.DEVNULL).strip()
+        except (OSError, subprocess.CalledProcessError):
+            return None
+    return {"git_sha": query("git", "rev-parse", "HEAD"), "branch": query("git", "branch", "--show-current")}
+
+
+def _load_timing_only_parameters(path: str | Path, expected_anchors: int) -> dict[str, Any]:
+    source = Path(path)
+    if not source.is_file():
+        raise FileNotFoundError(f"timing-only parameter NPZ does not exist: {source}")
+    with np.load(source, allow_pickle=False) as payload:
+        required = {"t1_ms", "t2_ms", "b1"}
+        missing = required.difference(payload.files)
+        if missing:
+            raise ValueError(f"timing-only parameter NPZ lacks: {sorted(missing)}")
+        parameters = {name: np.asarray(payload[name]) for name in required}
+    if any(value.shape != (expected_anchors,) for value in parameters.values()):
+        raise ValueError(f"timing-only parameters must align with all {expected_anchors} joint anchors in joint-dataset order.")
+    parameters["source"] = str(source)
+    parameters["sha256"] = _sha256_file(source)
+    return parameters
+
+
+def run_from_args(args: argparse.Namespace) -> dict[str, Path]:
+    """Build the existing fixed geometry and run the diagnostic-only audit CLI."""
+
+    from ismrm_v2.proposed.q002.contracts import cropped_observation_paths
+    from ismrm_v2.proposed.q002.joint_dataset import JointAnchorDataset
+    from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
+    from ismrm_v2.proposed.rigid_psf.hb1_stack_adapter import initialize_group_poses_from_hb1
+
+    device = torch.device(args.device)
+    if device.type == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError(f"Requested CUDA device is unavailable: {device}")
+    inputs = cropped_observation_paths(args.prepared_root, args.subject)
+    scalar_dataset = QuantPointDataset(inputs, device=device)
+    joint_dataset = JointAnchorDataset(inputs, scalar_dataset)
+    stack_initialization = initialize_group_poses_from_hb1(
+        scalar_dataset.group_axisangle_init,
+        inputs,
+        device=device,
+    )
+    decoder = None
+    if args.signal_decoder_checkpoint:
+        if not args.protocol_yaml:
+            raise ValueError("--signal-decoder-checkpoint requires --protocol-yaml.")
+        from ismrm_v2.proposed.signal_decoder.checkpoint_loader import load_frozen_mlp_decoder_for_benchmark
+        decoder = load_frozen_mlp_decoder_for_benchmark(args.signal_decoder_checkpoint, scalar_dataset, args.protocol_yaml, device=device)
+    elif args.protocol_yaml:
+        raise ValueError("--protocol-yaml requires --signal-decoder-checkpoint.")
+    parameters = _load_timing_only_parameters(args.timing_only_parameters_npz, int(joint_dataset.xyz.shape[0])) if args.timing_only_parameters_npz else None
+    if parameters is not None and decoder is None:
+        raise ValueError("--timing-only-parameters-npz requires --signal-decoder-checkpoint.")
+    sparse_manifest: dict[str, Any] | None = None
+    if args.sparse_manifest:
+        manifest_path = Path(args.sparse_manifest)
+        if not manifest_path.is_file():
+            raise FileNotFoundError(f"sparse manifest does not exist: {manifest_path}")
+        sparse_manifest = {"path": str(manifest_path), "sha256": _sha256_file(manifest_path)}
+    provenance = {
+        **_git_provenance(), "prepared_root": str(Path(args.prepared_root).resolve()),
+        "prepared_inputs": {str(path): _sha256_file(path) for path in inputs},
+        "sparse_manifest": sparse_manifest, "device": str(device),
+        "python_version": sys.version.split()[0], "numpy_version": np.__version__, "torch_version": torch.__version__,
+        "timing_only_decoder_checkpoint": str(args.signal_decoder_checkpoint) if args.signal_decoder_checkpoint else None,
+        "timing_only_parameters": {"path": parameters["source"], "sha256": parameters["sha256"]} if parameters else None,
+    }
+    result = run_cross_view_reliability_audit(
+        joint_dataset,
+        group_axisangle_physical=stack_initialization.post_stack_init_axisangle_physical,
+        subject=args.subject,
+        case_id=args.case,
+        geometry_source="existing initialize_group_poses_from_hb1 post_stack_init_axisangle_physical in physical RAS mm",
+        timing_only_decoder=decoder,
+        timing_only_parameters=parameters,
+        provenance=provenance,
+    )
+    return write_audit_outputs(result, args.output_dir)
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--subject", default="CYJ", help="Subject identifier under the prepared root.")
+    parser.add_argument("--case", required=True, help="Case identifier recorded in every output artifact.")
+    parser.add_argument("--prepared-root", required=True, help="Existing cropped prepared-observations root; never a v2.1 output root.")
+    parser.add_argument("--sparse-manifest", help="Optional sparse-manifest provenance record; it does not change the required SAX/2CH/4CH inputs.")
+    parser.add_argument("--output-dir", required=True, help="Required new or empty v2.2 output directory.")
+    parser.add_argument("--device", default="cpu", help="Torch device; local validation uses cpu, server may use cuda:0.")
+    parser.add_argument("--signal-decoder-checkpoint", help="Optional compatible frozen signal-decoder checkpoint for timing-only simulation.")
+    parser.add_argument("--protocol-yaml", help="Protocol YAML required with --signal-decoder-checkpoint.")
+    parser.add_argument("--timing-only-parameters-npz", help="Optional NPZ with anchor-aligned t1_ms, t2_ms, b1 arrays for timing-only simulation.")
+    return parser
+
+
+def main() -> None:
+    paths = run_from_args(build_parser().parse_args())
+    print(json.dumps({name: str(path) for name, path in paths.items()}, indent=2, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

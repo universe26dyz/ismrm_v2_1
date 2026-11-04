@@ -7,6 +7,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+VERSIONED_EXPERIMENTAL_PREFIX = "v2_2/"
 
 
 def test_completed_migrations_define_the_clean_package_implementation_set() -> None:
@@ -21,4 +22,6 @@ def test_completed_migrations_define_the_clean_package_implementation_set() -> N
         if entry["current_path"].startswith("src/ismrm_v2/")
         and entry.get("migration_status", "").startswith("MIGRATED_PHASE_")
     }
-    assert implementation == expected
+    experimental = {path for path in implementation if path.startswith(VERSIONED_EXPERIMENTAL_PREFIX)}
+    assert experimental == {"v2_2/preflight/cross_view_reliability_audit.py"}
+    assert implementation - experimental == expected

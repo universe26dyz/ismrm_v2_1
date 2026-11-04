@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ACTIVE = {"ACTIVE_ENTRYPOINT", "ACTIVE_EXECUTED", "ACTIVE_TRANSITIVE", "CONDITIONAL_ACTIVE", "CONFIG_RUNTIME_ASSET", "THIRD_PARTY_ACTIVE"}
+VERSIONED_EXPERIMENTAL_PREFIX = "v2_2/"
 
 
 def main(root: Path = ROOT) -> None:
@@ -46,7 +47,13 @@ def main(root: Path = ROOT) -> None:
         if entry["current_path"].startswith("src/ismrm_v2/")
         and entry.get("migration_status", "").startswith("MIGRATED_PHASE_")
     }
-    unexpected = [path.relative_to(package).as_posix() for path in package.rglob("*.py") if path.name != "__init__.py" and path.relative_to(package).as_posix() not in migrated]
+    unexpected = [
+        relative
+        for path in package.rglob("*.py")
+        if path.name != "__init__.py"
+        for relative in [path.relative_to(package).as_posix()]
+        if relative not in migrated and not relative.startswith(VERSIONED_EXPERIMENTAL_PREFIX)
+    ]
     if unexpected:
         raise SystemExit(f"unexpected clean-package implementation: {unexpected}")
     entries = {entry["current_path"]: entry for entry in manifest["entries"]}
