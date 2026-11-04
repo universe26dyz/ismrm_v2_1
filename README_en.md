@@ -1,6 +1,6 @@
 # ismrm_v2_1
 
-This is the frozen ISMRM submission baseline for the corrected HHZ SCMR-v5 MultiMap route. Operator-facing code is ordered in `pipeline/01_` through `pipeline/09_`; every module contains bilingual manuals and `run_stage.sh`. `common/` contains the import-compatible runtime code, `configs/` contains protocol and manifest templates, `subjects/` contains local subject inputs, and `runs/` contains generated results. Data and outputs are ignored by Git by default.
+This is the frozen ISMRM submission baseline for the corrected HHZ SCMR-v5 MultiMap route. Operator-facing code is ordered in `pipeline/01_` through `pipeline/09_`; project Python lives in `src/ismrm_v2/`, MATLAB in `matlab/`, and vendored NeSVoR in `third_party/nesvor/`. `configs/` contains protocol and manifest templates, `subjects/` contains local subject inputs, and `runs/` contains generated results. Data and outputs are ignored by Git by default.
 
 Run all new experiments from this root, with explicit `SUBJECT`, run roots and manifests. The server performs DICOM preprocessing, observation preparation, SCMR-v5 MATLAB fitting, 2D-fit-first, Proposed, final-pose and metrics. Local work is limited to manual ROI/mask drawing and copying the ROI bundle to the server.
 

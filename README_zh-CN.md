@@ -1,6 +1,6 @@
 # ismrm_v2_1
 
-这是 HHZ corrected SCMR-v5 的当前 ISMRM submission frozen baseline。代码按流水线顺序放在 `pipeline/01_` 到 `pipeline/09_`；每个目录同时有中英文操作手册和 `run_stage.sh`。`common/` 保存运行时所需的 import-compatible 算法代码，`configs/` 保存 protocol/manifest 模板，`subjects/` 保存本地 subject 输入副本，`runs/` 保存运行结果。后两类数据默认不进 Git。
+这是 HHZ corrected SCMR-v5 的当前 ISMRM submission frozen baseline。代码按流水线顺序放在 `pipeline/01_` 到 `pipeline/09_`；项目 Python 位于 `src/ismrm_v2/`、MATLAB 位于 `matlab/`、NeSVoR 位于 `third_party/nesvor/`。`configs/` 保存 protocol/manifest 模板，`subjects/` 保存本地 subject 输入副本，`runs/` 保存运行结果。后两类数据默认不进 Git。
 
 ## 运行原则
 
