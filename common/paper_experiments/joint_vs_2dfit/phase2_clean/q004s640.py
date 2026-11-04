@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from .contracts import sha256, write_immutable_json
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
 
 
 Q004_EXPERIMENT_ID = "Q004S640_K1_B6_roi_same_anchor_mse"

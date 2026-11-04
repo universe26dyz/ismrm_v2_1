@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from quality_experiments.Q002_B6_roi_same_anchor_mse.contracts import Q002S640_EXPERIMENT_ID
+from ismrm_v2.proposed.q002.contracts import Q002S640_EXPERIMENT_ID
 
-from .contracts import APPROVED_DECODER_SHA256, B6_CONFIG_SOURCE_SHA256, sha256
+from ismrm_v2.fit_first.contracts import APPROVED_DECODER_SHA256, B6_CONFIG_SOURCE_SHA256, sha256
 from .sparse_profile_manifest import validate_sparse_profile_manifest
 
 
@@ -34,7 +34,7 @@ def build_experiment_1_1_command(manifest: dict[str, Any], *, expected_generator
     if target.exists():
         raise FileExistsError(f"refusing existing Experiment 1.1 output root: {target}")
     values = [
-        executable, "-m", "quality_experiments.Q002_B6_roi_same_anchor_mse.run_q002_reconstruction",
+        executable, "-m", "ismrm_v2.proposed.q002.run_q002_reconstruction",
         "--cropped-prepared-root", str(manifest["prepared_root"]),
         "--subject-id", str(manifest["subject"]),
         "--sparse-manifest", str(manifest["_manifest_path"]),

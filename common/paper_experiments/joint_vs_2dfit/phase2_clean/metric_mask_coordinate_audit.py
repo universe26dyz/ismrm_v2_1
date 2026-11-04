@@ -18,14 +18,14 @@ from typing import Any, Callable, Iterable, Mapping
 
 import numpy as np
 
-from .contracts import sha256, write_immutable_json
-from .current_native_central_component_mask import load_validated_current_native_mask_plane
-from .evaluation import _metrics, reproject_binary_mask_to_native_plane, reproject_volume_to_native_plane
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.current_native_central_component_mask import load_validated_current_native_mask_plane
+from ismrm_v2.evaluation.evaluation import _metrics, reproject_binary_mask_to_native_plane, reproject_volume_to_native_plane
 from .final5_batch_runner import CaseRecord, _paths, build_batch_plan, load_final5_registry, validate_l100_metric, validate_sparse_metric
-from .final_cyj_reporting import _load_all_verified_native_cache_groups
-from .final_sparse_native_metrics import validate_sparse_endpoint_roots, validate_sparse_heldout_admission
-from .fit_first_route_contract import EXP1_1_SCHEMA, resolve_fit_first_route
-from .matched_output import verified_fit_first_effective_query_mask
+from ismrm_v2.evaluation.final_cyj_reporting import _load_all_verified_native_cache_groups
+from ismrm_v2.evaluation.final_sparse_native_metrics import validate_sparse_endpoint_roots, validate_sparse_heldout_admission
+from ismrm_v2.fit_first.fit_first_route_contract import EXP1_1_SCHEMA, resolve_fit_first_route
+from ismrm_v2.evaluation.matched_output import verified_fit_first_effective_query_mask
 
 
 FINAL_POSE_COORDINATE_SEMANTICS = "direct bundle world_train_ras converted with checkpoint model-space train_ras_to_physical; compared with Fit-first world_ras_mm in physical_RAS_mm"
@@ -172,7 +172,7 @@ def _write_csv(path: Path, rows: Iterable[Mapping[str, Any]]) -> None:
 
 def _plot_plane(path: Path, panels: list[tuple[str, np.ndarray, np.ndarray]], *, parameter: str, title: str, extent: list[float]) -> None:
     import matplotlib.pyplot as plt
-    from .visualization import DISPLAY_RANGES_MS, colorbars
+    from ismrm_v2.evaluation.visualization import DISPLAY_RANGES_MS, colorbars
     cmap, limits = colorbars().mapping[parameter.upper()], DISPLAY_RANGES_MS[parameter.upper()]
     figure = plt.figure(figsize=(2.55 * len(panels) + .6, 3.25)); grid = figure.add_gridspec(1, len(panels) + 1, width_ratios=[1] * len(panels) + [.055], wspace=.12)
     image = None
@@ -195,7 +195,7 @@ def _plot_masks(path: Path, masks: list[tuple[str, np.ndarray]], *, title: str, 
 def _plot_reference_support_overlay(path: Path, reference: np.ndarray, masks: list[tuple[str, np.ndarray]], *, parameter: str, title: str, extent: list[float]) -> None:
     """Show every support over the same unmodified native reference plane."""
     import matplotlib.pyplot as plt
-    from .visualization import DISPLAY_RANGES_MS, colorbars
+    from ismrm_v2.evaluation.visualization import DISPLAY_RANGES_MS, colorbars
     cmap, limits = colorbars().mapping[parameter.upper()], DISPLAY_RANGES_MS[parameter.upper()]
     figure = plt.figure(figsize=(2.5 * len(masks), 3.0))
     for index, (label, support) in enumerate(masks, start=1):
@@ -220,7 +220,7 @@ def _extent(cache: Mapping[str, Any], index: int, shape: tuple[int, int]) -> lis
 
 def _proposed_physical_converter(direct_root: Path, manifest: Mapping[str, Any], *, device: str) -> Callable[[np.ndarray], Any]:
     """Load only the published checkpoint/model-space transform on the requested device."""
-    from .direct_native_endpoint_audit import _load_model
+    from ismrm_v2.evaluation.direct_native_endpoint_audit import _load_model
     checkpoint = Path(manifest["checkpoint"]["path"])
     prepared = [Path(manifest["prepared_observations"][stack]["path"]) for stack in ("sax", "2ch", "4ch")]
     _model, space, torch = _load_model(checkpoint, prepared, device)
@@ -303,7 +303,7 @@ def _sparse_audit(record: CaseRecord, root: Path, qc: Path, *, figures: bool) ->
     native_root = root / "02_standardized_12_15_10" / "native_dictionary" / record.subject
     for stack, groups in admission["heldout"].items():
         if not groups: continue
-        from .fit_first import select_verified_native_cache_groups
+        from ismrm_v2.fit_first.fit_first import select_verified_native_cache_groups
         cache = select_verified_native_cache_groups(native_root, record.sparse_manifest, stack, groups)
         for index, group in enumerate(groups):
             affine = _native_ras_affine(cache, index)

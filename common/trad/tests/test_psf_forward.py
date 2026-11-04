@@ -1,8 +1,8 @@
 import torch
 
-from modules.module_04_quantitative_inr.quantitative_inr import QuantitativeINR, QuantitativeINRConfig
-from modules.module_05_signal_decoder.trad_signal_simulator import TradProtocol, TradSignalSimulator
-from modules.module_06_rigid_psf.rigid_psf_forward import GroupRigidPSF, TradQuantitativeForward
+from ismrm_v2.proposed.trad_quantitative_inr import QuantitativeINR, QuantitativeINRConfig
+from ismrm_v2.proposed.trad_signal_decoder.trad_signal_simulator import TradProtocol, TradSignalSimulator
+from ismrm_v2.proposed.rigid_psf.rigid_psf_forward import GroupRigidPSF, TradQuantitativeForward
 
 
 class _KnownSamples(torch.nn.Module):

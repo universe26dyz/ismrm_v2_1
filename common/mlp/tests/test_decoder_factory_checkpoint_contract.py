@@ -3,11 +3,11 @@ import json
 import numpy as np
 import torch
 
-from mlp.modules.module_05_signal_decoder.decoder_factory import frozen_mlp_decoder_factory
-from mlp.modules.module_05_signal_decoder.provenance import sha256_file
+from ismrm_v2.proposed.signal_decoder.decoder_factory import frozen_mlp_decoder_factory
+from ismrm_v2.proposed.signal_decoder.provenance import sha256_file
 from mlp.scripts.approve_formal_checkpoint import approve_formal_checkpoint
 from online_helpers import write_functional_checkpoint, write_observations
-from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
+from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
 
 
 def _formal_dataset(path):

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import torch
 
-from quality_experiments.Q001_recon.config import build_route_config, load_b6_resolved_config
+from ismrm_v2.proposed.q001_config import build_route_config, load_b6_resolved_config
 from quality_experiments.Q001_recon.evaluate_q001 import fixed_baseline_map_pair
 from quality_experiments.Q001_recon.run_controlled_reconstruction import checkpoint_provenance
 from quality_experiments.Q001_recon.contracts import verify_q001_input_bundle

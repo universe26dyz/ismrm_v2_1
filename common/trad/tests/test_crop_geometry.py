@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from modules.module_02_data_bridge.geometry import apply_affine_rc, crop_affine_lps_rc, dicom_lps_affine_rc
+from ismrm_v2.observations.geometry import apply_affine_rc, crop_affine_lps_rc, dicom_lps_affine_rc
 
 
 def test_crop_top_left_world_coordinate_equals_full_image_crop_coordinate():

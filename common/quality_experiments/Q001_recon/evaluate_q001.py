@@ -18,7 +18,7 @@ import numpy as np
 
 from quality_experiments.D2_k8_signal_domain.core import STACKS, write_csv, write_json
 from trad.evaluation.scmr.metrics import agreement_metrics
-from trad.evaluation.scmr.reference_2d import load_verified_reference
+from ismrm_v2.evaluation.scmr.reference_2d import load_verified_reference
 
 from .contracts import sha256, verify_q001_input_bundle
 from .evaluation import fixed_roi

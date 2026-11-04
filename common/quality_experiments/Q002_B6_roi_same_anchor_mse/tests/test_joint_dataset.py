@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 import torch
 
-from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
+from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
 
 
 def _write_observations(path: Path, *, masks: np.ndarray | None = None, timing_delta: bool = False, affine_delta: bool = False):
@@ -54,7 +54,7 @@ class _ScalarMetadataOnly:
 
 
 def test_joint_anchors_use_integer_pixel_identity_ordered_weights_and_and_mask(tmp_path):
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.joint_dataset import JointAnchorDataset
+    from ismrm_v2.proposed.q002.joint_dataset import JointAnchorDataset
 
     masks = np.ones((10, 2, 3), bool)
     for weight in range(10):
@@ -75,7 +75,7 @@ def test_joint_anchors_use_integer_pixel_identity_ordered_weights_and_and_mask(t
 
 @pytest.mark.parametrize(("kwargs", "message"), [({"timing_delta": True}, "timing"), ({"affine_delta": True}, "affine")])
 def test_joint_anchors_reject_group_metadata_mismatch(tmp_path, kwargs, message):
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.joint_dataset import JointAnchorDataset
+    from ismrm_v2.proposed.q002.joint_dataset import JointAnchorDataset
 
     path = tmp_path / "prepared" / "CYJ" / "sax" / "observations.npz"
     _write_observations(path, **kwargs)
@@ -84,7 +84,7 @@ def test_joint_anchors_reject_group_metadata_mismatch(tmp_path, kwargs, message)
 
 
 def test_joint_anchors_reject_empty_intersection_without_zero_filling(tmp_path):
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.joint_dataset import JointAnchorDataset
+    from ismrm_v2.proposed.q002.joint_dataset import JointAnchorDataset
 
     masks = np.ones((10, 2, 3), bool)
     masks[0] = False
@@ -95,7 +95,7 @@ def test_joint_anchors_reject_empty_intersection_without_zero_filling(tmp_path):
 
 
 def test_cropped_path_contract_rejects_full_fov_and_route_forbids_warm_start(tmp_path):
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.contracts import (
+    from ismrm_v2.proposed.q002.contracts import (
         Q002_EXPERIMENT_ID,
         build_q002_route_config,
         cropped_observation_paths,
@@ -116,7 +116,7 @@ def test_cropped_path_contract_rejects_full_fov_and_route_forbids_warm_start(tmp
 
 
 def test_profiled_paths_skip_none_stack_without_fake_observation(tmp_path):
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.contracts import profiled_observation_paths
+    from ismrm_v2.proposed.q002.contracts import profiled_observation_paths
 
     root = tmp_path / "derived"
     _write_observations(root / "sax" / "observations.npz")
@@ -129,7 +129,7 @@ def test_profiled_paths_skip_none_stack_without_fake_observation(tmp_path):
 
 
 def test_fixed_monitor_is_seed_stable_and_records_integer_anchor_hash(tmp_path):
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.joint_dataset import JointAnchorDataset
+    from ismrm_v2.proposed.q002.joint_dataset import JointAnchorDataset
 
     path = tmp_path / "prepared" / "CYJ" / "sax" / "observations.npz"
     _write_observations(path)

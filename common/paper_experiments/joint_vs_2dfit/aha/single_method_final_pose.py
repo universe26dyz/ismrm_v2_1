@@ -17,8 +17,8 @@ from typing import Any, Mapping
 
 import numpy as np
 
-from ..phase2_clean.contracts import sha256, write_immutable_json
-from ..phase2_clean.evaluation import PSNR_DATA_RANGES_MS, _metrics, masked_ssim
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.evaluation import PSNR_DATA_RANGES_MS, _metrics, masked_ssim
 
 
 FIT_FIRST_SCHEMAS = {
@@ -142,7 +142,7 @@ def _landmark(points: np.ndarray, labels: tuple[int, ...], name: str) -> tuple[f
 
 
 def _load_scmr_masks(root: Path, groups: np.ndarray, shape: tuple[int, int]) -> dict[str, np.ndarray]:
-    from .final5_myocardial_roi_metrics import ROI_NAMES
+    from ismrm_v2.evaluation.aha.final5_myocardial_roi_metrics import ROI_NAMES
 
     manifest, archive = root / "manifest.json", root / "sax_myocardium_masks.npz"
     if not manifest.is_file() or not archive.is_file():
@@ -178,10 +178,10 @@ def build_single_method_final_pose(*, subject: str, case: str, method: str,
     """Write immutable AHA16 and myocardial diagnostics from explicit current inputs."""
     native_root, prepared, mapping_path, roi_root, bundle_root, output = (
         Path(value) for value in (native_sax_root, prepared_sax, mapping_path, roi_bundle, native_bundle, output))
-    from .cyj11_adapter import load_cyj11_native_sax, require_cyj11_mapping
-    from .cyj11_legacy_roi import load_cyj11_roi_plane
-    from .final5_myocardial_roi_metrics import ROI_NAMES
-    from .legacy_aha16 import (LEVELS, PRIMARY_MYOCARDIUM_ROI, aha16_labels, build_filled_masks,
+    from ismrm_v2.evaluation.aha.cyj11_adapter import load_cyj11_native_sax, require_cyj11_mapping
+    from ismrm_v2.evaluation.aha.cyj11_legacy_roi import load_cyj11_roi_plane
+    from ismrm_v2.evaluation.aha.final5_myocardial_roi_metrics import ROI_NAMES
+    from ismrm_v2.evaluation.aha.legacy_aha16 import (LEVELS, PRIMARY_MYOCARDIUM_ROI, aha16_labels, build_filled_masks,
                                render_scmr_figure3, render_single_bullseye,
                                segment_statistics, validate_aha16_statistics)
     if output.exists():

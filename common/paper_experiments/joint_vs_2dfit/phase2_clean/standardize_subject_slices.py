@@ -11,7 +11,7 @@ from typing import Any
 
 import numpy as np
 
-from .contracts import sha256, write_immutable_json
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
 from ismrm_v2.sampling.sparse import STACKS, _git_sha, _physical_group_order, _read, _subset
 
 

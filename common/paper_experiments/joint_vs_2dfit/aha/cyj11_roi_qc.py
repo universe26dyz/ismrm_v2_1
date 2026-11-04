@@ -15,8 +15,8 @@ from typing import Any, Mapping
 
 import numpy as np
 
-from ..phase2_clean.contracts import sha256, write_immutable_json
-from .cyj11_adapter import cyj11_native_stack_root, load_cyj11_native_sax
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.aha.cyj11_adapter import cyj11_native_stack_root, load_cyj11_native_sax
 
 
 SCHEMA = "cyj11_native_sax_roi_qc/v1"

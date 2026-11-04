@@ -257,10 +257,10 @@ def _validate_rebuilt_training_space(rebuilt: Any, saved: Any, torch_module: Any
 def _load_model(checkpoint: Path, prepared_paths: list[Path], device_text: str,
                 *, sparse_contract: Mapping[str, Any] | None = None) -> tuple[Any, Any, Any]:
     import torch
-    from mlp.modules.module_07_objective_training.mlp_trainer import build_mlp_training_model
-    from reconstruction_core.orchestration import load_checkpoint
-    from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
-    from trad.modules.module_07_objective_training.training_space import TrainingSpace
+    from ismrm_v2.proposed.mlp_trainer import build_mlp_training_model
+    from ismrm_v2.proposed.reconstruction.orchestration import load_checkpoint
+    from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
+    from ismrm_v2.proposed.training.training_space import TrainingSpace
 
     device = torch.device(device_text)
     payload = torch.load(checkpoint, map_location=device, weights_only=False)

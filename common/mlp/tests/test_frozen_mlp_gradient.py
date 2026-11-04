@@ -1,7 +1,7 @@
 import torch
 
-from mlp.modules.module_05_signal_decoder.frozen_decoder import FrozenMLPSignalDecoder
-from mlp.modules.module_05_signal_decoder.mlp_model import MdmSignalMLP
+from ismrm_v2.proposed.signal_decoder.frozen_decoder import FrozenMLPSignalDecoder
+from ismrm_v2.proposed.signal_decoder.mlp_model import MdmSignalMLP
 
 
 def test_frozen_decoder_has_no_parameter_grad_but_preserves_tissue_input_gradients():

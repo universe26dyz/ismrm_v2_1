@@ -10,8 +10,8 @@ from typing import Any
 
 import numpy as np
 
-from .contracts import sha256, write_immutable_json
-from .evaluation import _metrics
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.evaluation import _metrics
 
 
 MASKS = ("primary_native_mask", "phase4r_l100")

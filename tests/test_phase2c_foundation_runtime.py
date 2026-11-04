@@ -70,7 +70,7 @@ def test_phase2c_clean_paths_are_the_only_foundation_authority() -> None:
     for old, new in moved.items():
         assert not (ROOT / old).exists()
         assert (ROOT / new).is_file()
-    assert (ROOT / "common/trad/modules/module_02_data_bridge/geometry.py").is_file()
+    assert (ROOT / "src/ismrm_v2/observations/geometry.py").is_file()
 
 
 def test_timing_contract_remains_hhz_ten_heartbeat_physics() -> None:
@@ -88,7 +88,7 @@ def test_timing_contract_remains_hhz_ten_heartbeat_physics() -> None:
 def test_sparse_l100_and_l50_keep_sax_and_partition_long_axis_groups(tmp_path: Path) -> None:
     sparse = _module("ismrm_v2.sampling.sparse")
     validator = _module("ismrm_v2.sampling.sparse_profile_manifest")
-    contracts = importlib.import_module("paper_experiments.joint_vs_2dfit.phase2_clean.contracts")
+    contracts = importlib.import_module("ismrm_v2.fit_first.contracts")
     source = tmp_path / "prepared"
     for stack in ("sax", "2ch", "4ch"):
         _write_observations(source / "FUTURE" / stack / "observations.npz", group_count=4)
@@ -118,8 +118,8 @@ def test_sparse_l100_and_l50_keep_sax_and_partition_long_axis_groups(tmp_path: P
 
 def test_stage_callers_and_q002_use_clean_modules_only() -> None:
     expected_imports = {
-        "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py": "from ismrm_v2.sampling.sparse_profile_manifest import LEGACY_SCHEMA_VERSION, SCHEMA_VERSION",
-        "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py": "from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest",
+        "src/ismrm_v2/proposed/q002/contracts.py": "from ismrm_v2.sampling.sparse_profile_manifest import LEGACY_SCHEMA_VERSION, SCHEMA_VERSION",
+        "src/ismrm_v2/proposed/q002/run_q002_reconstruction.py": "from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest",
         "src/ismrm_v2/preprocessing/validation.py": "from ismrm_v2.observations.mat_v73 import",
         "src/ismrm_v2/observations/prepare_all.py": "from ismrm_v2.observations.prepare_observations import",
     }

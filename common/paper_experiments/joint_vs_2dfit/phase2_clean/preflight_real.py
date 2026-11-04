@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .contracts import B6_CONFIG_SOURCE_SHA256, ELIGIBLE_REAL_SUBJECTS, sha256, validate_proposed_subject
+from ismrm_v2.fit_first.contracts import B6_CONFIG_SOURCE_SHA256, ELIGIBLE_REAL_SUBJECTS, sha256, validate_proposed_subject
 from .historical_nesvor_runtime import verify_runtime
 from .preflight_actual import verify_approved_decoder
 

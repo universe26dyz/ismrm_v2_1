@@ -1,8 +1,8 @@
 import numpy as np
 import torch
 
-from modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
-from modules.module_07_objective_training.training_space import TrainingSpace
+from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
+from ismrm_v2.proposed.training.training_space import TrainingSpace
 from third_party.nesvor.nesvor.transform import RigidTransform
 
 

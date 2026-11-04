@@ -1,8 +1,8 @@
 import numpy as np
 import torch
 
-from modules.module_06_rigid_psf.rigid_psf_forward import GroupRigidPSF
-from modules.module_08_inference_export.reprojection import export_native_plane_reprojections
+from ismrm_v2.proposed.rigid_psf.rigid_psf_forward import GroupRigidPSF
+from ismrm_v2.proposed.inference.reprojection import export_native_plane_reprojections
 
 
 class _IdentitySpace:

@@ -10,7 +10,7 @@ from typing import Any, Sequence
 
 import numpy as np
 
-from trad.modules.module_08_inference_export.export_quantitative import (
+from ismrm_v2.proposed.inference.export_quantitative import (
     FORMAL_PSF128_OUTPUT_PSF_FACTOR,
     FORMAL_PSF128_OUTPUT_RESOLUTION_MM,
     FORMAL_PSF128_SEED,

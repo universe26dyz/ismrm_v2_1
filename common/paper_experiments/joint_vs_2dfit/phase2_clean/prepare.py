@@ -2,7 +2,7 @@
 from __future__ import annotations
 import argparse, json, subprocess
 from pathlib import Path
-from .contracts import APPROVED_DECODER_SHA256, BASELINE_POSE_POLICY, ELIGIBLE_REAL_SUBJECTS, PROPOSED_CONTRACT, assert_phase1_ready, observation_hashes, sha256, write_immutable_json
+from ismrm_v2.fit_first.contracts import APPROVED_DECODER_SHA256, BASELINE_POSE_POLICY, ELIGIBLE_REAL_SUBJECTS, PROPOSED_CONTRACT, assert_phase1_ready, observation_hashes, sha256, write_immutable_json
 
 def prepare(phase1_root: str|Path, output: str|Path, b6_model: str|Path, decoder_manifest: str|Path) -> Path:
     root=Path(phase1_root); gate=root/'phase1_final_gate_matlab_parity.json'; assert_phase1_ready(json.loads(gate.read_text()))

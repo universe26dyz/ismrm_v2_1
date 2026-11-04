@@ -14,7 +14,7 @@ def test_dictionary_imports_from_standalone_common_tree():
         [
             sys.executable,
             "-c",
-            "from paper_experiments.joint_vs_2dfit.phase2_clean.dictionary import frozen_dictionary",
+            "from ismrm_v2.fit_first.dictionary import frozen_dictionary",
         ],
         cwd=project_root,
         env=env,

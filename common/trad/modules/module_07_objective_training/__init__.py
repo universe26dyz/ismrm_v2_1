@@ -1,6 +1,6 @@
 """Training-space adaptation, v1 loss, staged optimization, and checkpoints."""
 
-from .training_space import TrainingSpace
+from ismrm_v2.proposed.training.training_space import TrainingSpace
 
 
 def __getattr__(name: str):

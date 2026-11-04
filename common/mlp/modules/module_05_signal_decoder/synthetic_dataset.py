@@ -11,9 +11,9 @@ import numpy as np
 import torch
 import yaml
 
-from .mlp_model import make_input12
+from ismrm_v2.proposed.signal_decoder.mlp_model import make_input12
 from .synthetic_rr_domain import RRDomainConfig, generate_rhythm_timing9, split_rhythm_ids
-from .trad_teacher.trad_signal_simulator import TradProtocol, TradSignalSimulator
+from ismrm_v2.proposed.signal_decoder.trad_teacher.trad_signal_simulator import TradProtocol, TradSignalSimulator
 
 
 def protocol_from_record(record: Mapping[str, Any], protocol_path: str | Path, *, require_hhz_vps87: bool = True) -> TradProtocol:

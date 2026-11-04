@@ -6,7 +6,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 import numpy as np
-from .contracts import sha256, write_immutable_json
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
 
 SCHEMA = "phase4r_final_multi_subject_statistics/v1"
 SUBJECTS = ("CYJ", "DYL_2", "DYZ", "HHZ", "HJL")

@@ -8,7 +8,7 @@ def build_proposed_command(prepared_root: str|Path, decoder: str|Path, b6_model:
     decoder = Path(decoder)
     expected_decoder_sha256 = expected_decoder_sha256 or APPROVED_DECODER_SHA256
     if sha256(decoder) != expected_decoder_sha256: raise ValueError('decoder path does not match expected decoder SHA256')
-    args = [sys.executable,'-m','quality_experiments.Q002_B6_roi_same_anchor_mse.run_q002_reconstruction','--cropped-prepared-root',str(Path(prepared_root)),'--subject-id',subject_id,'--b6-model',str(Path(b6_model)),'--signal-simulator',str(decoder),'--expected-decoder-sha256',expected_decoder_sha256,'--protocol',str(Path(protocol)),'--output',str(Path(output)),'--device',device,'--experiment-id','Q002S640_B6_roi_same_anchor_mse','--anchor-batch-size','640','--endpoint-policy',endpoint_policy]
+    args = [sys.executable,'-m','ismrm_v2.proposed.q002.run_q002_reconstruction','--cropped-prepared-root',str(Path(prepared_root)),'--subject-id',subject_id,'--b6-model',str(Path(b6_model)),'--signal-simulator',str(decoder),'--expected-decoder-sha256',expected_decoder_sha256,'--protocol',str(Path(protocol)),'--output',str(Path(output)),'--device',device,'--experiment-id','Q002S640_B6_roi_same_anchor_mse','--anchor-batch-size','640','--endpoint-policy',endpoint_policy]
     if sparse_manifest is not None:
         args += ['--sparse-manifest', str(Path(sparse_manifest))]
     for flag, value in (('--expected-sparse-generator-git-sha', expected_sparse_generator_git_sha), ('--expected-sparse-manifest-sha256', expected_sparse_manifest_sha256), ('--expected-b6-model-sha256', expected_b6_model_sha256), ('--expected-protocol-sha256', expected_protocol_sha256)):

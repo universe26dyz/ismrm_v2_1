@@ -2,7 +2,7 @@ import torch
 from torch import nn
 import pytest
 
-from trad.modules.module_06_rigid_psf.rigid_psf_forward import TradQuantitativeForward
+from ismrm_v2.proposed.rigid_psf.rigid_psf_forward import TradQuantitativeForward
 
 
 class _PSF(nn.Module):
@@ -67,8 +67,8 @@ def test_fingerprint_k1_is_the_full_vector_without_weight_gather():
 
 
 def test_real_frozen_mlp_decoder_uses_bk_by_10_contract():
-    from mlp.modules.module_05_signal_decoder.frozen_decoder import FrozenMLPSignalDecoder
-    from mlp.modules.module_05_signal_decoder.mlp_model import MdmSignalMLP
+    from ismrm_v2.proposed.signal_decoder.frozen_decoder import FrozenMLPSignalDecoder
+    from ismrm_v2.proposed.signal_decoder.mlp_model import MdmSignalMLP
 
     decoder = FrozenMLPSignalDecoder(MdmSignalMLP())
     direct = decoder(torch.full((16,), 1000.0), torch.full((16,), 50.0), torch.ones(16), torch.zeros((16, 9)))

@@ -29,8 +29,8 @@ STAGE04_PROFILES = {
     for name in ("SAX100_2CH0_4CH0", "SAX100_2CH0_4CH100", "SAX100_2CH100_4CH0", "S2CH100_4CH50", "S2CH50_4CH100")
 }
 STAGE07_CLIS = {
-    "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py",
-    "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py",
+    "src/ismrm_v2/evaluation/aha/paired_aha_sd.py",
+    "src/ismrm_v2/evaluation/aha/paired_final_pose_through_plane.py",
 }
 ROLE_PRIORITY = {"ACTIVE_ENTRYPOINT": 9, "ACTIVE_EXECUTED": 8, "CONDITIONAL_ACTIVE": 7, "ACTIVE_TRANSITIVE": 6, "COMPATIBILITY_IMPORT_ONLY": 5, "CONFIG_RUNTIME_ASSET": 4, "THIRD_PARTY_ACTIVE": 3, "TEST_ONLY": 2, "LEGACY_UNUSED_BY_PIPELINE": 1}
 
@@ -73,9 +73,9 @@ def test_stage08_paths_and_external_boundaries_are_semantically_separate(tmp_pat
     inventory = _inventory(tmp_path)
     paths = {node["path"] for node in inventory["nodes"]}
     for path in (
-        "common/paper_experiments/joint_vs_2dfit/aha/common_native.py",
-        "common/paper_experiments/joint_vs_2dfit/aha/common_native_metrics_qc.py",
-        "common/paper_experiments/joint_vs_2dfit/aha/common_native_all_stack_roi_metrics.py",
+        "src/ismrm_v2/evaluation/aha/common_native.py",
+        "src/ismrm_v2/evaluation/aha/common_native_metrics_qc.py",
+        "src/ismrm_v2/evaluation/aha/common_native_all_stack_roi_metrics.py",
     ):
         assert path in paths
     assert not any("phase2_clean/common_native" in path for path in paths)
@@ -126,13 +126,13 @@ def test_phase2b_deployment_manifest_loader_follows_the_direct_callers(tmp_path:
 
 def test_markdown_uses_the_stage_specific_role_not_global_role(tmp_path: Path) -> None:
     inventory = _inventory(tmp_path)
-    node = next(node for node in inventory["nodes"] if node["path"] == "common/reconstruction_core/orchestration.py")
+    node = next(node for node in inventory["nodes"] if node["path"] == "src/ismrm_v2/proposed/reconstruction/orchestration.py")
     assert node["stage_roles"] == {"06": "ACTIVE_EXECUTED", "07": "ACTIVE_TRANSITIVE"}
     trace = (tmp_path / "trace.md").read_text(encoding="utf-8")
     stage07 = trace.split("## Stage 07", 1)[1].split("## Stage 08", 1)[0]
     direct, transitive = stage07.split("Direct execution chain:", 1)[1].split("Transitive implementation dependencies:", 1)
-    assert "common/reconstruction_core/orchestration.py" not in direct
-    assert "common/reconstruction_core/orchestration.py" in transitive
+    assert "src/ismrm_v2/proposed/reconstruction/orchestration.py" not in direct
+    assert "src/ismrm_v2/proposed/reconstruction/orchestration.py" in transitive
 
 
 def test_external_runtime_edges_cover_every_declared_stage(tmp_path: Path) -> None:

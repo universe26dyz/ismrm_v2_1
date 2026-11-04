@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from evaluation_common.myocardium.legacy_masks import (
+from ismrm_v2.evaluation.myocardium.legacy_masks import (
     classify_affine_relation,
     reorient_labels_exact,
     summarize_voxels,

@@ -1,6 +1,6 @@
 import torch
 
-from modules.module_04_quantitative_inr.quantitative_inr import QuantitativeINR, QuantitativeINRConfig
+from ismrm_v2.proposed.trad_quantitative_inr import QuantitativeINR, QuantitativeINRConfig
 
 
 def test_quantitative_inr_uses_bounded_continuous_fields_with_finite_gradients():

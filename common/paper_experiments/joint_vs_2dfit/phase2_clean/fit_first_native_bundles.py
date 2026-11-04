@@ -10,11 +10,11 @@ from typing import Any
 
 import numpy as np
 
-from .contracts import sha256, write_immutable_json
-from .evaluation import _world_sample
-from .fit_first_native_geometry import final_world_grid_original_order, negative_determinant_reindex
-from .fit_first_route_contract import INTENSITY_AUDIT_SCHEMA, resolve_fit_first_route
-from .matched_output import verified_fit_first_effective_query_mask
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.evaluation import _world_sample
+from ismrm_v2.fit_first.fit_first_native_geometry import final_world_grid_original_order, negative_determinant_reindex
+from ismrm_v2.fit_first.fit_first_route_contract import INTENSITY_AUDIT_SCHEMA, resolve_fit_first_route
+from ismrm_v2.evaluation.matched_output import verified_fit_first_effective_query_mask
 
 
 def _record(path: Path) -> dict[str, str]:

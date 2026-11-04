@@ -11,11 +11,11 @@ from pathlib import Path
 import torch
 import yaml
 
-from reconstruction_core.orchestration import finalize_timing_profile
-from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
+from ismrm_v2.proposed.reconstruction.orchestration import finalize_timing_profile
+from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
 from trad.modules.module_07_objective_training.trad_trainer import train_trad
-from trad.modules.module_08_inference_export.export_quantitative import export_quantitative_outputs
-from trad.modules.module_08_inference_export.reprojection import export_native_plane_reprojections
+from ismrm_v2.proposed.inference.export_quantitative import export_quantitative_outputs
+from ismrm_v2.proposed.inference.reprojection import export_native_plane_reprojections
 from trad.modules.module_09_qc_benchmark.qc import validate_smoke_outputs
 
 

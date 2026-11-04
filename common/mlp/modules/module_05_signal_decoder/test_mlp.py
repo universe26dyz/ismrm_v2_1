@@ -7,8 +7,8 @@ from typing import Any
 import torch
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 
-from .mlp_model import MdmSignalMLP
-from .trad_teacher.trad_signal_simulator import TradSignalSimulator
+from ismrm_v2.proposed.signal_decoder.mlp_model import MdmSignalMLP
+from ismrm_v2.proposed.signal_decoder.trad_teacher.trad_signal_simulator import TradSignalSimulator
 
 
 def fidelity_metrics(model: MdmSignalMLP, test_data: Dataset, batch_size: int, gradient_samples: int, *, protocol: Any) -> dict[str, Any]:

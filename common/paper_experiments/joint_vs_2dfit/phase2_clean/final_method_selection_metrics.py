@@ -11,12 +11,12 @@ from typing import Any, Mapping
 
 import numpy as np
 
-from .contracts import sha256, write_immutable_json
-from .current_native_central_component_mask import load_validated_current_native_mask_plane
-from .evaluation import reproject_volume_to_native_plane
-from .final_cyj_reporting import _load_all_verified_native_cache_groups
-from .final_sparse_native_metrics import validate_sparse_endpoint_roots
-from .final_stratified_native_metrics import PARAMETERS, REGIONS, STACKS, classify_stratified_groups
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.current_native_central_component_mask import load_validated_current_native_mask_plane
+from ismrm_v2.evaluation.evaluation import reproject_volume_to_native_plane
+from ismrm_v2.evaluation.final_cyj_reporting import _load_all_verified_native_cache_groups
+from ismrm_v2.evaluation.final_sparse_native_metrics import validate_sparse_endpoint_roots
+from ismrm_v2.evaluation.final_stratified_native_metrics import PARAMETERS, REGIONS, STACKS, classify_stratified_groups
 from .sparse_profile_manifest import validate_sparse_profile_manifest
 
 SCHEMA = "phase4r_method_selection_common_support/v1"

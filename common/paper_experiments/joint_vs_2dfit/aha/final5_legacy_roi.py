@@ -9,8 +9,8 @@ from typing import Any
 
 import numpy as np
 
-from ..phase2_clean.contracts import sha256, write_immutable_json
-from .final5_adapter import ROI_FILENAMES
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.aha.final5_adapter import ROI_FILENAMES
 
 
 DERIVATION_SCHEMA = "final5_legacy_roi_derivation_config/v1"

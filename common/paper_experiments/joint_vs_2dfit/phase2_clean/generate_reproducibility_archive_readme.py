@@ -162,7 +162,7 @@ for CASE_ROOT in "$RUN_ROOT/sparse_inputs/$SUBJECT"/*; do
   test -f "$SPARSE_MANIFEST"
   test ! -e "$OUTPUT"
 
-  "$PY" -m paper_experiments.joint_vs_2dfit.phase2_clean.proposed \
+  "$PY" -m ismrm_v2.proposed.proposed \
     --prepared-root "$INPUT_ROOT" \
     --subject-id "$SUBJECT" \
     --decoder "$DECODER" \
@@ -364,7 +364,7 @@ for CASE_ROOT in "$RUN_ROOT/sparse_inputs/$SUBJECT"/*; do
   test -f "$SPARSE_MANIFEST"
   test ! -e "$OUTPUT"
 
-  "$PY" -m paper_experiments.joint_vs_2dfit.phase2_clean.proposed \
+  "$PY" -m ismrm_v2.proposed.proposed \
     --prepared-root "$INPUT_ROOT" \
     --subject-id "$SUBJECT" \
     --decoder "$DECODER" \

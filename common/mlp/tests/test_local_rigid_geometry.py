@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from modules.module_02_data_bridge.geometry import (
+from ismrm_v2.observations.geometry import (
     apply_affine_rc,
     cropped_affine_lps_rc_to_initial_rigid,
     lps_to_ras,

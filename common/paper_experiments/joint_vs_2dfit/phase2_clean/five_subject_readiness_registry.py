@@ -11,7 +11,7 @@ from typing import Any
 
 import numpy as np
 
-from .contracts import APPROVED_DECODER_SHA256, B6_CONFIG_SOURCE_SHA256, sha256, write_immutable_json
+from ismrm_v2.fit_first.contracts import APPROVED_DECODER_SHA256, B6_CONFIG_SOURCE_SHA256, sha256, write_immutable_json
 from .sparse import _git_sha
 from .standardize_subject_slices import TARGET_COUNTS, validate_standardization_manifest
 from .reuse_standardized_native_dictionary_maps import validate_standardized_native_dictionary_reuse

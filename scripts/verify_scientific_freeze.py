@@ -55,12 +55,12 @@ def verify(root: Path) -> dict[str, Any]:
     _require_equal(manifest["protocol"]["sha256"], models["protocol_sha256"], "manifest protocol SHA")
     _require_equal(runtime["forbidden_decoder_ti_ms"], models["forbidden_decoder_ti_ms"], "forbidden decoder TI")
 
-    proposed = root / "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py"
-    q002_contracts = root / "common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py"
-    q002_training = root / "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py"
+    proposed = root / "src/ismrm_v2/proposed/proposed.py"
+    q002_contracts = root / "src/ismrm_v2/proposed/q002/contracts.py"
+    q002_training = root / "src/ismrm_v2/proposed/q002/training.py"
     stage06 = root / "pipeline/06_PROPOSED/run_stage.sh"
     _require_contains(proposed, "SCMR_V5_CORRECTED_DECODER_SHA256", "corrected decoder default")
-    _require_contains(root / "common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py", models["decoder_sha256"], "corrected decoder provenance")
+    _require_contains(root / "src/ismrm_v2/fit_first/contracts.py", models["decoder_sha256"], "corrected decoder provenance")
     _require_contains(stage06, models["decoder_sha256"], "corrected decoder binding")
     for flag, value in (("--expected-b6-model-sha256", models["b6_model_sha256"]), ("--expected-protocol-sha256", models["protocol_sha256"])):
         _require_contains(stage06, flag, "Proposed runtime validation")
@@ -88,7 +88,7 @@ def verify(root: Path) -> dict[str, Any]:
     _require_equal(resolved["spatial_regularization"]["n_points"], 256, "regularization points")
 
     inr_source = root / "common/mlp/modules/module_04_quantitative_inr/quantitative_inr.py"
-    decoder_source = root / "common/mlp/modules/module_05_signal_decoder/frozen_decoder.py"
+    decoder_source = root / "src/ismrm_v2/proposed/signal_decoder/frozen_decoder.py"
     for text in ("t2_ms = (5.0 + 195.0", "2500.0 - t2_ms", "b1 = (0.1 + 1.1", "F.softplus(raw[..., 3])"):
         _require_contains(inr_source, text, "quantitative INR bounds")
     for text in ("parameter.requires_grad_(False)", "self.mlp.eval()", "normalize is not True"):
@@ -98,8 +98,8 @@ def verify(root: Path) -> dict[str, Any]:
         raise ValueError("frozen decoder forward must preserve gradients to tissue inputs")
 
     baseline = contract["baseline_fit_first"]
-    baseline_source = root / "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py"
-    fit_first_source = root / "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py"
+    baseline_source = root / "src/ismrm_v2/fit_first/baseline.py"
+    fit_first_source = root / "src/ismrm_v2/fit_first/fit_first.py"
     native_cache = root / "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh"
     for text in ("--prebuilt-native-maps-root", "--reuse-native-maps-root", "--require-scmr-v5-native-maps"):
         _require_contains(native_cache, text, "fit-first active route")

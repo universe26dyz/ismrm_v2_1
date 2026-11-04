@@ -14,11 +14,11 @@ from typing import Any
 
 import numpy as np
 
-from quality_experiments.Q002_B6_roi_same_anchor_mse.contracts import profiled_observation_paths
+from ismrm_v2.proposed.q002.contracts import profiled_observation_paths
 
-from .contracts import sha256, write_immutable_json
-from .direct_native_bundles import _predict_central
-from .direct_native_endpoint_audit import _load_model, direct_native_world_grid
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.direct_native_bundles import _predict_central
+from ismrm_v2.evaluation.direct_native_endpoint_audit import _load_model, direct_native_world_grid
 
 
 STACKS = ("sax", "2ch", "4ch")

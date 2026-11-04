@@ -2,7 +2,7 @@
 from __future__ import annotations
 import argparse,json
 from pathlib import Path
-from .contracts import ELIGIBLE_REAL_SUBJECTS, compare_observation_hashes, compare_real_observation_identities, validate_proposed_subject
+from ismrm_v2.fit_first.contracts import ELIGIBLE_REAL_SUBJECTS, compare_observation_hashes, compare_real_observation_identities, validate_proposed_subject
 def _load(value: str | Path | dict) -> dict:
  return value if isinstance(value, dict) else json.loads(Path(value).read_text())
 def preflight(method:str,dataset:str,input_manifest:str|Path|dict,method_manifest:str|Path|dict,subject_id:str|None=None)->dict:

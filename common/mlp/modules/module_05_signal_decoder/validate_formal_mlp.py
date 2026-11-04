@@ -8,8 +8,8 @@ from pathlib import Path
 
 import torch
 
-from .mlp_model import MdmSignalMLP
-from .provenance import sha256_file
+from ismrm_v2.proposed.signal_decoder.mlp_model import MdmSignalMLP
+from ismrm_v2.proposed.signal_decoder.provenance import sha256_file
 from .test_mlp import fidelity_metrics
 from .train_mlp import LazyRRSplit, validate_dataset_provenance
 

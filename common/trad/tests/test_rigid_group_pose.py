@@ -1,6 +1,6 @@
 import torch
 
-from modules.module_06_rigid_psf.rigid_psf_forward import GroupRigidPSF
+from ismrm_v2.proposed.rigid_psf.rigid_psf_forward import GroupRigidPSF
 
 
 def test_rigid_pose_is_one_axisangle_tensor_per_group_and_has_no_deformation():

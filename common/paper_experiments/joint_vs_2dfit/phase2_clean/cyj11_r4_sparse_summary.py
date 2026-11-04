@@ -18,7 +18,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from .contracts import sha256, write_immutable_json
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
 from .cyj11_r4_reporting import PROTOCOL_CASES, R4_SOURCE, SUBJECTS
 
 

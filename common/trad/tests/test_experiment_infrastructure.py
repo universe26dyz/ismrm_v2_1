@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 import torch
 
-from modules.module_07_objective_training.experiment_infrastructure import (
+from ismrm_v2.proposed.training.experiment_infrastructure import (
     CachedBalancedSampler,
     FixedMonitorSet,
     IterationProfiler,

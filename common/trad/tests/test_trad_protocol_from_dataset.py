@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
+from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
 from modules.module_07_objective_training.trad_trainer import build_protocol_from_dataset
 
 

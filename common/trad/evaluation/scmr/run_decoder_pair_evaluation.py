@@ -26,8 +26,8 @@ from .decoder_pair import (
     select_representative_groups,
     validate_verified_reference,
 )
-from .quality_control import load_legacy_scmr_colorbars, write_range_audit
-from .reference_2d import load_verified_reference, sha256
+from ismrm_v2.evaluation.scmr.quality_control import load_legacy_scmr_colorbars, write_range_audit
+from ismrm_v2.evaluation.scmr.reference_2d import load_verified_reference, sha256
 
 
 def _write_json(value: dict[str, Any], path: Path) -> None:

@@ -4,8 +4,8 @@ from __future__ import annotations
 import argparse
 import json
 
-from .final5_adapter import FINAL5_SUBJECTS, assess_final5_aha_cohort, assess_final5_aha_readiness
-from .final5_aha16 import build_final5_aha16
+from ismrm_v2.evaluation.aha.final5_adapter import FINAL5_SUBJECTS, assess_final5_aha_cohort, assess_final5_aha_readiness
+from ismrm_v2.evaluation.aha.final5_aha16 import build_final5_aha16
 
 
 def main() -> None:

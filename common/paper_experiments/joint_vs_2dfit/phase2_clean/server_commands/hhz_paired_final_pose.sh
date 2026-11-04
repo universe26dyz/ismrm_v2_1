@@ -33,7 +33,7 @@ cd "$REPO" || exit 2
 
 "$PY" - "$NATIVE_MANIFEST" <<'PY'
 import json, pathlib, sys
-from paper_experiments.joint_vs_2dfit.phase2_clean.fit_first import require_scmr_v5_native_cache_manifest
+from ismrm_v2.fit_first.fit_first import require_scmr_v5_native_cache_manifest
 path = pathlib.Path(sys.argv[1])
 require_scmr_v5_native_cache_manifest(json.loads(path.read_text()), stack="SCMR-v5 SAX")
 print("native-cache mapping contract: SCMR-v5 MATLAB PASS")
@@ -106,35 +106,35 @@ for CASE in "${CASES[@]}"; do
   fi
 
   run_new "$CASE Proposed final-pose bundle" "$DIRECT_BUNDLE" \
-    "$PY" -m paper_experiments.joint_vs_2dfit.aha.cyj11_r3_direct_final_pose_bundle \
+    "$PY" -m ismrm_v2.evaluation.aha.cyj11_r3_direct_final_pose_bundle \
       --checkpoint "$PROPOSED/model.pt" --prepared-root "$PREPARED_FOR_CASE" --sparse-manifest "$MANIFEST" \
       --subject "$SUBJECT" --case "$CASE" --output "$DIRECT_BUNDLE" --device cuda:0 || exit 1
 
   run_new "$CASE Fit-first final-pose bundle" "$FIT_BUNDLE" \
-    "$PY" -m paper_experiments.joint_vs_2dfit.aha.current_fit_first_final_pose_bundle \
+    "$PY" -m ismrm_v2.evaluation.aha.current_fit_first_final_pose_bundle \
       --baseline-root "$FIT" --native-maps-root "$NATIVE_ROOT" --subject "$SUBJECT" --case "$CASE" \
       --sparse-manifest "$MANIFEST" --output "$FIT_BUNDLE" || exit 1
 
   run_new "$CASE AHA mapping" "$MAPPING" \
-    "$PY" -m paper_experiments.joint_vs_2dfit.aha.derive_final_pose_mapping \
+    "$PY" -m ismrm_v2.evaluation.aha.derive_final_pose_mapping \
       --subject "$SUBJECT" --case "$CASE" --prepared-sax "$PREP_SAX" --roi-bundle "$ROI_BUNDLE" --output "$MAPPING" || exit 1
 
   run_new "$CASE paired AHA and myocardial metrics" "$METRICS" \
-    "$PY" -m paper_experiments.joint_vs_2dfit.aha.paired_final_pose_postprocess \
+    "$PY" -m ismrm_v2.evaluation.aha.paired_final_pose_postprocess \
       --subject "$SUBJECT" --case "$CASE" --native-sax-root "$NATIVE_ROOT/sax" --prepared-sax "$PREP_SAX" \
       --mapping "$MAPPING" --roi-bundle "$ROI_BUNDLE" --outer-mask-bundle "$ROI_BUNDLE" \
       --proposed-bundle "$DIRECT_BUNDLE" --fit-first-bundle "$FIT_BUNDLE" --output "$METRICS" || exit 1
 
   run_new "$CASE 1px-core AHA SD bullseyes" "$AHA_SD_1PX" \
-    "$PY" -m paper_experiments.joint_vs_2dfit.aha.paired_aha_sd \
+    "$PY" -m ismrm_v2.evaluation.aha.paired_aha_sd \
       --segment-statistics-csv "$METRICS/aha16/aha16_segment_statistics_myocardium_core_1px.csv" --output "$AHA_SD_1PX" || exit 1
 
   run_new "$CASE legacy-core AHA SD bullseyes" "$AHA_SD_LEGACY" \
-    "$PY" -m paper_experiments.joint_vs_2dfit.aha.paired_aha_sd \
+    "$PY" -m ismrm_v2.evaluation.aha.paired_aha_sd \
       --segment-statistics-csv "$METRICS/aha16/aha16_segment_statistics_myocardium_core_legacy.csv" --output "$AHA_SD_LEGACY" || exit 1
 
   run_new "$CASE full-heart shared-mask through-plane and paired-slice QC" "$VISUAL_QC" \
-    "$PY" -m paper_experiments.joint_vs_2dfit.aha.paired_final_pose_through_plane \
+    "$PY" -m ismrm_v2.evaluation.aha.paired_final_pose_through_plane \
       --subject "$SUBJECT" --case "$CASE" --native-sax-root "$NATIVE_ROOT/sax" --prepared-sax "$PREP_SAX" \
       --proposed-bundle "$DIRECT_BUNDLE" --fit-first-bundle "$FIT_BUNDLE" \
       --proposed-t1 "$PROPOSED/T1_3D.nii.gz" --proposed-t2 "$PROPOSED/T2_3D.nii.gz" \

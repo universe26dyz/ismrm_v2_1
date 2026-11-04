@@ -14,7 +14,7 @@ from .psf_k8_postprocess_common import (
     write_json,
     write_synthetic_mat,
 )
-from .reference_2d import STACKS, sha256
+from ismrm_v2.evaluation.scmr.reference_2d import STACKS, sha256
 from .reference_paths import load_reference_paths
 
 

@@ -14,12 +14,12 @@ from pathlib import Path
 
 import torch
 
-from mlp.modules.module_07_objective_training.mlp_trainer import train_mlp_reconstruction
-from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
-from trad.modules.module_08_inference_export.export_quantitative import export_quantitative_outputs, export_quantitative_outputs_psf128
-from trad.modules.module_08_inference_export.reprojection import export_native_plane_reprojections
+from ismrm_v2.proposed.mlp_trainer import train_mlp_reconstruction
+from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
+from ismrm_v2.proposed.inference.export_quantitative import export_quantitative_outputs, export_quantitative_outputs_psf128
+from ismrm_v2.proposed.inference.reprojection import export_native_plane_reprojections
 
-from .config import build_route_config, load_b6_resolved_config
+from ismrm_v2.proposed.q001_config import build_route_config, load_b6_resolved_config
 from .contracts import verify_q001_input_bundle
 from .evaluation import evaluation_plan
 from .routes import build_route_plan, registration_inputs_for_training

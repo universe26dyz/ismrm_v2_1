@@ -65,7 +65,7 @@ def _write_reference_comparison(
 ) -> dict[str, str]:
     """Write residual/common-support arrays and requested reference-space metrics."""
 
-    from .reference_2d import STACKS, load_verified_reference
+    from ismrm_v2.evaluation.scmr.reference_2d import STACKS, load_verified_reference
 
     reference = load_verified_reference(reference_root, subject_id, preprocessed_root)
     hashes: dict[str, str] = {}

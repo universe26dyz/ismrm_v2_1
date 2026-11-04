@@ -11,7 +11,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from trad.evaluation.scmr.quality_control import DISPLAY_RANGES_MS, RESIDUAL_RANGES_MS, load_legacy_scmr_colorbars
+from ismrm_v2.evaluation.scmr.quality_control import DISPLAY_RANGES_MS, RESIDUAL_RANGES_MS, load_legacy_scmr_colorbars
 
 
 def deterministic_representatives(identities: Iterable[tuple[str, int, int, int]], *, limit: int) -> list[tuple[str, int, int, int]]:

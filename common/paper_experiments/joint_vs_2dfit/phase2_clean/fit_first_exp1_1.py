@@ -16,8 +16,8 @@ from typing import Any
 
 import numpy as np
 
-from .contracts import sha256, write_immutable_json
-from .fit_first import build_independent_nesvor_commands, export_nesvor_native_inputs
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.fit_first.fit_first import build_independent_nesvor_commands, export_nesvor_native_inputs
 from .sparse_profile_manifest import validate_sparse_profile_manifest
 
 

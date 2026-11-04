@@ -11,7 +11,7 @@ EXPECTED_SHA256 = {
 
 
 def test_vendored_scmr_luts_are_exact_legacy_files_and_construct_identical_colormaps():
-    from trad.evaluation.scmr.quality_control import _sha256, load_legacy_scmr_colorbars
+    from ismrm_v2.evaluation.scmr.quality_control import _sha256, load_legacy_scmr_colorbars
 
     legacy = load_legacy_scmr_colorbars(LEGACY_ROOT)
     vendored = load_legacy_scmr_colorbars()

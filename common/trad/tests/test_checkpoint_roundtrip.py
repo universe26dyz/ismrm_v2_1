@@ -8,7 +8,7 @@ def _dataset(path):
     affine = np.eye(4); affine[:3, 0] = [0, 2, 0]; affine[:3, 1] = [1, 0, 0]; affine[:3, 2] = [0, 0, 6]
     images = np.stack([np.full((2, 2), 0.2 + 0.01 * weight, dtype=np.float32) for weight in range(10)])
     np.savez_compressed(path, images=images, masks=np.ones((10, 2, 2), dtype=bool), group_idx=np.zeros(10, dtype=np.int64), weight_idx=np.arange(10, dtype=np.int64), stack_idx=np.zeros(10, dtype=np.int64), acquisition_time_ms=np.arange(10, dtype=np.float64), timing9_ms=np.full((10, 9), 70.0), affine_lps_rc=np.repeat(affine[None], 10, axis=0), pixel_spacing_rc_mm=np.repeat([[2.0, 1.0]], 10, axis=0), slice_thickness_mm=np.full(10, 6.0), tr_ms=np.full(10, 3.2), vps=np.full(10, 32, dtype=np.int64))
-    from modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
+    from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
     return QuantPointDataset([path])
 
 

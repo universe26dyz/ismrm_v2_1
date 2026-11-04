@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from modules.module_08_inference_export.export_quantitative import sample_quantitative_fields
+from ismrm_v2.proposed.inference.export_quantitative import sample_quantitative_fields
 
 
 class _ConstantINR(nn.Module):

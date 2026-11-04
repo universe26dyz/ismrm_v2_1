@@ -10,7 +10,7 @@ import numpy as np
 import pydicom
 import yaml
 
-from trad.modules.module_02_data_bridge.geometry import crop_affine_lps_rc, dicom_lps_affine_rc
+from ismrm_v2.observations.geometry import crop_affine_lps_rc, dicom_lps_affine_rc
 from .timing import compute_duration_before_acq
 
 

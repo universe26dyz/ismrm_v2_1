@@ -261,7 +261,7 @@ def _paired_support(pair: DecoderPair, parameter: str, stack: str) -> np.ndarray
 
 
 def _crop(data: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    from .quality_control import _crop as existing_crop
+    from ismrm_v2.evaluation.scmr.quality_control import _crop as existing_crop
 
     return existing_crop(data, mask)
 
@@ -271,7 +271,7 @@ def render_paired_figure2(pair: DecoderPair, selected: dict[str, int], output: s
 
     import matplotlib.pyplot as plt
 
-    from .quality_control import DISPLAY_RANGES_MS, RESIDUAL_RANGES_MS
+    from ismrm_v2.evaluation.scmr.quality_control import DISPLAY_RANGES_MS, RESIDUAL_RANGES_MS
 
     root = Path(output)
     root.mkdir(parents=True, exist_ok=True)
@@ -328,7 +328,7 @@ def render_paired_all_slice_montages(pair: DecoderPair, paired_rows: list[dict[s
 
     import matplotlib.pyplot as plt
 
-    from .quality_control import DISPLAY_RANGES_MS, RESIDUAL_RANGES_MS
+    from ismrm_v2.evaluation.scmr.quality_control import DISPLAY_RANGES_MS, RESIDUAL_RANGES_MS
 
     root = Path(output)
     lookup = {(row["method"], row["parameter"], row["stack"], row["group_idx"]): row for row in paired_rows if row["method"] in {"Bloch", "FrozenMLP"}}
@@ -416,7 +416,7 @@ def render_paired_myocardium(pair: DecoderPair, selected: dict[str, int], masks:
 
     import matplotlib.pyplot as plt
 
-    from .quality_control import DISPLAY_RANGES_MS, RESIDUAL_RANGES_MS
+    from ismrm_v2.evaluation.scmr.quality_control import DISPLAY_RANGES_MS, RESIDUAL_RANGES_MS
 
     root = Path(output)
     root.mkdir(parents=True, exist_ok=True)
@@ -462,7 +462,7 @@ def render_paired_figure1(reference: Any, trad_run: str | Path, mlp_run: str | P
 
     import matplotlib.pyplot as plt
 
-    from .quality_control import DISPLAY_RANGES_MS
+    from ismrm_v2.evaluation.scmr.quality_control import DISPLAY_RANGES_MS
     from .run_scmr_fig12 import _foreground_center, _plane_world, _require_nifti, _sample_plane_shaped
 
     nib, _ = _require_nifti()

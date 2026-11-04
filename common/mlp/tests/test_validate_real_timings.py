@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 import torch
 
-from mlp.modules.module_05_signal_decoder.mlp_model import MdmSignalMLP
-from mlp.modules.module_05_signal_decoder.provenance import sha256_file
+from ismrm_v2.proposed.signal_decoder.mlp_model import MdmSignalMLP
+from ismrm_v2.proposed.signal_decoder.provenance import sha256_file
 from mlp.modules.module_05_signal_decoder.validate_real_timings import validate_real_timings
 
 

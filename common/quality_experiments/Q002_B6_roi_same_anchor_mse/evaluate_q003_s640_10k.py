@@ -13,7 +13,7 @@ import numpy as np
 from quality_experiments.D2_k8_signal_domain.core import write_csv, write_json
 from quality_experiments.Q001_recon.metrics import true_pooled_rows
 from trad.evaluation.scmr.metrics import agreement_metrics, signal_agreement_metrics
-from trad.evaluation.scmr.reference_2d import load_verified_reference
+from ismrm_v2.evaluation.scmr.reference_2d import load_verified_reference
 
 from .evaluate_q002 import _canonical_weight_zero_maps, _load, _sha, _signal_identity_index, _validated_route_checkpoint
 from .metrics import fingerprint_cosine_summary, strict_fingerprint_four_way_common_support, strict_q003_four_way_common_support

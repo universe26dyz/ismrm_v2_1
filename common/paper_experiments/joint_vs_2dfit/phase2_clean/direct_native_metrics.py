@@ -10,8 +10,8 @@ from typing import Any
 
 import numpy as np
 
-from .contracts import sha256, write_immutable_json
-from .final_cyj_reporting import PARAMETERS, _load_all_verified_native_cache_groups
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.final_cyj_reporting import PARAMETERS, _load_all_verified_native_cache_groups
 from .mask_sensitivity_audit import MASKS, run_mask_sensitivity_audit
 
 

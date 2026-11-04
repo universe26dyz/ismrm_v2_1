@@ -14,9 +14,9 @@ from typing import Any
 import numpy as np
 import torch
 
-from mlp.modules.module_05_signal_decoder.checkpoint_loader import load_frozen_mlp_decoder_for_benchmark
+from ismrm_v2.proposed.signal_decoder.checkpoint_loader import load_frozen_mlp_decoder_for_benchmark
 from mlp.modules.module_05_signal_decoder.synthetic_dataset import protocol_from_record
-from mlp.modules.module_05_signal_decoder.trad_teacher.trad_signal_simulator import TradSignalSimulator
+from ismrm_v2.proposed.signal_decoder.trad_teacher.trad_signal_simulator import TradSignalSimulator
 
 
 def _synchronize(device: torch.device) -> None:

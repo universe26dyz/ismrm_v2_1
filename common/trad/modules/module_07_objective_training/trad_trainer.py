@@ -1,6 +1,6 @@
 """Compatibility facade for the decoder-neutral reconstruction engine."""
 
-from reconstruction_core.orchestration import (
+from ismrm_v2.proposed.reconstruction.orchestration import (
     TradTrainingModel,
     _balanced_mse,
     _data_loss,

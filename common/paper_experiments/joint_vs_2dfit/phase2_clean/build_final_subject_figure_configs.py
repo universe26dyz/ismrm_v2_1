@@ -15,8 +15,8 @@ import tempfile
 from pathlib import Path
 from typing import Mapping
 
-from .contracts import write_immutable_json
-from .final_cyj_reporting import ENDPOINTS, EXPECTED_FOLDS, METHOD_DISPLAY_ORDER, PROPOSED_METHODS
+from ismrm_v2.fit_first.contracts import write_immutable_json
+from ismrm_v2.evaluation.final_cyj_reporting import ENDPOINTS, EXPECTED_FOLDS, METHOD_DISPLAY_ORDER, PROPOSED_METHODS
 
 
 COMMON_SUPPORT_CONTRACT = "frozen_L100_display_mask AND in_volume(all configured comparison methods) AND finite(all configured comparison methods)"

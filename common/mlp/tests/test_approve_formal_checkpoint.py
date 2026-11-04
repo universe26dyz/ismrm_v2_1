@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import torch
 
-from mlp.modules.module_05_signal_decoder.provenance import sha256_file
+from ismrm_v2.proposed.signal_decoder.provenance import sha256_file
 from online_helpers import write_functional_checkpoint
 
 

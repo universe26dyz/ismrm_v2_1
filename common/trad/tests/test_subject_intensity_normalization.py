@@ -6,9 +6,9 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from modules.module_03_dataset_geometry import quantitative_point_dataset as dataset_module
-from modules.module_03_dataset_geometry.quantitative_point_dataset import _exact_linear_quantile_kthvalue, robust_trimmed_mean_intensity
-from reconstruction_core.orchestration import _intensity_normalization_provenance
-from modules.module_07_objective_training.experiment_infrastructure import write_experiment_manifest
+from ismrm_v2.proposed.quantitative_point_dataset import _exact_linear_quantile_kthvalue, robust_trimmed_mean_intensity
+from ismrm_v2.proposed.reconstruction.orchestration import _intensity_normalization_provenance
+from ismrm_v2.proposed.training.experiment_infrastructure import write_experiment_manifest
 
 
 def test_trimmed_mean_intensity_matches_strict_q10_q90_mask():

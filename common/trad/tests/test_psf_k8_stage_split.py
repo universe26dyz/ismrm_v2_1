@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from trad.evaluation.scmr.psf_k8_postprocess_common import verify_stage1
-from trad.evaluation.scmr.reference_2d import STACKS, sha256
+from ismrm_v2.evaluation.scmr.reference_2d import STACKS, sha256
 
 
 def _stage1(root: Path, n_samples: int = 8) -> None:

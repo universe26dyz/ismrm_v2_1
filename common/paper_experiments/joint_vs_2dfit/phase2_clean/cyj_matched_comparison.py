@@ -12,8 +12,8 @@ from typing import Any, Iterable
 
 import numpy as np
 
-from .contracts import sha256, write_immutable_json
-from .matched_output import endpoint_contract, export_fixed_l100_fit_first, formalize_proposed_export
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.matched_output import endpoint_contract, export_fixed_l100_fit_first, formalize_proposed_export
 
 
 CYJ_CASES = (

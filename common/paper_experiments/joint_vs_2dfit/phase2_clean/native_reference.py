@@ -5,8 +5,8 @@ from pathlib import Path
 import numpy as np
 import nibabel as nib
 
-from .contracts import historical_reference_is_current_compatible, sha256, write_immutable_json
-from .fit_first import fit_native
+from ismrm_v2.fit_first.contracts import historical_reference_is_current_compatible, sha256, write_immutable_json
+from ismrm_v2.fit_first.fit_first import fit_native
 
 def build_current_native_reference(observations: str|Path, output: str|Path, *, legacy_config: dict | None = None) -> Path:
     """Generate effective (not 3-D-GT) maps with the frozen current dictionary matcher."""

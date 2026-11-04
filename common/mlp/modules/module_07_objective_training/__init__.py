@@ -6,7 +6,7 @@ def __getattr__(name: str):
         from . import mlp_trainer
         return getattr(mlp_trainer, name)
     if name == "TrainingSpace":
-        from trad.modules.module_07_objective_training.training_space import TrainingSpace
+        from ismrm_v2.proposed.training.training_space import TrainingSpace
         return TrainingSpace
     raise AttributeError(name)
 

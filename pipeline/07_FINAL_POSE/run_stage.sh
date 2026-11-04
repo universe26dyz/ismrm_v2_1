@@ -7,6 +7,6 @@ ROI_BUNDLE=${3:?usage: $0 RUN_ROOT SUBJECT ROI_BUNDLE CASE}
 CASE=${4:?usage: $0 RUN_ROOT SUBJECT ROI_BUNDLE CASE}
 PYTHON=${PYTHON:-python}
 PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m ismrm_v2.io.validate_subject_id "$SUBJECT"
-REPO="$PROJECT_ROOT/common" SUBJECT="$SUBJECT" \
+PYTHONPATH="$PROJECT_ROOT/src:$PROJECT_ROOT/common${PYTHONPATH:+:$PYTHONPATH}" REPO="$PROJECT_ROOT/common" SUBJECT="$SUBJECT" \
   bash "$REPO/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh" \
   "$RUN_ROOT" "$RUN_ROOT" "$ROI_BUNDLE" "$CASE"

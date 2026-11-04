@@ -232,7 +232,7 @@ def build_sparse_profile_condition(prepared_root: str | Path, subject: str, prof
 
 def _default_audit(path: Path) -> dict[str, object]:
     try:
-        from trad.modules.module_06_rigid_psf.hb1_stack_adapter import audit_hb1_stack
+        from ismrm_v2.proposed.rigid_psf.hb1_stack_adapter import audit_hb1_stack
     except ModuleNotFoundError as exc:
         raise RuntimeError("HB1 stack audit requires the project CPU PyTorch environment") from exc
     audit = audit_hb1_stack(path)

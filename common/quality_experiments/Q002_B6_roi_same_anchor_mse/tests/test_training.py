@@ -12,7 +12,7 @@ class _Joint:
 
 
 def test_anchor_sampler_uses_replacement_and_never_expands_to_640_anchors():
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.training import JointAnchorSampler
+    from ismrm_v2.proposed.q002.training import JointAnchorSampler
 
     sampler = JointAnchorSampler(_Joint(), seed=7)
     batch = sampler.sample(64)
@@ -23,7 +23,7 @@ def test_anchor_sampler_uses_replacement_and_never_expands_to_640_anchors():
 
 
 def test_route_controlled_anchor_sampler_keeps_q002_64_and_q002_s640_distinct():
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.training import JointAnchorSampler
+    from ismrm_v2.proposed.q002.training import JointAnchorSampler
 
     q002_64 = JointAnchorSampler(_Joint(), seed=7, anchor_batch_size=64).sample()
     q002_s640 = JointAnchorSampler(_Joint(), seed=7, anchor_batch_size=640).sample()
@@ -37,7 +37,7 @@ def test_route_controlled_anchor_sampler_keeps_q002_64_and_q002_s640_distinct():
 
 
 def test_s640_control_accounting_uses_k8_and_preserves_b6_regularization_budget():
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.training import q002_training_controls
+    from ismrm_v2.proposed.q002.training import q002_training_controls
 
     controls = q002_training_controls(
         {"stage_a_iterations": 2000, "stage_b_iterations": 4000, "batch_size": 640, "psf_samples": 8, "seed": 20260911},
@@ -55,7 +55,7 @@ def test_s640_control_accounting_uses_k8_and_preserves_b6_regularization_budget(
 
 
 def test_joint_vector_mse_matches_hand_formula_and_uses_b6_stack_weights():
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.training import joint_vector_mse
+    from ismrm_v2.proposed.q002.training import joint_vector_mse
 
     prediction = torch.tensor([[1.0] * 10, [3.0] * 10])
     observed = torch.tensor([[0.0] * 10, [1.0] * 10])
@@ -64,14 +64,14 @@ def test_joint_vector_mse_matches_hand_formula_and_uses_b6_stack_weights():
 
 
 def test_q002_control_contract_preserves_b6_stage_and_scalar_budget():
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.training import q002_training_controls
+    from ismrm_v2.proposed.q002.training import q002_training_controls
 
     controls = q002_training_controls({"stage_a_iterations": 2000, "stage_b_iterations": 4000, "batch_size": 640, "psf_samples": 8, "seed": 20260911})
     assert controls == {"stage_a_iterations": 2000, "stage_b_iterations": 4000, "effective_scalar_budget": 640, "anchor_batch_size": 64, "weights_per_anchor": 10, "psf_samples": 8, "seed": 20260911}
 
 
 def test_q002_64_route_remains_explicit_and_s640_route_is_immutable():
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.contracts import (
+    from ismrm_v2.proposed.q002.contracts import (
         Q002_EXPERIMENT_ID,
         Q002S640_EXPERIMENT_ID,
         build_q002_route_config,
@@ -92,7 +92,7 @@ def test_q002_64_route_remains_explicit_and_s640_route_is_immutable():
 
 
 def test_q002_runner_exposes_explicit_cropped_only_arguments():
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.run_q002_reconstruction import build_parser
+    from ismrm_v2.proposed.q002.run_q002_reconstruction import build_parser
 
     args = build_parser().parse_args(["--cropped-prepared-root", "/crop", "--b6-model", "/b6.pt", "--signal-simulator", "/approved.pth", "--output", "/out"])
     assert args.device == "cuda:0" and args.cropped_prepared_root == "/crop"
@@ -101,7 +101,7 @@ def test_q002_runner_exposes_explicit_cropped_only_arguments():
 
 
 def test_regularization_batch_reuses_b6_scalar_sampler_with_640_candidates():
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.training import regularization_batch_from_b6_scalar_support
+    from ismrm_v2.proposed.q002.training import regularization_batch_from_b6_scalar_support
 
     class ScalarSampler:
         def sample(self, n):

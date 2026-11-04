@@ -19,7 +19,7 @@ from typing import Any
 import numpy as np
 
 from .metrics import METRIC_COLUMNS, agreement_metrics
-from .quality_control import (
+from ismrm_v2.evaluation.scmr.quality_control import (
     DISPLAY_RANGES_MS,
     RESIDUAL_RANGES_MS,
     SCMRColorbars,
@@ -27,7 +27,7 @@ from .quality_control import (
     render_all_slice_montages,
     write_range_audit,
 )
-from .reference_2d import NativeReference, STACKS, load_verified_reference, sha256
+from ismrm_v2.evaluation.scmr.reference_2d import NativeReference, STACKS, load_verified_reference, sha256
 
 
 LEGACY_FILES = [

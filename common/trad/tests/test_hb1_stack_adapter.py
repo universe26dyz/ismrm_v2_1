@@ -1,6 +1,6 @@
 import numpy as np
 
-from modules.module_06_rigid_psf.hb1_stack_adapter import (
+from ismrm_v2.proposed.rigid_psf.hb1_stack_adapter import (
     HB1_GEOMETRY_TOLERANCE,
     audit_hb1_stack,
     build_hb1_registration_stack,

@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from .contracts import APPROVED_DECODER_SHA256, B6_CONFIG_SOURCE_SHA256, sha256, write_immutable_json
+from ismrm_v2.fit_first.contracts import APPROVED_DECODER_SHA256, B6_CONFIG_SOURCE_SHA256, sha256, write_immutable_json
 
 
 SCHEMA = "phase4r_final_method_selection/v1"

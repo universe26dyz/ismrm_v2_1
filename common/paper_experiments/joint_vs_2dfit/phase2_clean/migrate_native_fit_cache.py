@@ -10,8 +10,8 @@ from pathlib import Path
 
 import numpy as np
 
-from .contracts import BASELINE_POSE_POLICY, sha256, write_immutable_json
-from .fit_first import NATIVE_FIT_METHOD, STACKS, _complete_source_group, _dictionary_contract, _native_group_audit
+from ismrm_v2.fit_first.contracts import BASELINE_POSE_POLICY, sha256, write_immutable_json
+from ismrm_v2.fit_first.fit_first import NATIVE_FIT_METHOD, STACKS, _complete_source_group, _dictionary_contract, _native_group_audit
 
 HISTORICAL_DICTIONARY_DECLARATION = 'frozen current HHZ/TRAD grid; normalized cosine; no interpolation/refinement'
 

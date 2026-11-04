@@ -184,11 +184,11 @@ def build_r5_plan(inputs: R5Inputs, *, git_head: Callable[[Path], str] = _git_he
     l100 = _case_paths(root, inputs.subject, "L100_fold0")
     steps: list[dict[str, Any]] = [
         {"id": "l100_proposed_direct_native_bundle", "kind": "command", "cwd": str(direct), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.direct_native_bundles",
+            inputs.python_executable, "-m", "ismrm_v2.evaluation.direct_native_bundles",
             "--checkpoint", checkpoint, "--prepared-root", prepared, "--endpoint", "central", "--output", proposed_bundle, "--device", inputs.device,
         )},
         {"id": "l100_fit_first_pose_audit", "kind": "command", "cwd": str(fixed), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.fit_first_native_pose_audit",
+            inputs.python_executable, "-m", "ismrm_v2.fit_first.fit_first_native_pose_audit",
             "--baseline-root", baseline, "--r0-native-maps-root", r0_native, "--output", pose_audit,
         )},
         {"id": "l100_fit_first_native_bundle", "kind": "command", "cwd": str(fixed), "argv": _command(
@@ -201,7 +201,7 @@ def build_r5_plan(inputs: R5Inputs, *, git_head: Callable[[Path], str] = _git_he
         config = config_root / f"{case}.central.figure.json"
         steps.extend((
             {"id": f"figure_config_{case}", "kind": "write_json", "path": str(config), "payload": _figure_config(root=root, subject=inputs.subject, case=case, r0_native_maps_root=r0_native, native_mask_root=native_masks, proposed_bundle=proposed_bundle, fit_first_bundle=fit_first_bundle)},
-            {"id": f"figures_{case}", "kind": "command", "cwd": str(fixed), "argv": _command(inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.final_cyj_reporting", "figures", "--config", config, "--output", figure_root / case)},
+            {"id": f"figures_{case}", "kind": "command", "cwd": str(fixed), "argv": _command(inputs.python_executable, "-m", "ismrm_v2.evaluation.final_cyj_reporting", "figures", "--config", config, "--output", figure_root / case)},
         ))
     steps.append({"id": "publish_migration_record", "kind": "write_json", "path": str(migration), "payload": {
         "schema": "cyj11_r5_legacy_figure_generation/v1", "status": "COMPLETE", "subject": inputs.subject,

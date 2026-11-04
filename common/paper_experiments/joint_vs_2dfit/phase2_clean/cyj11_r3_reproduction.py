@@ -194,13 +194,13 @@ def build_r3_plan(inputs: R3Inputs, *, git_head: Callable[[Path], str] = _git_he
             "--condition", condition, "--phase", str(phase), "--output-root", sparse_root,
         )})
         steps.append({"id": f"proposed_{case}", "cwd": str(inputs.historical_worktree.resolve()), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.proposed",
+            inputs.python_executable, "-m", "ismrm_v2.proposed.proposed",
             "--prepared-root", reconstruction_prepared, "--decoder", inputs.signal_simulator,
             "--b6-model", inputs.b6_model, "--output", proposed_root,
             "--subject-id", inputs.subject, "--device", inputs.device, "--execute",
         )})
         baseline = _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.baseline",
+            inputs.python_executable, "-m", "ismrm_v2.fit_first.baseline",
             "--prepared-root", reconstruction_prepared, "--subject-id", inputs.subject, "--output", fit_root,
             "--nesvor-executable", inputs.nesvor_executable,
         )
@@ -216,12 +216,12 @@ def build_r3_plan(inputs: R3Inputs, *, git_head: Callable[[Path], str] = _git_he
                 "destination": str(native_cache),
             })
         steps.append({"id": f"proposed_central_{case}", "cwd": str(inputs.historical_worktree.resolve()), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.matched_output", "proposed",
+            inputs.python_executable, "-m", "ismrm_v2.evaluation.matched_output", "proposed",
             "--subject", inputs.subject, "--condition", case, "--source-root", proposed_root,
             "--endpoint", "central", "--output", proposed_endpoint,
         )})
         steps.append({"id": f"fit_first_central_{case}", "cwd": str(inputs.historical_worktree.resolve()), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.matched_output", "fit-first",
+            inputs.python_executable, "-m", "ismrm_v2.evaluation.matched_output", "fit-first",
             "--subject", inputs.subject, "--condition", case,
             "--l100-fit-first-root", l100_fit_root, "--sparse-fit-first-root", fit_root,
             "--sparse-manifest", sparse_manifest, "--r0-native-maps-root", native_cache,

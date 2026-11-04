@@ -16,7 +16,7 @@ from typing import Any, Mapping
 
 import numpy as np
 
-from trad.evaluation.scmr.quality_control import DISPLAY_RANGES_MS, load_legacy_scmr_colorbars
+from ismrm_v2.evaluation.scmr.quality_control import DISPLAY_RANGES_MS, load_legacy_scmr_colorbars
 
 from .contracts import sha256, write_immutable_json
 from .evaluation import reproject_volume_to_native_plane

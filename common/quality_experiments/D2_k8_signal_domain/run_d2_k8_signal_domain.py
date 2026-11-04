@@ -14,13 +14,13 @@ import torch
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from mlp.modules.module_07_objective_training.mlp_trainer import build_mlp_training_model, load_mlp_reconstruction_checkpoint
+from ismrm_v2.proposed.mlp_trainer import build_mlp_training_model, load_mlp_reconstruction_checkpoint
 from quality_experiments.D2_k8_signal_domain.core import STACKS, aggregate, export_k8_reprojections, method_specific_slice_rows, paired_slice_rows, prepare_empty_output, sha256, write_csv, write_json
 from quality_experiments.D2_k8_signal_domain.figures import render_metric_summaries, render_residual_montage
-from reconstruction_core.orchestration import build_training_model, load_checkpoint
-from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
-from trad.modules.module_05_signal_decoder.decoder_factory import bloch_decoder_factory
-from trad.modules.module_07_objective_training.training_space import TrainingSpace
+from ismrm_v2.proposed.reconstruction.orchestration import build_training_model, load_checkpoint
+from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
+from ismrm_v2.proposed.trad_signal_decoder.decoder_factory import bloch_decoder_factory
+from ismrm_v2.proposed.training.training_space import TrainingSpace
 
 
 EXPERIMENT_ID = "D2_BASELINE_SIGNAL_K8_V1"

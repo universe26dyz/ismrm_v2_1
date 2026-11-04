@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import torch
 
-from trad.modules.module_06_rigid_psf.rigid_psf_forward import GroupRigidPSF
+from ismrm_v2.proposed.rigid_psf.rigid_psf_forward import GroupRigidPSF
 
 from quality_experiments.D2_k8_signal_domain.core import export_k8_reprojections, prepare_empty_output, signal_metric_row, strict_paired_signal_support
 

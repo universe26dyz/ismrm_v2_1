@@ -20,8 +20,8 @@ from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 import yaml
 
-from .mlp_model import MdmSignalMLP
-from .provenance import sha256_file
+from ismrm_v2.proposed.signal_decoder.mlp_model import MdmSignalMLP
+from ismrm_v2.proposed.signal_decoder.provenance import sha256_file
 from .synthetic_dataset import protocol_from_record
 from .test_mlp import fidelity_metrics
 

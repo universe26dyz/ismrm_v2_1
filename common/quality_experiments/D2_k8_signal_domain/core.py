@@ -12,7 +12,7 @@ from typing import Any, Iterable
 import numpy as np
 
 from trad.evaluation.scmr.metrics import signal_agreement_metrics
-from trad.modules.module_08_inference_export.reprojection import export_native_plane_reprojections
+from ismrm_v2.proposed.inference.reprojection import export_native_plane_reprojections
 
 
 STACKS = ("sax", "2ch", "4ch")

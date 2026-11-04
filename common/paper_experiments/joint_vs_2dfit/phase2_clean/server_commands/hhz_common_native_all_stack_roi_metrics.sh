@@ -60,7 +60,7 @@ for CASE in "$@"; do
     fi
   done
   echo "START $CASE all-stack common-native LV/myocardial ROI metrics"
-  "$PY" -m paper_experiments.joint_vs_2dfit.aha.common_native_all_stack_roi_metrics \
+  "$PY" -m ismrm_v2.evaluation.aha.common_native_all_stack_roi_metrics \
     --subject "$SUBJECT" --case "$CASE" --native-maps-root "$NATIVE_ROOT" \
     --prepared-subject-root "$PREP_SUBJECT" --roi-bundle "$ROI_BUNDLE" \
     --sparse-manifest "$SPARSE_MANIFEST" \

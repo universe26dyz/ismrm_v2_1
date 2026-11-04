@@ -8,7 +8,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
-from .contracts import ELIGIBLE_REAL_SUBJECTS
+from ismrm_v2.fit_first.contracts import ELIGIBLE_REAL_SUBJECTS
 
 
 def bland_altman(reference_means: list[float], prediction_means: list[float]) -> dict[str, object]:

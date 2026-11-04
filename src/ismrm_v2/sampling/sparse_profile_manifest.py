@@ -13,7 +13,7 @@ from typing import Any
 
 import numpy as np
 
-from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import sha256
+from ismrm_v2.fit_first.contracts import sha256
 from ismrm_v2.sampling.sparse import _json_sha256, _resolve_profile, load_sparse_profile
 
 

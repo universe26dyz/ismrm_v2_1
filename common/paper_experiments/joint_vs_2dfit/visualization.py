@@ -15,7 +15,7 @@ from typing import Any, Mapping
 
 import numpy as np
 
-from trad.evaluation.scmr.quality_control import (
+from ismrm_v2.evaluation.scmr.quality_control import (
     DISPLAY_RANGES_MS,
     RESIDUAL_RANGES_MS,
     SCMRColorbars,

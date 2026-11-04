@@ -15,7 +15,7 @@ from typing import Any, Callable, Mapping
 
 import numpy as np
 
-from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import sha256, write_immutable_json
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
 
 CONDITIONS = {"L100": 1, "L50": 2, "L33": 3, "L25": 4}
 REQUIRED_FIELDS = (
@@ -232,7 +232,7 @@ def build_sparse_profile_condition(prepared_root: str | Path, subject: str, prof
 
 def _default_audit(path: Path) -> dict[str, object]:
     try:
-        from trad.modules.module_06_rigid_psf.hb1_stack_adapter import audit_hb1_stack
+        from ismrm_v2.proposed.rigid_psf.hb1_stack_adapter import audit_hb1_stack
     except ModuleNotFoundError as exc:
         raise RuntimeError("HB1 stack audit requires the project CPU PyTorch environment") from exc
     audit = audit_hb1_stack(path)

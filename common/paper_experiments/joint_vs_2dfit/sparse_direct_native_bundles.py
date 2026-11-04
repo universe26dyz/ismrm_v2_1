@@ -14,7 +14,7 @@ from typing import Any
 
 import numpy as np
 
-from quality_experiments.Q002_B6_roi_same_anchor_mse.contracts import profiled_observation_paths
+from ismrm_v2.proposed.q002.contracts import profiled_observation_paths
 
 from .contracts import sha256, write_immutable_json
 from .direct_native_bundles import _predict_central

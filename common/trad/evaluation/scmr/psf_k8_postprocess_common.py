@@ -13,7 +13,7 @@ from scipy.io import savemat
 
 from .build_native_reference import _load_mapping
 from .metrics import agreement_metrics, signal_agreement_metrics
-from .reference_2d import STACKS, load_verified_reference, sha256
+from ismrm_v2.evaluation.scmr.reference_2d import STACKS, load_verified_reference, sha256
 
 
 def write_json(value: dict[str, Any], path: Path) -> None:

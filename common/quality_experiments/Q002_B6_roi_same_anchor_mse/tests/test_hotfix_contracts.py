@@ -3,7 +3,9 @@ from pathlib import Path
 
 
 def test_raw_export_precedes_psf128_export_in_q002_launcher():
-    source = Path(__file__).resolve().parents[1] / "run_q002_reconstruction.py"
+    from ismrm_v2.proposed.q002 import run_q002_reconstruction
+
+    source = Path(run_q002_reconstruction.__file__)
     tree = ast.parse(source.read_text())
     calls = [node.func.id if isinstance(node.func, ast.Name) else node.func.attr for node in ast.walk(tree) if isinstance(node, ast.Call)]
     assert calls.index("export_quantitative_outputs") < calls.index("export_quantitative_outputs_psf128")

@@ -3,7 +3,7 @@ import copy
 import pytest
 import torch
 
-from mlp.modules.module_05_signal_decoder.checkpoint_loader import load_frozen_mlp_decoder
+from ismrm_v2.proposed.signal_decoder.checkpoint_loader import load_frozen_mlp_decoder
 from online_helpers import write_functional_checkpoint, write_observations
 
 

@@ -5,7 +5,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .contracts import sha256
+from ismrm_v2.fit_first.contracts import sha256
 
 REQUIRED_GATES = (
     "actual_observation_hash_gate",

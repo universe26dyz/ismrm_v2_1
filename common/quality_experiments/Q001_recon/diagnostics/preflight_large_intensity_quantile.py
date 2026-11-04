@@ -6,7 +6,7 @@ import json
 
 import torch
 
-from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import (
+from ismrm_v2.proposed.quantitative_point_dataset import (
     _exact_linear_quantile_kthvalue,
 )
 

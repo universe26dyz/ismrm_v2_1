@@ -1,6 +1,6 @@
 import numpy as np
 
-from evaluation_common.myocardium.build_native_bundle import (
+from ismrm_v2.evaluation.myocardium.build_native_bundle import (
     myocardium_core_1px,
     myocardium_core_legacy,
 )

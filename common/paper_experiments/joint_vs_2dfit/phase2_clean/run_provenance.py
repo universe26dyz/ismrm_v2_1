@@ -4,7 +4,7 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
-from .contracts import BASELINE_POSE_POLICY, PROPOSED_CONTRACT, sha256, write_immutable_json
+from ismrm_v2.fit_first.contracts import BASELINE_POSE_POLICY, PROPOSED_CONTRACT, sha256, write_immutable_json
 
 
 def _available_observation_hashes(root: str | Path) -> dict[str, str]:

@@ -10,17 +10,17 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from mlp.modules.module_07_objective_training.mlp_trainer import build_mlp_training_model
-from reconstruction_core.orchestration import load_checkpoint
-from trad.modules.module_03_dataset_geometry.quantitative_point_dataset import QuantPointDataset
-from trad.modules.module_08_inference_export.reprojection import export_native_plane_reprojections
+from ismrm_v2.proposed.mlp_trainer import build_mlp_training_model
+from ismrm_v2.proposed.reconstruction.orchestration import load_checkpoint
+from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
+from ismrm_v2.proposed.inference.reprojection import export_native_plane_reprojections
 
 from quality_experiments.D2_k8_signal_domain.core import write_csv, write_json
 from quality_experiments.Q001_recon.metrics import true_pooled_rows
 from trad.evaluation.scmr.metrics import signal_agreement_metrics
-from trad.evaluation.scmr.reference_2d import load_verified_reference
+from ismrm_v2.evaluation.scmr.reference_2d import load_verified_reference
 
-from .contracts import cropped_observation_paths
+from ismrm_v2.proposed.q002.contracts import cropped_observation_paths
 from .evaluate_q002 import _canonical_weight_zero_maps, _load, _run_three_way, _sha, _signal_identity_index, _validated_route_checkpoint
 from .metrics import fingerprint_cosine_summary, strict_fingerprint_three_way_common_support, strict_q004_three_way_common_support
 from .visualization import deterministic_representatives, render_fingerprint_curves, render_map_montages, visualization_display_contract, write_visualization_manifest

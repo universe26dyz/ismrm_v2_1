@@ -1,6 +1,6 @@
 import torch
 
-from modules.module_05_signal_decoder.trad_signal_simulator import TradProtocol, TradSignalSimulator
+from ismrm_v2.proposed.trad_signal_decoder.trad_signal_simulator import TradProtocol, TradSignalSimulator
 
 
 def test_hhz_signal_decoder_returns_normalized_ten_weights_and_finite_gradients():

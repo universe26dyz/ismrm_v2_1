@@ -14,9 +14,9 @@ from typing import Any, Mapping
 
 import numpy as np
 
-from ..phase2_clean.contracts import sha256, write_immutable_json
-from .cyj11_myocardial_roi_metrics import _load_scmr_masks
-from .cyj11_runner import load_cyj11_run_inputs, native_sax_plane
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.evaluation.aha.cyj11_myocardial_roi_metrics import _load_scmr_masks
+from ismrm_v2.evaluation.aha.cyj11_runner import load_cyj11_run_inputs, native_sax_plane
 
 
 CURRENT_SCHEMA = "cyj11_parity_current_native/v1"

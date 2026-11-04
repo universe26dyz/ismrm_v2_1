@@ -55,30 +55,30 @@ DECLARED_EDGES = [
     ("04", STAGE_ENTRYPOINTS["04"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh", "SHELL_BASH", "always", "stage wrapper", "ACTIVE_EXECUTED"),
     ("04", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh", "src/ismrm_v2/sampling/sparse.py", "SHELL_PYTHON_MODULE", "per selected sparse profile", "profile builder", "CONDITIONAL_ACTIVE"),
     ("05", STAGE_ENTRYPOINTS["05"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "SHELL_BASH", "always", "stage wrapper", "ACTIVE_EXECUTED"),
-    ("05", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py", "SHELL_PYTHON_MODULE", "always", "SCMR-v5 native cache", "ACTIVE_EXECUTED"),
-    ("05", "common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "MATLAB_FUNCTION", "per stack", "MATLAB mapper subprocess", "ACTIVE_EXECUTED"),
+    ("05", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "src/ismrm_v2/fit_first/scmr_v5_native_cache.py", "SHELL_PYTHON_MODULE", "always", "SCMR-v5 native cache", "ACTIVE_EXECUTED"),
+    ("05", "src/ismrm_v2/fit_first/scmr_v5_native_cache.py", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "MATLAB_FUNCTION", "per stack", "MATLAB mapper subprocess", "ACTIVE_EXECUTED"),
     ("05", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths matcher", "ACTIVE_TRANSITIVE"),
     ("05", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths simulator", "ACTIVE_TRANSITIVE"),
     ("05", "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m", "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m", "MATLAB_ADDPATH", "per stack", "mapper verifies and addpaths utility", "ACTIVE_TRANSITIVE"),
-    ("05", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py", "SHELL_PYTHON_MODULE", "L100 and sparse cases", "baseline CLI", "CONDITIONAL_ACTIVE"),
-    ("06", STAGE_ENTRYPOINTS["06"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py", "SHELL_PYTHON_MODULE", "always", "python -m proposed", "ACTIVE_EXECUTED"),
-    ("06", "common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py", "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py", "PYTHON_CALL", "formal Q002S640", "Q002 formal reconstruction call", "ACTIVE_EXECUTED"),
-    ("06", "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py", "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py", "PYTHON_CALL", "formal Q002S640", "Q002 training call", "ACTIVE_EXECUTED"),
-    ("06", "common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py", "common/reconstruction_core/orchestration.py", "PYTHON_CALL", "formal Q002S640", "shared reconstruction engine", "ACTIVE_EXECUTED"),
+    ("05", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh", "src/ismrm_v2/fit_first/baseline.py", "SHELL_PYTHON_MODULE", "L100 and sparse cases", "baseline CLI", "CONDITIONAL_ACTIVE"),
+    ("06", STAGE_ENTRYPOINTS["06"], "src/ismrm_v2/proposed/proposed.py", "SHELL_PYTHON_MODULE", "always", "python -m proposed", "ACTIVE_EXECUTED"),
+    ("06", "src/ismrm_v2/proposed/proposed.py", "src/ismrm_v2/proposed/q002/run_q002_reconstruction.py", "PYTHON_CALL", "formal Q002S640", "Q002 formal reconstruction call", "ACTIVE_EXECUTED"),
+    ("06", "src/ismrm_v2/proposed/q002/run_q002_reconstruction.py", "src/ismrm_v2/proposed/q002/training.py", "PYTHON_CALL", "formal Q002S640", "Q002 training call", "ACTIVE_EXECUTED"),
+    ("06", "src/ismrm_v2/proposed/q002/training.py", "src/ismrm_v2/proposed/reconstruction/orchestration.py", "PYTHON_CALL", "formal Q002S640", "shared reconstruction engine", "ACTIVE_EXECUTED"),
     ("06", STAGE_ENTRYPOINTS["06"], "configs/protocol_scmr_v5_10_100.yaml", "CONFIG_READ", "always", "--protocol", "CONFIG_RUNTIME_ASSET"),
     ("06", STAGE_ENTRYPOINTS["06"], "configs/models_manifest.json", "CONFIG_READ", "always", "model provenance", "CONFIG_RUNTIME_ASSET"),
     ("06", STAGE_ENTRYPOINTS["06"], "runtime/runtime_contract.json", "CONFIG_READ", "always", "runtime contract", "CONFIG_RUNTIME_ASSET"),
     ("07", STAGE_ENTRYPOINTS["07"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "SHELL_BASH", "always", "stage wrapper", "ACTIVE_EXECUTED"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py", "SHELL_PYTHON_MODULE", "per case", "Proposed final-pose bundle", "CONDITIONAL_ACTIVE"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py", "SHELL_PYTHON_MODULE", "per case", "Fit-first final-pose bundle", "CONDITIONAL_ACTIVE"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py", "SHELL_PYTHON_MODULE", "per case", "ROI mapping", "CONDITIONAL_ACTIVE"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py", "SHELL_PYTHON_MODULE", "per case", "paired AHA metrics", "CONDITIONAL_ACTIVE"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py", "SHELL_PYTHON_MODULE", "twice per case", "AHA SD CLI for 1px and legacy cores", "CONDITIONAL_ACTIVE"),
-    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py", "SHELL_PYTHON_MODULE", "per case", "through-plane QC CLI", "CONDITIONAL_ACTIVE"),
+    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/cyj11_r3_direct_final_pose_bundle.py", "SHELL_PYTHON_MODULE", "per case", "Proposed final-pose bundle", "CONDITIONAL_ACTIVE"),
+    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/current_fit_first_final_pose_bundle.py", "SHELL_PYTHON_MODULE", "per case", "Fit-first final-pose bundle", "CONDITIONAL_ACTIVE"),
+    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/derive_final_pose_mapping.py", "SHELL_PYTHON_MODULE", "per case", "ROI mapping", "CONDITIONAL_ACTIVE"),
+    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/paired_final_pose_postprocess.py", "SHELL_PYTHON_MODULE", "per case", "paired AHA metrics", "CONDITIONAL_ACTIVE"),
+    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/paired_aha_sd.py", "SHELL_PYTHON_MODULE", "twice per case", "AHA SD CLI for 1px and legacy cores", "CONDITIONAL_ACTIVE"),
+    ("07", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh", "src/ismrm_v2/evaluation/aha/paired_final_pose_through_plane.py", "SHELL_PYTHON_MODULE", "per case", "through-plane QC CLI", "CONDITIONAL_ACTIVE"),
     ("08", STAGE_ENTRYPOINTS["08"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh", "SHELL_BASH", "always", "first evaluation wrapper", "ACTIVE_EXECUTED"),
     ("08", STAGE_ENTRYPOINTS["08"], "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh", "SHELL_BASH", "always", "second evaluation wrapper", "ACTIVE_EXECUTED"),
-    ("08", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh", "common/paper_experiments/joint_vs_2dfit/aha/common_native_metrics_qc.py", "SHELL_PYTHON_MODULE", "per case", "common-native metrics CLI", "CONDITIONAL_ACTIVE"),
-    ("08", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh", "common/paper_experiments/joint_vs_2dfit/aha/common_native_all_stack_roi_metrics.py", "SHELL_PYTHON_MODULE", "per case", "all-stack ROI CLI", "CONDITIONAL_ACTIVE"),
+    ("08", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh", "src/ismrm_v2/evaluation/aha/common_native_metrics_qc.py", "SHELL_PYTHON_MODULE", "per case", "common-native metrics CLI", "CONDITIONAL_ACTIVE"),
+    ("08", "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh", "src/ismrm_v2/evaluation/aha/common_native_all_stack_roi_metrics.py", "SHELL_PYTHON_MODULE", "per case", "all-stack ROI CLI", "CONDITIONAL_ACTIVE"),
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_project_integrity.py", "SHELL_PYTHON_SCRIPT", "always", "integrity checker", "ACTIVE_EXECUTED"),
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_no_legacy_code_path.py", "SHELL_PYTHON_SCRIPT", "always", "legacy checker", "ACTIVE_EXECUTED"),
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_runtime_contract.py", "SHELL_PYTHON_SCRIPT", "always", "runtime checker", "ACTIVE_EXECUTED"),
@@ -109,10 +109,10 @@ EXTERNAL = [
     {"id": "b6_model.pt", "kind": "model_asset", "required_by_stages": ["06"], "expected_sha256": "15981fbe93d2c70e14755ea756a02856c9383481e7d92d239619268a628a29b5", "repository_embedded": False},
 ]
 PROXIES = [
-    {"wrapper": "common/mlp/modules/module_07_objective_training/mlp_trainer.py", "implementation": "common/reconstruction_core/orchestration.py", "relationship": "FACADE", "evidence": "imports and re-exports the sole reconstruction engine", "active_caller": "MLP compatibility route", "cleanup_candidate": True},
-    {"wrapper": "common/mlp/modules/module_04_quantitative_inr/quantitative_inr.py", "implementation": "common/trad/modules/module_04_quantitative_inr/quantitative_inr.py", "relationship": "DUPLICATE_IMPLEMENTATION", "evidence": "parallel source implementations with package-local imports", "active_caller": "Q002 uses MLP copy", "cleanup_candidate": True},
-    {"wrapper": "common/mlp/modules/module_05_signal_decoder/frozen_decoder.py", "implementation": "common/trad/modules/module_05_signal_decoder/decoder_factory.py", "relationship": "INDEPENDENT_IMPLEMENTATION", "evidence": "frozen MLP decoder class is not a forwarding proxy", "active_caller": "Q002 frozen decoder", "cleanup_candidate": False},
-    {"wrapper": "common/mlp/modules/module_06_rigid_psf/rigid_psf_forward.py", "implementation": "common/trad/modules/module_06_rigid_psf/rigid_psf_forward.py", "relationship": "DUPLICATE_IMPLEMENTATION", "evidence": "parallel source implementations with package-local imports", "active_caller": "MLP/TRAD compatibility packages", "cleanup_candidate": True},
+    {"wrapper": "src/ismrm_v2/proposed/mlp_trainer.py", "implementation": "src/ismrm_v2/proposed/reconstruction/orchestration.py", "relationship": "FACADE", "evidence": "imports and re-exports the sole reconstruction engine", "active_caller": "MLP compatibility route", "cleanup_candidate": True},
+    {"wrapper": "common/mlp/modules/module_04_quantitative_inr/quantitative_inr.py", "implementation": "src/ismrm_v2/proposed/trad_quantitative_inr.py", "relationship": "DUPLICATE_IMPLEMENTATION", "evidence": "parallel source implementations with package-local imports", "active_caller": "Q002 uses MLP copy", "cleanup_candidate": True},
+    {"wrapper": "src/ismrm_v2/proposed/signal_decoder/frozen_decoder.py", "implementation": "src/ismrm_v2/proposed/trad_signal_decoder/decoder_factory.py", "relationship": "INDEPENDENT_IMPLEMENTATION", "evidence": "frozen MLP decoder class is not a forwarding proxy", "active_caller": "Q002 frozen decoder", "cleanup_candidate": False},
+    {"wrapper": "common/mlp/modules/module_06_rigid_psf/rigid_psf_forward.py", "implementation": "src/ismrm_v2/proposed/rigid_psf/rigid_psf_forward.py", "relationship": "DUPLICATE_IMPLEMENTATION", "evidence": "parallel source implementations with package-local imports", "active_caller": "MLP/TRAD compatibility packages", "cleanup_candidate": True},
 ]
 
 
@@ -162,7 +162,19 @@ def _matlab_calls(root: Path, path: Path) -> list[tuple[Path, str]]:
     """
     text = re.sub(r"%.*$", "", path.read_text(encoding="utf-8", errors="ignore"), flags=re.M)
     local = _matlab_local_functions(path)
-    index = {candidate.stem: candidate for candidate in root.glob("common/**/*.m")}
+    canonical = {
+        "deformableReg2Dmind_asym_nodisplay": "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/deformableReg2Dmind_asym_nodisplay.m",
+        "MIND_descriptor2D": "common/trad/modules/module_01_preprocess_matlab/hhz_original/MIND_registration/MIND_descriptor2D.m",
+        "HHMMSS2Sec": "common/trad/modules/module_01_preprocess_matlab/hhz_original/Utility/HHMMSS2Sec.m",
+        "mppca_denoise_multimap_stack": "common/trad/modules/module_01_preprocess_matlab/preprocessing_v1/mppca_denoise_multimap_stack.m",
+        "sim_T1T2_10HB_bssfp": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m",
+        "d2r": "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m",
+    }
+    index = {candidate.stem: candidate for candidate in sorted((root / "common/trad").glob("**/*.m"))}
+    for name, relative in canonical.items():
+        candidate = root / relative
+        if candidate.is_file():
+            index[name] = candidate
     names = set(re.findall(r"(?<![\w.])([A-Za-z]\w*)\s*\(", text)) - local
     calls: list[tuple[Path, str]] = []
     for name in sorted(names):

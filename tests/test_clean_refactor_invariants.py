@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import json
 from pathlib import Path
 
 
@@ -13,16 +14,11 @@ def test_completed_migrations_define_the_clean_package_implementation_set() -> N
     assert result.returncode == 0, result.stdout + result.stderr
     skeleton = ROOT / "src/ismrm_v2"
     implementation = {path.relative_to(skeleton).as_posix() for path in skeleton.rglob("*.py") if path.name != "__init__.py"}
-    assert implementation == {
-        "io/validate_subject_id.py",
-        "io/build_subject_deployment_manifest.py",
-        "io/deployment_manifest.py",
-        "preprocessing/validation.py",
-        "observations/prepare_all.py",
-        "observations/build_manifest.py",
-        "observations/mat_v73.py",
-        "observations/timing.py",
-        "observations/prepare_observations.py",
-        "sampling/sparse.py",
-        "sampling/sparse_profile_manifest.py",
+    manifest = json.loads((ROOT / "docs/clean_code_migration_manifest.json").read_text(encoding="utf-8"))
+    expected = {
+        entry["current_path"].removeprefix("src/ismrm_v2/")
+        for entry in manifest["entries"]
+        if entry["current_path"].startswith("src/ismrm_v2/")
+        and entry.get("migration_status", "").startswith("MIGRATED_PHASE_")
     }
+    assert implementation == expected

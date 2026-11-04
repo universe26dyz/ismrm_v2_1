@@ -10,8 +10,8 @@ from typing import Any
 
 import numpy as np
 
-from .contracts import sha256, write_immutable_json
-from .fit_first import NATIVE_FIT_METHOD, _dictionary_contract
+from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
+from ismrm_v2.fit_first.fit_first import NATIVE_FIT_METHOD, _dictionary_contract
 from ismrm_v2.sampling.sparse import STACKS, _git_sha
 from .standardize_subject_slices import MAPPING_FIELD, TARGET_COUNTS, validate_standardization_manifest, validated_standardized_mapping
 

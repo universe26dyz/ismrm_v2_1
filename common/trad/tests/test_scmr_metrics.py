@@ -32,7 +32,7 @@ def test_scmr_runner_validates_alignment_and_writes_figures(tmp_path) -> None:
     nib = pytest.importorskip("nibabel")
     from argparse import Namespace
 
-    from trad.evaluation.scmr.reference_2d import sha256
+    from ismrm_v2.evaluation.scmr.reference_2d import sha256
     from trad.evaluation.scmr.run_scmr_fig12 import run
 
     subject = "TEST"

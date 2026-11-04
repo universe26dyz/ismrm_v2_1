@@ -8,7 +8,7 @@ import pytest
 
 
 def test_q005_k4_differs_from_q002_k8_only_by_training_psf_derived_locations() -> None:
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.contracts import Q002S640_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, build_q002_route_config
+    from ismrm_v2.proposed.q002.contracts import Q002S640_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, build_q002_route_config
 
     base = {"training": {"seed": 20260911, "scheduler": "frozen"}, "decoder": {"checkpoint": "/approved.pth"}, "export": {"sample_psf": 8, "endpoint_psf_samples": 128}}
     k8 = build_q002_route_config(base, cropped_prepared_root="/cropped", experiment_id=Q002S640_EXPERIMENT_ID, anchor_batch_size=640)
@@ -25,7 +25,7 @@ def test_q005_k4_differs_from_q002_k8_only_by_training_psf_derived_locations() -
 def test_q005_k4_cpu_forward_uses_exactly_2560_locations_and_chunk_four() -> None:
     import torch
     from torch import nn
-    from trad.modules.module_06_rigid_psf.rigid_psf_forward import TradQuantitativeForward
+    from ismrm_v2.proposed.rigid_psf.rigid_psf_forward import TradQuantitativeForward
 
     class PSF(nn.Module):
         def __init__(self): super().__init__(); self.requested = []
@@ -48,7 +48,7 @@ def test_q005_k4_cpu_forward_uses_exactly_2560_locations_and_chunk_four() -> Non
 
 @pytest.mark.parametrize("experiment_id", ("Q002S640_B6_roi_same_anchor_mse", "Q004S640_K1_B6_roi_same_anchor_mse", "Q005S640_K4_B6_roi_same_anchor_mse"))
 def test_formal_sparse_routes_require_matching_manifest_and_frozen_dependency_pins(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, experiment_id: str) -> None:
-    from quality_experiments.Q002_B6_roi_same_anchor_mse import run_q002_reconstruction as route
+    from ismrm_v2.proposed.q002 import run_q002_reconstruction as route
 
     b6, decoder, protocol = (tmp_path / name for name in ("b6.json", "decoder.pt", "protocol.yaml"))
     b6.write_text("b6", encoding="utf-8"); decoder.write_text("decoder", encoding="utf-8"); protocol.write_text("protocol", encoding="utf-8")

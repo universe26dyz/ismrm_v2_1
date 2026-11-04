@@ -162,7 +162,7 @@ def finalize_scmr_one_stage_fit_first(root: str | Path) -> Path:
 
 def build_baseline_command(args: argparse.Namespace) -> str:
     """Return the future Fit-first command without creating native-map outputs."""
-    values = [sys.executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.baseline", "--prepared-root", args.prepared_root, "--subject-id", args.subject_id, "--output", args.output, "--nesvor-executable", args.nesvor_executable]
+    values = [sys.executable, "-m", "ismrm_v2.fit_first.baseline", "--prepared-root", args.prepared_root, "--subject-id", args.subject_id, "--output", args.output, "--nesvor-executable", args.nesvor_executable]
     if args.reuse_native_maps_root:
         values.extend(("--reuse-native-maps-root", args.reuse_native_maps_root))
     if args.prebuilt_native_maps_root:

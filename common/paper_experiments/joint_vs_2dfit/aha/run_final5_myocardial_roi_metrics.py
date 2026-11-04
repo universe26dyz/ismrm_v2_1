@@ -4,8 +4,8 @@ from __future__ import annotations
 import argparse
 import json
 
-from .final5_adapter import FINAL5_SUBJECTS
-from .final5_myocardial_roi_metrics import (assess_final5_myocardial_roi_readiness,
+from ismrm_v2.evaluation.aha.final5_adapter import FINAL5_SUBJECTS
+from ismrm_v2.evaluation.aha.final5_myocardial_roi_metrics import (assess_final5_myocardial_roi_readiness,
                                              build_final5_myocardial_roi_metrics)
 
 

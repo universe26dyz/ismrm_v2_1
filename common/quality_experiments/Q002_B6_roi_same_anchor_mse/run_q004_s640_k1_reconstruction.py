@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from .contracts import Q004S640_K1_EXPERIMENT_ID
-from .run_q002_reconstruction import build_parser as _build_shared_parser
-from .run_q002_reconstruction import run
+from ismrm_v2.proposed.q002.contracts import Q004S640_K1_EXPERIMENT_ID
+from ismrm_v2.proposed.q002.run_q002_reconstruction import build_parser as _build_shared_parser
+from ismrm_v2.proposed.q002.run_q002_reconstruction import run
 
 
 def build_parser():

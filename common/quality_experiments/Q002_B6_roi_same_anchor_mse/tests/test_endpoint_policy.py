@@ -25,7 +25,7 @@ def _run_args(tmp_path: Path, *, endpoint_policy: str | None) -> Namespace:
 
 
 def _patch_runner(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, calls: list[tuple[str, str]]) -> None:
-    from quality_experiments.Q002_B6_roi_same_anchor_mse import run_q002_reconstruction as runner
+    from ismrm_v2.proposed.q002 import run_q002_reconstruction as runner
 
     monkeypatch.setattr(runner, "validate_formal_sparse_reconstruction_dependencies", lambda _args: None)
     monkeypatch.setattr(runner.torch.cuda, "is_available", lambda: True)
@@ -59,7 +59,7 @@ def _patch_runner(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, calls: list[t
 
 
 def test_central_only_keeps_k8_training_and_writes_only_central_endpoint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    from quality_experiments.Q002_B6_roi_same_anchor_mse import run_q002_reconstruction as runner
+    from ismrm_v2.proposed.q002 import run_q002_reconstruction as runner
 
     calls: list[tuple[str, str]] = []
     _patch_runner(monkeypatch, tmp_path, calls)
@@ -83,7 +83,7 @@ def test_central_only_keeps_k8_training_and_writes_only_central_endpoint(monkeyp
 
 
 def test_legacy_policy_is_default_and_retains_psf128_and_k8_signal(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    from quality_experiments.Q002_B6_roi_same_anchor_mse import run_q002_reconstruction as runner
+    from ismrm_v2.proposed.q002 import run_q002_reconstruction as runner
 
     calls: list[tuple[str, str]] = []
     _patch_runner(monkeypatch, tmp_path, calls)
@@ -101,7 +101,7 @@ def test_legacy_policy_is_default_and_retains_psf128_and_k8_signal(monkeypatch: 
 
 
 def test_central_only_cannot_change_historical_k4_route(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    from quality_experiments.Q002_B6_roi_same_anchor_mse import run_q002_reconstruction as runner
+    from ismrm_v2.proposed.q002 import run_q002_reconstruction as runner
 
     args = _run_args(tmp_path, endpoint_policy="central_only")
     args.experiment_id = "Q005S640_K4_B6_roi_same_anchor_mse"
@@ -118,7 +118,7 @@ def test_central_only_cannot_change_historical_k4_route(monkeypatch: pytest.Monk
 
 
 def test_parser_exposes_backward_compatible_explicit_endpoint_policy() -> None:
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.run_q002_reconstruction import build_parser
+    from ismrm_v2.proposed.q002.run_q002_reconstruction import build_parser
 
     args = build_parser().parse_args(["--cropped-prepared-root", "/crop", "--b6-model", "/b6", "--signal-simulator", "/decoder", "--output", "/out"])
     assert args.endpoint_policy == "legacy"

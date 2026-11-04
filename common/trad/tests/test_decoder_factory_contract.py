@@ -2,10 +2,10 @@ import torch
 
 
 def test_decoder_interface_preserves_batch_shape_dtype_and_gradient():
-    from trad.modules.module_05_signal_decoder.decoder_factory import build_bloch_decoder
-    from trad.modules.module_05_signal_decoder.trad_signal_simulator import TradProtocol
-    from mlp.modules.module_05_signal_decoder.frozen_decoder import FrozenMLPSignalDecoder
-    from mlp.modules.module_05_signal_decoder.mlp_model import MdmSignalMLP
+    from ismrm_v2.proposed.trad_signal_decoder.decoder_factory import build_bloch_decoder
+    from ismrm_v2.proposed.trad_signal_decoder.trad_signal_simulator import TradProtocol
+    from ismrm_v2.proposed.signal_decoder.frozen_decoder import FrozenMLPSignalDecoder
+    from ismrm_v2.proposed.signal_decoder.mlp_model import MdmSignalMLP
 
     protocol = TradProtocol(3.2, 32)
     t1 = torch.full((2, 3), 1000.0, requires_grad=True)

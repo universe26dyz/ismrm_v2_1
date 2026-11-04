@@ -52,10 +52,10 @@ def _audit(path: Path) -> dict[str, object]:
 
 
 def test_legacy_l50_manifest_is_formally_validated_without_changing_group_id_selection(tmp_path: Path) -> None:
-    from paper_experiments.joint_vs_2dfit.phase2_clean.contracts import sha256
+    from ismrm_v2.fit_first.contracts import sha256
     from ismrm_v2.sampling.sparse import build_sparse_condition
     from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
-    from quality_experiments.Q002_B6_roi_same_anchor_mse.contracts import profiled_observation_paths
+    from ismrm_v2.proposed.q002.contracts import profiled_observation_paths
 
     source_root = tmp_path / "prepared"
     for stack in STACKS:

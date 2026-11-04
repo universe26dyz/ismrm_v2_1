@@ -5,11 +5,11 @@ import argparse
 import json
 from pathlib import Path
 
-from .cyj11_adapter import cyj11_native_stack_root, derive_cyj11_historical_mapping, write_cyj11_mapping
-from .cyj11_aha16 import build_cyj11_aha16
-from .cyj11_legacy_roi import derive_cyj11_native_roi_bundle, derive_cyj11_native_roi_config, roi_derivation_readiness
-from .cyj11_myocardial_roi_metrics import build_cyj11_myocardial_roi_metrics
-from .cyj11_runner import load_cyj11_endpoint_images, load_cyj11_final_pose_bundles
+from ismrm_v2.evaluation.aha.cyj11_adapter import cyj11_native_stack_root, derive_cyj11_historical_mapping, write_cyj11_mapping
+from ismrm_v2.evaluation.aha.cyj11_aha16 import build_cyj11_aha16
+from ismrm_v2.evaluation.aha.cyj11_legacy_roi import derive_cyj11_native_roi_bundle, derive_cyj11_native_roi_config, roi_derivation_readiness
+from ismrm_v2.evaluation.aha.cyj11_myocardial_roi_metrics import build_cyj11_myocardial_roi_metrics
+from ismrm_v2.evaluation.aha.cyj11_runner import load_cyj11_endpoint_images, load_cyj11_final_pose_bundles
 
 
 def _readiness(root: Path, subject: str, case: str, mapping: str | None, roi_bundle: str | None,
@@ -31,7 +31,7 @@ def _readiness(root: Path, subject: str, case: str, mapping: str | None, roi_bun
         return {**report, "status": "FINAL_POSE_BUNDLES_PENDING" if sampling == "final_pose" else "ENDPOINTS_PENDING", "reason": str(exc)}
     if mapping is None or roi_bundle is None:
         return {**report, "status": "ROI_MAPPING_PENDING", "reason": "explicit mapping and immutable ROI bundle are required"}
-    from .cyj11_adapter import require_cyj11_mapping
+    from ismrm_v2.evaluation.aha.cyj11_adapter import require_cyj11_mapping
     try:
         require_cyj11_mapping(mapping, subject=subject, case=case, prepared_sax_path=prepared,
                               roi_bundle_path=Path(roi_bundle) / "roi_derivation_manifest.json")

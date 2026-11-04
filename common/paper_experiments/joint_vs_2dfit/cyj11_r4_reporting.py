@@ -204,14 +204,14 @@ def build_r4_plan(inputs: R4Inputs, *, git_head: Callable[[Path], str] = _git_he
     fixed = inputs.historical_worktree.resolve()
     steps: list[dict[str, Any]] = [
         {"id": "direct_native_l100_audit", "kind": "command", "cwd": str(audit_worktree), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.direct_native_endpoint_audit",
+            inputs.python_executable, "-m", "ismrm_v2.evaluation.direct_native_endpoint_audit",
             "--checkpoint", checkpoint, "--prepared-root", prepared, "--r0-native-maps-root", native_cache,
             "--sparse-manifest", l100["sparse"], "--central-t1", l100["proposed"] / "T1_3D.nii.gz",
             "--central-t2", l100["proposed"] / "T2_3D.nii.gz", "--l100-t1", l100["fit_first"] / "t1" / "l100_checkpoint_mask.nii.gz",
             "--l100-t2", l100["fit_first"] / "t2" / "l100_checkpoint_mask.nii.gz", "--output", native_support, "--device", inputs.device,
         )},
         {"id": "current_native_masks", "kind": "command", "cwd": str(fixed), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.current_native_central_component_mask",
+            inputs.python_executable, "-m", "ismrm_v2.evaluation.current_native_central_component_mask",
             "--r0-native-maps-root", native_cache, "--sparse-manifest", l100["sparse"],
             "--l100-native-support-root", native_support, "--output", native_masks,
         )},
@@ -219,7 +219,7 @@ def build_r4_plan(inputs: R4Inputs, *, git_head: Callable[[Path], str] = _git_he
     for case in cases:
         paths = _paths(root, inputs.subject, case)
         steps.append({"id": f"metrics_{case}", "kind": "command", "cwd": str(fixed), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.final_stratified_native_metrics",
+            inputs.python_executable, "-m", "ismrm_v2.evaluation.final_stratified_native_metrics",
             "--proposed-endpoint-root", paths["proposed"], "--fit-first-endpoint-root", paths["fit_first"],
             "--native-mask-root", native_masks, "--r0-native-maps-root", native_cache,
             "--sparse-manifest", paths["sparse"], "--output", paths["metric"],
@@ -230,11 +230,11 @@ def build_r4_plan(inputs: R4Inputs, *, git_head: Callable[[Path], str] = _git_he
             config_path = root / "configs" / "r4" / inputs.subject / inputs.protocol / R4_SOURCE / f"{case}.central.figure.json"
             steps.append({"id": f"figure_config_{case}", "kind": "write_json", "path": str(config_path), "payload": _figure_config(root=root, subject=inputs.subject, case=case, sparse=paths["sparse"], profile=sparse_records[case] if inputs.protocol == "profile-v2" else None, native_mask_root=native_masks, r0_native_maps_root=native_cache)})
             steps.append({"id": f"figures_{case}", "kind": "command", "cwd": str(fixed), "argv": _command(
-                inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.final_cyj_reporting", "figures",
+                inputs.python_executable, "-m", "ismrm_v2.evaluation.final_cyj_reporting", "figures",
                 "--config", config_path, "--output", figure_root / case,
             )})
     steps.append({"id": "aggregate", "kind": "command", "cwd": str(fixed), "argv": _command(
-        inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.final_cyj_reporting", "aggregate",
+        inputs.python_executable, "-m", "ismrm_v2.evaluation.final_cyj_reporting", "aggregate",
         "--subject", inputs.subject, "--fit-first-source-method", "Q002S640", "--method-root", f"Q002S640={collection}", "--output", summary,
     )})
     steps.append({"id": "publish_migration_record", "kind": "write_json", "path": str(migration_record), "payload": {

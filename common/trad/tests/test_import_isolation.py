@@ -16,7 +16,7 @@ import importlib
 import sys
 
 importlib.import_module('trad.scripts.run_training')
-importlib.import_module('mlp.modules.module_05_signal_decoder.frozen_decoder')
+importlib.import_module('ismrm_v2.proposed.signal_decoder.frozen_decoder')
 assert 'modules' not in sys.modules
 assert 'third_party' not in sys.modules
 """

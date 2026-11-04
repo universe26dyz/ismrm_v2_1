@@ -19,9 +19,9 @@ from typing import Any
 
 import numpy as np
 
-from .contracts import HISTORICAL_NESVOR_EXECUTABLE_DEFAULT, sha256, write_immutable_json
-from .fit_first import STACKS, export_nesvor_native_inputs
-from .fit_first_native_pose_audit import _GEOMETRY_EQUIVALENCE_TOL_MM, _VALUE_CORRESPONDENCE_TOL
+from ismrm_v2.fit_first.contracts import HISTORICAL_NESVOR_EXECUTABLE_DEFAULT, sha256, write_immutable_json
+from ismrm_v2.fit_first.fit_first import STACKS, export_nesvor_native_inputs
+from ismrm_v2.fit_first.fit_first_native_pose_audit import _GEOMETRY_EQUIVALENCE_TOL_MM, _VALUE_CORRESPONDENCE_TOL
 from .reuse_standardized_native_dictionary_maps import validate_standardized_native_dictionary_reuse
 from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
 

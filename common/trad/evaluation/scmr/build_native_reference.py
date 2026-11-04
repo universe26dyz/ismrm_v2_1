@@ -16,7 +16,7 @@ from typing import Any
 
 import numpy as np
 
-from .reference_2d import REQUIRED_SEMANTICS, STACKS, sha256
+from ismrm_v2.evaluation.scmr.reference_2d import REQUIRED_SEMANTICS, STACKS, sha256
 
 
 CYJ_GROUP_COUNTS = {"sax": 14, "2ch": 15, "4ch": 12}

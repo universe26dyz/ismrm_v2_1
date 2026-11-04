@@ -50,7 +50,7 @@ for CASE in "$@"; do
     fi
   done
   echo "START $CASE common-native paired metrics and QC"
-  "$PY" -m paper_experiments.joint_vs_2dfit.aha.common_native_metrics_qc \
+  "$PY" -m ismrm_v2.evaluation.aha.common_native_metrics_qc \
     --subject "$SUBJECT" --case "$CASE" --native-maps-root "$NATIVE_ROOT" \
     --prepared-subject-root "$PREP_SUBJECT" --roi-bundle "$ROI_BUNDLE" \
     --proposed-t1 "$PROPOSED/T1_3D.nii.gz" --proposed-t2 "$PROPOSED/T2_3D.nii.gz" \

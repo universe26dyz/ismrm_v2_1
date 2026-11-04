@@ -1,6 +1,6 @@
 import torch
 
-from mlp.modules.module_05_signal_decoder.checkpoint_loader import load_frozen_mlp_decoder_for_benchmark
+from ismrm_v2.proposed.signal_decoder.checkpoint_loader import load_frozen_mlp_decoder_for_benchmark
 from online_helpers import write_functional_checkpoint, write_observations
 
 

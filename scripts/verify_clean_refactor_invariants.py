@@ -39,32 +39,21 @@ def main(root: Path = ROOT) -> None:
         if not (root / entrypoint).is_file():
             raise SystemExit(f"pipeline entrypoint missing: {entrypoint}")
     package = root / "src/ismrm_v2"
+    manifest = json.loads((root / "docs/clean_code_migration_manifest.json").read_text(encoding="utf-8"))
     migrated = {
-        "io/validate_subject_id.py": "MIGRATED_PHASE_2A",
-        "io/build_subject_deployment_manifest.py": "MIGRATED_PHASE_2A",
-        "io/deployment_manifest.py": "MIGRATED_PHASE_2B",
-        "preprocessing/validation.py": "MIGRATED_PHASE_2C",
-        "observations/prepare_all.py": "MIGRATED_PHASE_2C",
-        "observations/build_manifest.py": "MIGRATED_PHASE_2C",
-        "observations/mat_v73.py": "MIGRATED_PHASE_2C",
-        "observations/timing.py": "MIGRATED_PHASE_2C",
-        "observations/prepare_observations.py": "MIGRATED_PHASE_2C",
-        "sampling/sparse.py": "MIGRATED_PHASE_2C",
-        "sampling/sparse_profile_manifest.py": "MIGRATED_PHASE_2C",
+        entry["current_path"].removeprefix("src/ismrm_v2/"): entry["migration_status"]
+        for entry in manifest["entries"]
+        if entry["current_path"].startswith("src/ismrm_v2/")
+        and entry.get("migration_status", "").startswith("MIGRATED_PHASE_")
     }
     unexpected = [path.relative_to(package).as_posix() for path in package.rglob("*.py") if path.name != "__init__.py" and path.relative_to(package).as_posix() not in migrated]
     if unexpected:
         raise SystemExit(f"unexpected clean-package implementation: {unexpected}")
-    manifest = json.loads((root / "docs/clean_code_migration_manifest.json").read_text(encoding="utf-8"))
     entries = {entry["current_path"]: entry for entry in manifest["entries"]}
     for relative, expected_status in migrated.items():
         entry = entries.get(f"src/ismrm_v2/{relative}")
         if entry is None or entry.get("migration_status") != expected_status:
             raise SystemExit(f"completed package module is not recorded as migrated: {relative}")
-    for deferred in ("proposed", "fit_first", "evaluation"):
-        implementation = [path.relative_to(package).as_posix() for path in (package / deferred).rglob("*.py") if path.name != "__init__.py"]
-        if implementation:
-            raise SystemExit(f"completed migration unexpectedly includes deferred {deferred}: {implementation}")
     subprocess.check_call([sys.executable, str(root / "scripts/verify_server_local_state_policy.py"), str(root)])
     print("CLEAN REFACTOR INVARIANTS: PASS")
 

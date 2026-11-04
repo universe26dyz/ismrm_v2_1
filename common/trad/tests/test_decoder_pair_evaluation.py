@@ -140,7 +140,7 @@ def test_load_decoder_pair_rejects_psf_provenance_mismatch(tmp_path, field, valu
 def _write_full_pair_fixture(tmp_path):
     h5py = pytest.importorskip("h5py")
     nib = pytest.importorskip("nibabel")
-    from trad.evaluation.scmr.reference_2d import sha256
+    from ismrm_v2.evaluation.scmr.reference_2d import sha256
 
     subject = "CYJ"
     trad_eval = _write_pair_eval(tmp_path / "trad_eval", decoder_type="Bloch")

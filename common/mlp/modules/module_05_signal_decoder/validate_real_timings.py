@@ -5,11 +5,11 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset
-from .mlp_model import MdmSignalMLP
-from .provenance import sha256_file
+from ismrm_v2.proposed.signal_decoder.mlp_model import MdmSignalMLP
+from ismrm_v2.proposed.signal_decoder.provenance import sha256_file
 from .synthetic_dataset import protocol_from_record
 from .test_mlp import fidelity_metrics
-from .trad_teacher.trad_signal_simulator import TradSignalSimulator
+from ismrm_v2.proposed.signal_decoder.trad_teacher.trad_signal_simulator import TradSignalSimulator
 
 _TR_SERIALIZATION_ATOL_MS = 1e-4
 

@@ -14,7 +14,7 @@ import pytest
     ],
 )
 def test_runtime_launcher_wires_only_q003_cosine_to_shared_trainer(monkeypatch, tmp_path, experiment_id, anchor_batch_size, expected_cosine):
-    from quality_experiments.Q002_B6_roi_same_anchor_mse import run_q002_reconstruction as launcher
+    from ismrm_v2.proposed.q002 import run_q002_reconstruction as launcher
 
     inputs = []
     for name in ("sax", "2ch", "4ch"):
@@ -31,6 +31,7 @@ def test_runtime_launcher_wires_only_q003_cosine_to_shared_trainer(monkeypatch, 
     monkeypatch.setattr(launcher, "load_b6_resolved_config", lambda _: {"decoder": {"checkpoint": str(decoder)}, "training": {}, "export": {"output_resolution_mm": 1.0, "output_batch_size": 1}, "bbox": {}})
     monkeypatch.setattr(launcher, "QuantPointDataset", lambda *_args, **_kwargs: object())
     monkeypatch.setattr(launcher, "JointAnchorDataset", lambda *_args, **_kwargs: SimpleNamespace(qc={}))
+    monkeypatch.setattr(launcher, "validate_formal_sparse_reconstruction_dependencies", lambda _args: None)
 
     def fake_train(_scalar, _joint, _resolved, _protocol, output, **kwargs):
         captured.update(kwargs)

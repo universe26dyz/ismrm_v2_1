@@ -243,7 +243,7 @@ def build_reproduction_plan(inputs: ReproductionInputs, *, git_head: Callable[[P
         {"id": "build_sparse_input", "cwd": str(inputs.sparse_worktree.resolve()), "argv": _sparse_command(inputs, case, sparse_root)},
         {"id": "l100_fit_first_dependency", "kind": "verified_existing_dependency", "path": str(inputs.l100_fit_first_root.resolve())},
         {"id": "proposed_sparse", "cwd": str(inputs.q002_worktree.resolve()), "argv": _command(
-            inputs.python_executable, "-m", "quality_experiments.Q002_B6_roi_same_anchor_mse.run_q002_reconstruction",
+            inputs.python_executable, "-m", "ismrm_v2.proposed.q002.run_q002_reconstruction",
             "--cropped-prepared-root", sparse_case_root, "--subject-id", inputs.subject,
             "--sparse-manifest", sparse_manifest, "--expected-sparse-generator-git-sha", SPARSE_COMMIT,
             "--expected-sparse-manifest-sha256", manifest_sha, "--b6-model", inputs.b6_model,
@@ -253,7 +253,7 @@ def build_reproduction_plan(inputs: ReproductionInputs, *, git_head: Callable[[P
             "--experiment-id", "Q002S640_B6_roi_same_anchor_mse", "--anchor-batch-size", "640",
         )},
         {"id": "fit_first_sparse_prepare", "cwd": str(inputs.fit_first_worktree.resolve()), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.baseline",
+            inputs.python_executable, "-m", "ismrm_v2.fit_first.baseline",
             "--prepared-root", sparse_case_root, "--subject-id", inputs.subject, "--output", fit_root,
             "--nesvor-executable", nesvor, "--reuse-native-maps-root", inputs.native_cache_root,
             "--sparse-manifest", sparse_manifest, "--expected-generator-git-sha", SPARSE_COMMIT,
@@ -261,12 +261,12 @@ def build_reproduction_plan(inputs: ReproductionInputs, *, git_head: Callable[[P
         ), "expected_output_sampling_masks": sample_masks,
            "output_sampling_semantics": "post_training_raw_volume_sampling_only"},
         {"id": "proposed_central", "cwd": str(inputs.fit_first_worktree.resolve()), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.matched_output", "proposed",
+            inputs.python_executable, "-m", "ismrm_v2.evaluation.matched_output", "proposed",
             "--subject", inputs.subject, "--condition", inputs.case_id, "--source-root", proposed_root,
             "--endpoint", "central", "--output", proposed_endpoint,
         )},
         {"id": "fit_first_central", "cwd": str(inputs.fit_first_worktree.resolve()), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.matched_output", "fit-first",
+            inputs.python_executable, "-m", "ismrm_v2.evaluation.matched_output", "fit-first",
             "--subject", inputs.subject, "--condition", inputs.case_id, "--l100-fit-first-root", inputs.l100_fit_first_root,
             "--sparse-fit-first-root", fit_root, "--sparse-manifest", sparse_manifest,
             "--r0-native-maps-root", inputs.native_cache_root, "--nesvor-executable", nesvor,
@@ -276,7 +276,7 @@ def build_reproduction_plan(inputs: ReproductionInputs, *, git_head: Callable[[P
     if inputs.include_metric:
         assert inputs.native_mask_root is not None
         steps.append({"id": "metric_central", "cwd": str(inputs.fit_first_worktree.resolve()), "argv": _command(
-            inputs.python_executable, "-m", "paper_experiments.joint_vs_2dfit.phase2_clean.final_stratified_native_metrics",
+            inputs.python_executable, "-m", "ismrm_v2.evaluation.final_stratified_native_metrics",
             "--proposed-endpoint-root", proposed_endpoint, "--fit-first-endpoint-root", fit_endpoint,
             "--native-mask-root", inputs.native_mask_root, "--r0-native-maps-root", inputs.native_cache_root,
             "--sparse-manifest", sparse_manifest, "--output", metric_root,

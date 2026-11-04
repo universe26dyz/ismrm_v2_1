@@ -37,7 +37,7 @@ def _write_inputs(root, subject: str, stack: str, groups: int, shape: tuple[int,
 def test_package_native_reference_uses_prepared_group_order_and_current_sax_geometry(tmp_path) -> None:
     nib = pytest.importorskip("nibabel")
     from trad.evaluation.scmr.build_native_reference import package_native_reference
-    from trad.evaluation.scmr.reference_2d import load_verified_reference
+    from ismrm_v2.evaluation.scmr.reference_2d import load_verified_reference
 
     subject, shape = "TEST", (3, 4)
     expected = {stack: _write_inputs(tmp_path, subject, stack, groups, shape) for stack, groups in (("sax", 2), ("2ch", 1), ("4ch", 1))}
