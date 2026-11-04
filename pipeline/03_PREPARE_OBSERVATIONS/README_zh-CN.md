@@ -13,7 +13,7 @@
 ## 命令
 
 ```bash
-python "$PROJECT_ROOT/common/trad/scripts/prepare_all_observations.py" \
+python -m ismrm_v2.observations.prepare_all \
   --manifest "$PROJECT_ROOT/subjects/$SUBJECT/manifest.json" \
   --preprocessed-root "$RUN_ROOT/preprocessed" \
   --prepared-root "$RUN_ROOT/prepared" \

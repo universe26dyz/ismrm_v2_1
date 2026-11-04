@@ -7,7 +7,7 @@ MATLAB 使用 SCMR-v5 dictionary matcher 生成 native mapping/cache；随后独
 `run_stage.sh`：调用 native-cache/fitting 服务器脚本，并保留每个 case 的日志。
 
 ```bash
-bash "$PROJECT_ROOT/common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh" \
+bash "$PROJECT_ROOT/pipeline/05_SCMR_V5_FIT_FIRST/internal/run_scmr_v5_fit_first.sh" \
   "$RUN_ROOT" "$RUN_ROOT/preprocessed" "$SUBJECT" "$RUN_ROOT/prepared" matlab
 ```
 

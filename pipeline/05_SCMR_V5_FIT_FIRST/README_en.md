@@ -5,7 +5,7 @@ Run the SCMR-v5 MATLAB dictionary matcher and then independent T1/T2 NeSVoR/fit-
 `run_stage.sh` invokes the server native-cache/fit-first launcher and retains per-case logs.
 
 ```bash
-bash "$PROJECT_ROOT/common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh" \
+bash "$PROJECT_ROOT/pipeline/05_SCMR_V5_FIT_FIRST/internal/run_scmr_v5_fit_first.sh" \
   "$RUN_ROOT" "$RUN_ROOT/preprocessed" "$SUBJECT" "$RUN_ROOT/prepared" matlab
 ```
 

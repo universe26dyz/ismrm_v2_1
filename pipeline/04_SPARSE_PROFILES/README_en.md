@@ -5,7 +5,7 @@ Derive L100, L25, L50 and five cross-stack profiles directly from one correct pr
 `run_stage.sh` invokes the sparse profile builder and creates the eight case manifests.
 
 ```bash
-bash "$PROJECT_ROOT/common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh" \
+bash "$PROJECT_ROOT/pipeline/04_SPARSE_PROFILES/internal/build_sparse_profiles.sh" \
   "$RUN_ROOT/prepared" "$SUBJECT" "$RUN_ROOT/sparse_inputs" "$PYTHON"
 ```
 

@@ -5,7 +5,7 @@ This bridge reads the MAT outputs, DICOM identities and the SCMR-v5 10/100 proto
 `run_stage.sh` invokes `prepare_all_observations.py` with explicit manifest and protocol paths.
 
 ```bash
-python "$PROJECT_ROOT/common/trad/scripts/prepare_all_observations.py" \
+python -m ismrm_v2.observations.prepare_all \
   --manifest "$PROJECT_ROOT/subjects/$SUBJECT/manifest.json" \
   --preprocessed-root "$RUN_ROOT/preprocessed" \
   --prepared-root "$RUN_ROOT/prepared" \
