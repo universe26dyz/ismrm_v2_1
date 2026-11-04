@@ -800,27 +800,63 @@
       "post_move_source_sha256": "6147280c8fc8a89671fd43946e44e0a7bbbcb1678987d84b66f50143f415df35",
       "reason": "Phase 2D: formal Proposed/Q002, reconstruction, INR, decoder, PSF, training, inference, and export runtime moved without scientific-behavior changes.",
       "to_path": "src/ismrm_v2/proposed/training/training_space.py"
+    },
+    {
+      "from_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
+      "to_path": "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py",
+      "kind": "MOVE_WITH_IMPORT_ADAPTATION",
+      "phase": "FINAL_CLEANUP",
+      "pre_move_source_sha256": "b60cf6df0a7f55a19d52ef926a7d5e3b7a1e46168a89f20026618b6f0d40878f",
+      "post_move_source_sha256": "b60cf6df0a7f55a19d52ef926a7d5e3b7a1e46168a89f20026618b6f0d40878f",
+      "reason": "Final cleanup: retained legacy Fit-first route moved to the clean package; Stage 05 behavior is unchanged."
+    },
+    {
+      "from_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
+      "to_path": "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py",
+      "kind": "MOVE_WITH_IMPORT_ADAPTATION",
+      "phase": "FINAL_CLEANUP",
+      "pre_move_source_sha256": "517d0fd8f082d6e70e339e814bf89b74cdfd88d902405969a6e2ec947f007f1a",
+      "post_move_source_sha256": "517d0fd8f082d6e70e339e814bf89b74cdfd88d902405969a6e2ec947f007f1a",
+      "reason": "Final cleanup: retained legacy dictionary-reuse validation moved to the clean package; Stage 05 behavior is unchanged."
+    },
+    {
+      "from_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
+      "to_path": "src/ismrm_v2/fit_first/standardize_subject_slices.py",
+      "kind": "MOVE_WITH_IMPORT_ADAPTATION",
+      "phase": "FINAL_CLEANUP",
+      "pre_move_source_sha256": "58c7ba3d9243cd7c1ef7420dece8c70fdf6034593bc5d2cfa84e3ae57ff7b403",
+      "post_move_source_sha256": "58c7ba3d9243cd7c1ef7420dece8c70fdf6034593bc5d2cfa84e3ae57ff7b403",
+      "reason": "Final cleanup: retained non-selected standardization compatibility route moved to the clean package without reactivation."
+    },
+    {
+      "from_path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q004_s640_k1_reconstruction.py",
+      "to_path": "src/ismrm_v2/proposed/q002/run_q004_s640_k1_reconstruction.py",
+      "kind": "MOVE",
+      "phase": "FINAL_CLEANUP",
+      "pre_move_source_sha256": "45d70ecf5e6267bea78166070fe282b64e1023991c4a7a90fe140d4abf24c6f0",
+      "post_move_source_sha256": "45d70ecf5e6267bea78166070fe282b64e1023991c4a7a90fe140d4abf24c6f0",
+      "reason": "Final cleanup: historical Q004 launcher moved to the clean Q002 package; it remains outside the formal Q002S640 runtime."
     }
   ],
   "duplicate_implementation_plan": [
     {
-      "future_action": "MERGE_LATER",
+      "future_action": "DEFER_FINAL_CLEANUP",
       "paths": [
         "common/mlp/modules/module_04_quantitative_inr/quantitative_inr.py",
         "common/trad/modules/module_04_quantitative_inr/quantitative_inr.py"
       ],
-      "phase1_action": "MERGE_LATER",
-      "reason": "retain both implementations until a validated import and numerical-behavior merge",
+      "phase1_action": "DEFER_FINAL_CLEANUP",
+      "reason": "Retained: independent compatibility-tree callers and freeze-contract evidence still require a separately validated numerical merge.",
       "relationship": "DUPLICATE_IMPLEMENTATION"
     },
     {
-      "future_action": "MERGE_LATER",
+      "future_action": "DEFER_FINAL_CLEANUP",
       "paths": [
         "common/mlp/modules/module_06_rigid_psf/rigid_psf_forward.py",
         "common/trad/modules/module_06_rigid_psf/rigid_psf_forward.py"
       ],
-      "phase1_action": "MERGE_LATER",
-      "reason": "retain both implementations until a validated import and numerical-behavior merge",
+      "phase1_action": "DEFER_FINAL_CLEANUP",
+      "reason": "Retained: independent compatibility-tree callers and freeze-contract evidence still require a separately validated numerical merge.",
       "relationship": "DUPLICATE_IMPLEMENTATION"
     },
     {
@@ -901,32 +937,6 @@
       }
     },
     {
-      "classification": "COMPATIBILITY_IMPORT_ONLY",
-      "current_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
-      "future_action": "REMOVE_AFTER_IMPORT_DECOUPLING",
-      "future_target_path": null,
-      "phase1_action": "KEEP_CURRENT",
-      "reason": "compatibility import remains until callers are decoupled",
-      "safe_to_delete_now": false,
-      "source_sha256": "b60cf6df0a7f55a19d52ef926a7d5e3b7a1e46168a89f20026618b6f0d40878f",
-      "stage_roles": {
-        "05": "COMPATIBILITY_IMPORT_ONLY"
-      }
-    },
-    {
-      "classification": "COMPATIBILITY_IMPORT_ONLY",
-      "current_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
-      "future_action": "REMOVE_AFTER_IMPORT_DECOUPLING",
-      "future_target_path": null,
-      "phase1_action": "KEEP_CURRENT",
-      "reason": "compatibility import remains until callers are decoupled",
-      "safe_to_delete_now": false,
-      "source_sha256": "517d0fd8f082d6e70e339e814bf89b74cdfd88d902405969a6e2ec947f007f1a",
-      "stage_roles": {
-        "05": "COMPATIBILITY_IMPORT_ONLY"
-      }
-    },
-    {
       "classification": "ACTIVE_EXECUTED",
       "current_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/build_sparse_profiles.sh",
       "future_action": "RENAME_LATER",
@@ -989,58 +999,6 @@
       "source_sha256": "747db217273b19977e6027ef1d8c1ef3b6fca1b49d8fb55a220498f5cbb8426e",
       "stage_roles": {
         "05": "ACTIVE_EXECUTED"
-      }
-    },
-    {
-      "classification": "COMPATIBILITY_IMPORT_ONLY",
-      "current_path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
-      "future_action": "REMOVE_AFTER_IMPORT_DECOUPLING",
-      "future_target_path": null,
-      "phase1_action": "KEEP_CURRENT",
-      "reason": "compatibility import remains until callers are decoupled",
-      "safe_to_delete_now": false,
-      "source_sha256": "58c7ba3d9243cd7c1ef7420dece8c70fdf6034593bc5d2cfa84e3ae57ff7b403",
-      "stage_roles": {
-        "05": "COMPATIBILITY_IMPORT_ONLY"
-      }
-    },
-    {
-      "classification": "LEGACY_UNUSED_BY_PIPELINE",
-      "current_path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/evaluate_q003_s640_10k.py",
-      "future_action": "REMOVE_AFTER_VALIDATION",
-      "future_target_path": null,
-      "phase1_action": "AUDITED_UNUSED_CANDIDATE",
-      "reason": "audited outside formal runtime",
-      "safe_to_delete_now": false,
-      "source_sha256": "3d052e46aa811b304350944bfa84a5125f81cf50243c3a034be2937ba0f32d38",
-      "stage_roles": {
-        "06": "LEGACY_UNUSED_BY_PIPELINE"
-      }
-    },
-    {
-      "classification": "LEGACY_UNUSED_BY_PIPELINE",
-      "current_path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q003_reconstruction.py",
-      "future_action": "REMOVE_AFTER_VALIDATION",
-      "future_target_path": null,
-      "phase1_action": "AUDITED_UNUSED_CANDIDATE",
-      "reason": "audited outside formal runtime",
-      "safe_to_delete_now": false,
-      "source_sha256": "849afa6faa98a53eefd315b0cb13202e40a5ab4d719ffb6a415359accac3a750",
-      "stage_roles": {
-        "06": "LEGACY_UNUSED_BY_PIPELINE"
-      }
-    },
-    {
-      "classification": "LEGACY_UNUSED_BY_PIPELINE",
-      "current_path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q004_s640_k1_reconstruction.py",
-      "future_action": "REMOVE_AFTER_VALIDATION",
-      "future_target_path": null,
-      "phase1_action": "AUDITED_UNUSED_CANDIDATE",
-      "reason": "audited outside formal runtime",
-      "safe_to_delete_now": false,
-      "source_sha256": "45d70ecf5e6267bea78166070fe282b64e1023991c4a7a90fe140d4abf24c6f0",
-      "stage_roles": {
-        "06": "LEGACY_UNUSED_BY_PIPELINE"
       }
     },
     {
@@ -2322,7 +2280,7 @@
       "classification": "CONDITIONAL_ACTIVE",
       "current_path": "src/ismrm_v2/fit_first/baseline.py",
       "safe_to_delete_now": false,
-      "source_sha256": "fa075560906fbfa412af825a20cb121ccbabc3770dc239bde3044c0c04323ea1",
+      "source_sha256": "f125018530f62d7e2e27fe73fa3b74d0b2f90b0f8136845a92ecd7b6be13715d",
       "stage_roles": {
         "05": "CONDITIONAL_ACTIVE"
       },
@@ -2381,6 +2339,20 @@
       "migration_status": "MIGRATED_PHASE_2D",
       "phase1_action": "MIGRATED_PHASE_2D",
       "reason": "Phase 2D: SCMR-v5 Fit-first dictionary and NeSVoR runtime moved to its clean-package authority; only import or module-path references were adapted."
+    },
+    {
+      "future_action": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "future_target_path": "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py",
+      "migration_status": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "phase1_action": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "reason": "Final cleanup: retained legacy Fit-first route moved to the clean package; Stage 05 behavior is unchanged.",
+      "safe_to_delete_now": false,
+      "classification": "COMPATIBILITY_IMPORT_ONLY",
+      "current_path": "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py",
+      "source_sha256": "b60cf6df0a7f55a19d52ef926a7d5e3b7a1e46168a89f20026618b6f0d40878f",
+      "stage_roles": {
+        "05": "COMPATIBILITY_IMPORT_ONLY"
+      }
     },
     {
       "classification": "ACTIVE_TRANSITIVE",
@@ -2472,6 +2444,20 @@
       "reason": "Phase 2D: SCMR-v5 Fit-first dictionary and NeSVoR runtime moved to its clean-package authority; only import or module-path references were adapted."
     },
     {
+      "future_action": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "future_target_path": "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py",
+      "migration_status": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "phase1_action": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "reason": "Final cleanup: retained legacy dictionary-reuse validation moved to the clean package; Stage 05 behavior is unchanged.",
+      "safe_to_delete_now": false,
+      "classification": "COMPATIBILITY_IMPORT_ONLY",
+      "current_path": "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py",
+      "source_sha256": "517d0fd8f082d6e70e339e814bf89b74cdfd88d902405969a6e2ec947f007f1a",
+      "stage_roles": {
+        "05": "COMPATIBILITY_IMPORT_ONLY"
+      }
+    },
+    {
       "classification": "ACTIVE_EXECUTED",
       "current_path": "src/ismrm_v2/fit_first/scmr_v5_native_cache.py",
       "safe_to_delete_now": false,
@@ -2500,6 +2486,20 @@
       "migration_status": "MIGRATED_PHASE_2D",
       "phase1_action": "MIGRATED_PHASE_2D",
       "reason": "Phase 2D: SCMR-v5 Fit-first dictionary and NeSVoR runtime moved to its clean-package authority; only import or module-path references were adapted."
+    },
+    {
+      "future_action": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "future_target_path": "src/ismrm_v2/fit_first/standardize_subject_slices.py",
+      "migration_status": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "phase1_action": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "reason": "Final cleanup: retained non-selected standardization compatibility route moved to the clean package without reactivation.",
+      "safe_to_delete_now": false,
+      "classification": "COMPATIBILITY_IMPORT_ONLY",
+      "current_path": "src/ismrm_v2/fit_first/standardize_subject_slices.py",
+      "source_sha256": "58c7ba3d9243cd7c1ef7420dece8c70fdf6034593bc5d2cfa84e3ae57ff7b403",
+      "stage_roles": {
+        "05": "COMPATIBILITY_IMPORT_ONLY"
+      }
     },
     {
       "classification": "ACTIVE_EXECUTED",
@@ -2783,6 +2783,20 @@
       "migration_status": "MIGRATED_PHASE_2D",
       "phase1_action": "MIGRATED_PHASE_2D",
       "reason": "Phase 2D: formal Proposed/Q002, reconstruction, INR, decoder, PSF, training, inference, and export runtime moved to its clean-package authority; only import or module-path references were adapted."
+    },
+    {
+      "future_action": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "future_target_path": "src/ismrm_v2/proposed/q002/run_q004_s640_k1_reconstruction.py",
+      "migration_status": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "phase1_action": "MIGRATED_PHASE_FINAL_CLEANUP",
+      "reason": "Final cleanup: historical Q004 launcher moved to the clean Q002 package; it remains outside the formal Q002S640 runtime.",
+      "safe_to_delete_now": false,
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "current_path": "src/ismrm_v2/proposed/q002/run_q004_s640_k1_reconstruction.py",
+      "source_sha256": "45d70ecf5e6267bea78166070fe282b64e1023991c4a7a90fe140d4abf24c6f0",
+      "stage_roles": {
+        "06": "LEGACY_UNUSED_BY_PIPELINE"
+      }
     },
     {
       "classification": "ACTIVE_EXECUTED",
@@ -3076,9 +3090,9 @@
       "reason": "Sparse-profile manifest validation moved into sampling; imports were adapted to the clean sparse authority without changing validation behavior."
     }
   ],
-  "entry_count": 153,
+  "entry_count": 151,
   "inventory_schema": "active-dependency-inventory/v3",
-  "inventory_source_runtime_fingerprint_sha256": "14ab1def2a47afbe6ab64b0a2a8887284b3c3608293936a99e3d84c048f5b6af",
+  "inventory_source_runtime_fingerprint_sha256": "e7a7adc689e2f5ddcf2154e787fcd82b841da18e39f68cb8381f735e9dd0e563",
   "schema_version": "clean-code-migration/v1",
   "import_path_adaptations": [
     {
@@ -4188,6 +4202,222 @@
       "path": "tests/test_phase2c_foundation_runtime.py",
       "phase": "2D",
       "reason": "Caller now resolves the migrated clean-package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/mlp/modules/module_05_signal_decoder/synthetic_rr_domain.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/mlp/modules/module_07_objective_training/training_space.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/mlp/scripts/export_mlp_from_checkpoint.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/mlp/tests/test_dataset_grouping.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/mlp/tests/test_mat_v73_loader.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/mlp/tests/test_mlp_end_to_end_tiny.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/mlp/tests/test_mlp_online_batchnorm_frozen.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/mlp/tests/test_multistack_dataset.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/mlp/tests/test_step3_recovery.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/mlp/tests/test_timing.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/paper_experiments/joint_vs_2dfit/phase2_clean/q004s640.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/paper_experiments/joint_vs_2dfit/q004s640.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/quality_experiments/Q001_recon/tests/test_formal_psf128_export.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q004_s640_k1.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/modules/module_07_objective_training/trad_trainer.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/scripts/export_checkpoint.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_checkpoint_roundtrip.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_end_to_end_tiny.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_experiment_configs.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_map_domain_psf.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_numerical_stability.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_pre_experiment_gates.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_quantitative_regularization_coordinates.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_reference_paths.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_signal_metric_schema.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_step2_controls.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_subject_intensity_normalization.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_timing_profile_summary.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "/home/universe/SVR/multimap_postprogramming/ismrm_v2_clean_worktree/common/trad/tests/test_trad_protocol_from_dataset.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/q004s640.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "common/paper_experiments/joint_vs_2dfit/q004s640.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q003_s640_10k.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q004_s640_k1.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "src/ismrm_v2/fit_first/baseline.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "tests/test_deployment_manifest_contract.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
+    },
+    {
+      "classification": "IMPORT_PATH_ADAPTATION_ONLY",
+      "path": "tests/test_phase2_dependency_closure.py",
+      "phase": "FINAL_CLEANUP",
+      "reason": "Final cleanup caller now resolves an explicit clean/package authority; scientific behavior is unchanged."
     }
   ]
 }

@@ -11,7 +11,7 @@
     "COMPATIBILITY_IMPORT_ONLY": 3,
     "CONDITIONAL_ACTIVE": 10,
     "CONFIG_RUNTIME_ASSET": 8,
-    "LEGACY_UNUSED_BY_PIPELINE": 3,
+    "LEGACY_UNUSED_BY_PIPELINE": 1,
     "TEST_ONLY": 2,
     "THIRD_PARTY_ACTIVE": 18
   },
@@ -50,78 +50,6 @@
     }
   ],
   "edges": [
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .reuse_standardized_native_dictionary_maps import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
-      "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.fit_first.contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
-      "stage": "05",
-      "to": "src/ismrm_v2/fit_first/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.fit_first.fit_first import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
-      "stage": "05",
-      "to": "src/ismrm_v2/fit_first/fit_first.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.fit_first.fit_first_native_pose_audit import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
-      "stage": "05",
-      "to": "src/ismrm_v2/fit_first/fit_first_native_pose_audit.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
-      "stage": "05",
-      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from .standardize_subject_slices import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
-      "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.fit_first.contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
-      "stage": "05",
-      "to": "src/ismrm_v2/fit_first/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.fit_first.fit_first import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
-      "stage": "05",
-      "to": "src/ismrm_v2/fit_first/fit_first.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.sampling.sparse import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
-      "stage": "05",
-      "to": "src/ismrm_v2/sampling/sparse.py"
-    },
     {
       "condition": "always within Stage 04 batch",
       "edge_type": "CONFIG_READ",
@@ -337,22 +265,6 @@
       "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh",
       "stage": "05",
       "to": "src/ismrm_v2/fit_first/scmr_v5_native_cache.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.fit_first.contracts import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
-      "stage": "05",
-      "to": "src/ismrm_v2/fit_first/contracts.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from ismrm_v2.sampling.sparse import",
-      "from": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
-      "stage": "05",
-      "to": "src/ismrm_v2/sampling/sparse.py"
     },
     {
       "condition": "per stack",
@@ -4029,22 +3941,6 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
-      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.fit_first_intensity_preserving import",
-      "from": "src/ismrm_v2/fit_first/baseline.py",
-      "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
-      "evidence": "from paper_experiments.joint_vs_2dfit.phase2_clean.reuse_standardized_native_dictionary_maps import",
-      "from": "src/ismrm_v2/fit_first/baseline.py",
-      "stage": "05",
-      "to": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py"
-    },
-    {
-      "condition": "import-time",
-      "edge_type": "PYTHON_IMPORT",
       "evidence": "from ismrm_v2.fit_first.contracts import",
       "from": "src/ismrm_v2/fit_first/baseline.py",
       "stage": "05",
@@ -4061,6 +3957,22 @@
     {
       "condition": "import-time",
       "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.fit_first.fit_first_intensity_preserving import",
+      "from": "src/ismrm_v2/fit_first/baseline.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.fit_first.reuse_standardized_native_dictionary_maps import",
+      "from": "src/ismrm_v2/fit_first/baseline.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
       "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
       "from": "src/ismrm_v2/fit_first/baseline.py",
       "stage": "05",
@@ -4184,6 +4096,46 @@
       "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
       "from": "src/ismrm_v2/fit_first/fit_first.py",
       "stage": "08",
+      "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.fit_first.contracts import",
+      "from": "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/fit_first/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.fit_first.fit_first import",
+      "from": "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/fit_first/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.fit_first.fit_first_native_pose_audit import",
+      "from": "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/fit_first/fit_first_native_pose_audit.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .reuse_standardized_native_dictionary_maps import",
+      "from": "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.sampling.sparse_profile_manifest import",
+      "from": "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py",
+      "stage": "05",
       "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
@@ -4331,6 +4283,38 @@
       "to": "src/ismrm_v2/sampling/sparse_profile_manifest.py"
     },
     {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.fit_first.contracts import",
+      "from": "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/fit_first/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.fit_first.fit_first import",
+      "from": "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/fit_first/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from .standardize_subject_slices import",
+      "from": "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/fit_first/standardize_subject_slices.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.sampling.sparse import",
+      "from": "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/sampling/sparse.py"
+    },
+    {
       "condition": "per stack",
       "edge_type": "MATLAB_FUNCTION",
       "evidence": "MATLAB mapper subprocess",
@@ -4353,6 +4337,22 @@
       "from": "src/ismrm_v2/fit_first/scmr_v5_native_cache.py",
       "stage": "05",
       "to": "src/ismrm_v2/fit_first/fit_first.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.fit_first.contracts import",
+      "from": "src/ismrm_v2/fit_first/standardize_subject_slices.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/fit_first/contracts.py"
+    },
+    {
+      "condition": "import-time",
+      "edge_type": "PYTHON_IMPORT",
+      "evidence": "from ismrm_v2.sampling.sparse import",
+      "from": "src/ismrm_v2/fit_first/standardize_subject_slices.py",
+      "stage": "05",
+      "to": "src/ismrm_v2/sampling/sparse.py"
     },
     {
       "condition": "import-time",
@@ -5480,10 +5480,10 @@
     }
   ],
   "generation_provenance": {
-    "generator_sha256": "d03e8b49ae05c5c25cfac525c581ac2a04da46a40cba4d74b4b6f5376c5a3894",
+    "generator_sha256": "3af1305c588e0ed9bdaa9cde03c6bf55dbf331f76ee60d0130813ee00f02327d",
     "inventory_schema": "active-dependency-inventory/v3",
-    "source_file_count": 153,
-    "source_runtime_fingerprint_sha256": "14ab1def2a47afbe6ab64b0a2a8887284b3c3608293936a99e3d84c048f5b6af"
+    "source_file_count": 151,
+    "source_runtime_fingerprint_sha256": "e7a7adc689e2f5ddcf2154e787fcd82b841da18e39f68cb8381f735e9dd0e563"
   },
   "nodes": [
     {
@@ -5609,58 +5609,6 @@
       },
       "stages": [
         "04"
-      ]
-    },
-    {
-      "classification": "COMPATIBILITY_IMPORT_ONLY",
-      "discovery_methods": [
-        "AUDIT_EXCLUSION",
-        "PYTHON_IMPORT"
-      ],
-      "evidence": [
-        "baseline imports it, but Stage 05 supplies SCMR-v5 prebuilt/reuse flags, never intensity-preserving flags"
-      ],
-      "functional_area": "stage_05",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
-      "reason": "baseline imports it, but Stage 05 supplies SCMR-v5 prebuilt/reuse flags, never intensity-preserving flags",
-      "source_sha256": "b60cf6df0a7f55a19d52ef926a7d5e3b7a1e46168a89f20026618b6f0d40878f",
-      "stage_roles": {
-        "05": "COMPATIBILITY_IMPORT_ONLY"
-      },
-      "stages": [
-        "05"
-      ]
-    },
-    {
-      "classification": "COMPATIBILITY_IMPORT_ONLY",
-      "discovery_methods": [
-        "AUDIT_EXCLUSION",
-        "PYTHON_IMPORT"
-      ],
-      "evidence": [
-        "baseline imports it, but Stage 05 never supplies standardized reuse flags"
-      ],
-      "functional_area": "stage_05",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
-      "reason": "baseline imports it, but Stage 05 never supplies standardized reuse flags",
-      "source_sha256": "517d0fd8f082d6e70e339e814bf89b74cdfd88d902405969a6e2ec947f007f1a",
-      "stage_roles": {
-        "05": "COMPATIBILITY_IMPORT_ONLY"
-      },
-      "stages": [
-        "05"
       ]
     },
     {
@@ -5792,107 +5740,6 @@
       },
       "stages": [
         "05"
-      ]
-    },
-    {
-      "classification": "COMPATIBILITY_IMPORT_ONLY",
-      "discovery_methods": [
-        "AUDIT_EXCLUSION",
-        "PYTHON_IMPORT"
-      ],
-      "evidence": [
-        "standardization route is not selected by Stage 05"
-      ],
-      "functional_area": "stage_05",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
-      "reason": "standardization route is not selected by Stage 05",
-      "source_sha256": "58c7ba3d9243cd7c1ef7420dece8c70fdf6034593bc5d2cfa84e3ae57ff7b403",
-      "stage_roles": {
-        "05": "COMPATIBILITY_IMPORT_ONLY"
-      },
-      "stages": [
-        "05"
-      ]
-    },
-    {
-      "classification": "LEGACY_UNUSED_BY_PIPELINE",
-      "discovery_methods": [
-        "AUDIT_EXCLUSION"
-      ],
-      "evidence": [
-        "10k evaluation variant is not reached by formal Q002S640 command"
-      ],
-      "functional_area": "stage_06",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/evaluate_q003_s640_10k.py",
-      "reason": "10k evaluation variant is not reached by formal Q002S640 command",
-      "source_sha256": "3d052e46aa811b304350944bfa84a5125f81cf50243c3a034be2937ba0f32d38",
-      "stage_roles": {
-        "06": "LEGACY_UNUSED_BY_PIPELINE"
-      },
-      "stages": [
-        "06"
-      ]
-    },
-    {
-      "classification": "LEGACY_UNUSED_BY_PIPELINE",
-      "discovery_methods": [
-        "AUDIT_EXCLUSION"
-      ],
-      "evidence": [
-        "Q003 experiment is not reached by formal Q002S640 command"
-      ],
-      "functional_area": "stage_06",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q003_reconstruction.py",
-      "reason": "Q003 experiment is not reached by formal Q002S640 command",
-      "source_sha256": "849afa6faa98a53eefd315b0cb13202e40a5ab4d719ffb6a415359accac3a750",
-      "stage_roles": {
-        "06": "LEGACY_UNUSED_BY_PIPELINE"
-      },
-      "stages": [
-        "06"
-      ]
-    },
-    {
-      "classification": "LEGACY_UNUSED_BY_PIPELINE",
-      "discovery_methods": [
-        "AUDIT_EXCLUSION"
-      ],
-      "evidence": [
-        "Q004/K1 experiment is not reached by formal Q002S640 command"
-      ],
-      "functional_area": "stage_06",
-      "generic_runtime_usage": false,
-      "historical_name": false,
-      "historical_name_tokens": [],
-      "inputs": [],
-      "language": "python",
-      "outputs": [],
-      "path": "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q004_s640_k1_reconstruction.py",
-      "reason": "Q004/K1 experiment is not reached by formal Q002S640 command",
-      "source_sha256": "45d70ecf5e6267bea78166070fe282b64e1023991c4a7a90fe140d4abf24c6f0",
-      "stage_roles": {
-        "06": "LEGACY_UNUSED_BY_PIPELINE"
-      },
-      "stages": [
-        "06"
       ]
     },
     {
@@ -8429,7 +8276,7 @@
       "outputs": [],
       "path": "src/ismrm_v2/fit_first/baseline.py",
       "reason": "baseline CLI",
-      "source_sha256": "fa075560906fbfa412af825a20cb121ccbabc3770dc239bde3044c0c04323ea1",
+      "source_sha256": "f125018530f62d7e2e27fe73fa3b74d0b2f90b0f8136845a92ecd7b6be13715d",
       "stage_roles": {
         "05": "CONDITIONAL_ACTIVE"
       },
@@ -8526,6 +8373,32 @@
         "05",
         "07",
         "08"
+      ]
+    },
+    {
+      "classification": "COMPATIBILITY_IMPORT_ONLY",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION",
+        "PYTHON_IMPORT"
+      ],
+      "evidence": [
+        "baseline imports it, but Stage 05 supplies SCMR-v5 prebuilt/reuse flags, never intensity-preserving flags"
+      ],
+      "functional_area": "stage_05",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py",
+      "reason": "baseline imports it, but Stage 05 supplies SCMR-v5 prebuilt/reuse flags, never intensity-preserving flags",
+      "source_sha256": "b60cf6df0a7f55a19d52ef926a7d5e3b7a1e46168a89f20026618b6f0d40878f",
+      "stage_roles": {
+        "05": "COMPATIBILITY_IMPORT_ONLY"
+      },
+      "stages": [
+        "05"
       ]
     },
     {
@@ -8689,6 +8562,32 @@
       ]
     },
     {
+      "classification": "COMPATIBILITY_IMPORT_ONLY",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION",
+        "PYTHON_IMPORT"
+      ],
+      "evidence": [
+        "baseline imports it, but Stage 05 never supplies standardized reuse flags"
+      ],
+      "functional_area": "stage_05",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py",
+      "reason": "baseline imports it, but Stage 05 never supplies standardized reuse flags",
+      "source_sha256": "517d0fd8f082d6e70e339e814bf89b74cdfd88d902405969a6e2ec947f007f1a",
+      "stage_roles": {
+        "05": "COMPATIBILITY_IMPORT_ONLY"
+      },
+      "stages": [
+        "05"
+      ]
+    },
+    {
       "classification": "ACTIVE_EXECUTED",
       "discovery_methods": [
         "MANUAL_DYNAMIC_OVERRIDE",
@@ -8744,6 +8643,32 @@
         "05",
         "07",
         "08"
+      ]
+    },
+    {
+      "classification": "COMPATIBILITY_IMPORT_ONLY",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION",
+        "PYTHON_IMPORT"
+      ],
+      "evidence": [
+        "standardization route is not selected by Stage 05"
+      ],
+      "functional_area": "stage_05",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/fit_first/standardize_subject_slices.py",
+      "reason": "standardization route is not selected by Stage 05",
+      "source_sha256": "58c7ba3d9243cd7c1ef7420dece8c70fdf6034593bc5d2cfa84e3ae57ff7b403",
+      "stage_roles": {
+        "05": "COMPATIBILITY_IMPORT_ONLY"
+      },
+      "stages": [
+        "05"
       ]
     },
     {
@@ -9253,6 +9178,31 @@
       "source_sha256": "83015f49ae836079e5e2ca520f97bce56e8bffc0c04edcde75061e6e7c423a78",
       "stage_roles": {
         "06": "ACTIVE_EXECUTED"
+      },
+      "stages": [
+        "06"
+      ]
+    },
+    {
+      "classification": "LEGACY_UNUSED_BY_PIPELINE",
+      "discovery_methods": [
+        "AUDIT_EXCLUSION"
+      ],
+      "evidence": [
+        "Q004/K1 experiment is not reached by formal Q002S640 command"
+      ],
+      "functional_area": "stage_06",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "src/ismrm_v2/proposed/q002/run_q004_s640_k1_reconstruction.py",
+      "reason": "Q004/K1 experiment is not reached by formal Q002S640 command",
+      "source_sha256": "45d70ecf5e6267bea78166070fe282b64e1023991c4a7a90fe140d4abf24c6f0",
+      "stage_roles": {
+        "06": "LEGACY_UNUSED_BY_PIPELINE"
       },
       "stages": [
         "06"
@@ -9922,10 +9872,7 @@
         "fit_first reconstruction"
       ],
       "paths": [
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py",
         "common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh",
-        "common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py",
         "common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m",
         "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m",
         "common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m",
@@ -9952,10 +9899,13 @@
         "src/ismrm_v2/fit_first/contracts.py",
         "src/ismrm_v2/fit_first/dictionary.py",
         "src/ismrm_v2/fit_first/fit_first.py",
+        "src/ismrm_v2/fit_first/fit_first_intensity_preserving.py",
         "src/ismrm_v2/fit_first/fit_first_native_geometry.py",
         "src/ismrm_v2/fit_first/fit_first_native_pose_audit.py",
+        "src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py",
         "src/ismrm_v2/fit_first/scmr_v5_native_cache.py",
         "src/ismrm_v2/fit_first/simulate_hhz_signals.py",
+        "src/ismrm_v2/fit_first/standardize_subject_slices.py",
         "src/ismrm_v2/io/validate_subject_id.py",
         "src/ismrm_v2/observations/geometry.py",
         "src/ismrm_v2/proposed/rigid_psf/hb1_stack_adapter.py",
@@ -9979,9 +9929,6 @@
         "final_rigid_poses.json"
       ],
       "paths": [
-        "common/quality_experiments/Q002_B6_roi_same_anchor_mse/evaluate_q003_s640_10k.py",
-        "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q003_reconstruction.py",
-        "common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q004_s640_k1_reconstruction.py",
         "common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q002s640_k256.py",
         "common/quality_experiments/Q002_B6_roi_same_anchor_mse/tests/test_q005s640_k4.py",
         "common/trad/third_party/nesvor/nesvor/image/__init__.py",
@@ -10018,6 +9965,7 @@
         "src/ismrm_v2/proposed/q002/contracts.py",
         "src/ismrm_v2/proposed/q002/joint_dataset.py",
         "src/ismrm_v2/proposed/q002/run_q002_reconstruction.py",
+        "src/ismrm_v2/proposed/q002/run_q004_s640_k1_reconstruction.py",
         "src/ismrm_v2/proposed/q002/training.py",
         "src/ismrm_v2/proposed/q002/training_curves.py",
         "src/ismrm_v2/proposed/quantitative_point_dataset.py",

@@ -1,6 +1,6 @@
 # Active pipeline dependency trace
 
-Generated deterministically from runtime-source fingerprint `14ab1def2a47afbe6ab64b0a2a8887284b3c3608293936a99e3d84c048f5b6af` (generator `d03e8b49ae05c5c25cfac525c581ac2a04da46a40cba4d74b4b6f5376c5a3894`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
+Generated deterministically from runtime-source fingerprint `e7a7adc689e2f5ddcf2154e787fcd82b841da18e39f68cb8381f735e9dd0e563` (generator `3af1305c588e0ed9bdaa9cde03c6bf55dbf331f76ee60d0130813ee00f02327d`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
 
 ## Stage 01
 
@@ -216,9 +216,9 @@ Transitive implementation dependencies:
 - `src/ismrm_v2/sampling/sparse_profile_manifest.py`
 
 Compatibility import closure:
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_intensity_preserving.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/reuse_standardized_native_dictionary_maps.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/standardize_subject_slices.py`
+- `src/ismrm_v2/fit_first/fit_first_intensity_preserving.py`
+- `src/ismrm_v2/fit_first/reuse_standardized_native_dictionary_maps.py`
+- `src/ismrm_v2/fit_first/standardize_subject_slices.py`
 
 Runtime configs/assets:
 
