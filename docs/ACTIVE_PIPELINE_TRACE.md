@@ -1,6 +1,6 @@
 # Active pipeline dependency trace
 
-Generated deterministically from runtime-source fingerprint `74c0793635083660cf7d6c3db1544bf57e159dafd5b37b851d0b25ff2d63aebd` (generator `3619000ec826c9a9ceb205ccb6d60401b543bcb83e3d8679e97283696bd18132`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
+Generated deterministically from runtime-source fingerprint `14ab1def2a47afbe6ab64b0a2a8887284b3c3608293936a99e3d84c048f5b6af` (generator `d03e8b49ae05c5c25cfac525c581ac2a04da46a40cba4d74b4b6f5376c5a3894`). Static only: no DICOM, MATLAB, NeSVoR, GPU, or model binary is executed.
 
 ## Stage 01
 
@@ -95,9 +95,9 @@ Direct execution chain:
 Conditional direct execution:
 
 Transitive implementation dependencies:
-- `common/trad/modules/module_02_data_bridge/geometry.py`
 - `src/ismrm_v2/io/deployment_manifest.py`
 - `src/ismrm_v2/observations/build_manifest.py`
+- `src/ismrm_v2/observations/geometry.py`
 - `src/ismrm_v2/observations/mat_v73.py`
 - `src/ismrm_v2/observations/prepare_observations.py`
 - `src/ismrm_v2/observations/timing.py`
@@ -142,9 +142,9 @@ Conditional direct execution:
 - `src/ismrm_v2/sampling/sparse.py`
 
 Transitive implementation dependencies:
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py`
-- `common/trad/modules/module_02_data_bridge/geometry.py`
-- `common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py`
+- `src/ismrm_v2/fit_first/contracts.py`
+- `src/ismrm_v2/observations/geometry.py`
+- `src/ismrm_v2/proposed/rigid_psf/hb1_stack_adapter.py`
 
 Compatibility import closure:
 
@@ -192,26 +192,26 @@ Outputs:
 - `fit_first reconstruction`
 
 Direct execution chain:
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/scmr_v5_native_cache.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/run_scmr_v5_fit_first.sh`
 - `common/trad/evaluation/scmr/matlab/build_scmr_v5_native_maps.m`
+- `src/ismrm_v2/fit_first/scmr_v5_native_cache.py`
 - `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/baseline.py`
+- `src/ismrm_v2/fit_first/baseline.py`
 
 Transitive implementation dependencies:
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_pose_audit.py`
-- `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
 - `common/trad/evaluation/scmr/matlab/scmr_v5_matcher/function_T1T2_10HB_bssfp_qc.m`
 - `common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/dictionary/sim_T1T2_10HB_bssfp.m`
 - `common/trad/evaluation/scmr/matlab/scmr_v5_matcher/matlab/utils/d2r.m`
-- `common/trad/modules/module_02_data_bridge/geometry.py`
-- `common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py`
+- `src/ismrm_v2/fit_first/contracts.py`
+- `src/ismrm_v2/fit_first/dictionary.py`
+- `src/ismrm_v2/fit_first/fit_first.py`
+- `src/ismrm_v2/fit_first/fit_first_native_geometry.py`
+- `src/ismrm_v2/fit_first/fit_first_native_pose_audit.py`
+- `src/ismrm_v2/fit_first/simulate_hhz_signals.py`
+- `src/ismrm_v2/observations/geometry.py`
+- `src/ismrm_v2/proposed/rigid_psf/hb1_stack_adapter.py`
 - `src/ismrm_v2/sampling/sparse.py`
 - `src/ismrm_v2/sampling/sparse_profile_manifest.py`
 
@@ -246,7 +246,7 @@ External runtime boundaries:
 - `nesvor`
 
 Historical-name cleanup candidates:
-- `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
+- `src/ismrm_v2/fit_first/simulate_hhz_signals.py`
 
 ## Stage 06
 
@@ -266,39 +266,39 @@ Outputs:
 - `final_rigid_poses.json`
 
 Direct execution chain:
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/proposed.py`
-- `common/quality_experiments/Q002_B6_roi_same_anchor_mse/run_q002_reconstruction.py`
-- `common/quality_experiments/Q002_B6_roi_same_anchor_mse/training.py`
-- `common/reconstruction_core/orchestration.py`
 - `src/ismrm_v2/io/validate_subject_id.py`
+- `src/ismrm_v2/proposed/proposed.py`
+- `src/ismrm_v2/proposed/q002/run_q002_reconstruction.py`
+- `src/ismrm_v2/proposed/q002/training.py`
+- `src/ismrm_v2/proposed/reconstruction/orchestration.py`
 
 Conditional direct execution:
 
 Transitive implementation dependencies:
-- `common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py`
-- `common/mlp/modules/module_05_signal_decoder/decoder_factory.py`
-- `common/mlp/modules/module_05_signal_decoder/frozen_decoder.py`
-- `common/mlp/modules/module_05_signal_decoder/mlp_model.py`
-- `common/mlp/modules/module_05_signal_decoder/provenance.py`
-- `common/mlp/modules/module_05_signal_decoder/trad_teacher/trad_signal_simulator.py`
-- `common/mlp/modules/module_07_objective_training/mlp_trainer.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py`
-- `common/quality_experiments/Q001_recon/config.py`
-- `common/quality_experiments/Q002_B6_roi_same_anchor_mse/contracts.py`
-- `common/quality_experiments/Q002_B6_roi_same_anchor_mse/joint_dataset.py`
-- `common/quality_experiments/Q002_B6_roi_same_anchor_mse/training_curves.py`
-- `common/trad/evaluation/profiling/summarize_timing_profile.py`
-- `common/trad/modules/module_02_data_bridge/geometry.py`
-- `common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py`
-- `common/trad/modules/module_04_quantitative_inr/quantitative_inr.py`
-- `common/trad/modules/module_05_signal_decoder/decoder_factory.py`
-- `common/trad/modules/module_05_signal_decoder/trad_signal_simulator.py`
-- `common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py`
-- `common/trad/modules/module_06_rigid_psf/rigid_psf_forward.py`
-- `common/trad/modules/module_07_objective_training/experiment_infrastructure.py`
-- `common/trad/modules/module_07_objective_training/training_space.py`
-- `common/trad/modules/module_08_inference_export/export_quantitative.py`
-- `common/trad/modules/module_08_inference_export/reprojection.py`
+- `src/ismrm_v2/fit_first/contracts.py`
+- `src/ismrm_v2/observations/geometry.py`
+- `src/ismrm_v2/proposed/inference/export_quantitative.py`
+- `src/ismrm_v2/proposed/inference/reprojection.py`
+- `src/ismrm_v2/proposed/mlp_trainer.py`
+- `src/ismrm_v2/proposed/profiling/summarize_timing_profile.py`
+- `src/ismrm_v2/proposed/q001_config.py`
+- `src/ismrm_v2/proposed/q002/contracts.py`
+- `src/ismrm_v2/proposed/q002/joint_dataset.py`
+- `src/ismrm_v2/proposed/q002/training_curves.py`
+- `src/ismrm_v2/proposed/quantitative_point_dataset.py`
+- `src/ismrm_v2/proposed/rigid_psf/hb1_stack_adapter.py`
+- `src/ismrm_v2/proposed/rigid_psf/rigid_psf_forward.py`
+- `src/ismrm_v2/proposed/signal_decoder/checkpoint_loader.py`
+- `src/ismrm_v2/proposed/signal_decoder/decoder_factory.py`
+- `src/ismrm_v2/proposed/signal_decoder/frozen_decoder.py`
+- `src/ismrm_v2/proposed/signal_decoder/mlp_model.py`
+- `src/ismrm_v2/proposed/signal_decoder/provenance.py`
+- `src/ismrm_v2/proposed/signal_decoder/trad_teacher/trad_signal_simulator.py`
+- `src/ismrm_v2/proposed/trad_quantitative_inr.py`
+- `src/ismrm_v2/proposed/trad_signal_decoder/decoder_factory.py`
+- `src/ismrm_v2/proposed/trad_signal_decoder/trad_signal_simulator.py`
+- `src/ismrm_v2/proposed/training/experiment_infrastructure.py`
+- `src/ismrm_v2/proposed/training/training_space.py`
 - `src/ismrm_v2/sampling/sparse.py`
 - `src/ismrm_v2/sampling/sparse_profile_manifest.py`
 
@@ -352,71 +352,71 @@ Direct execution chain:
 - `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
-- `common/paper_experiments/joint_vs_2dfit/aha/current_fit_first_final_pose_bundle.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/derive_final_pose_mapping.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/paired_aha_sd.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_postprocess.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_through_plane.py`
+- `src/ismrm_v2/evaluation/aha/current_fit_first_final_pose_bundle.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_r3_direct_final_pose_bundle.py`
+- `src/ismrm_v2/evaluation/aha/derive_final_pose_mapping.py`
+- `src/ismrm_v2/evaluation/aha/paired_aha_sd.py`
+- `src/ismrm_v2/evaluation/aha/paired_final_pose_postprocess.py`
+- `src/ismrm_v2/evaluation/aha/paired_final_pose_through_plane.py`
 
 Transitive implementation dependencies:
-- `common/evaluation_common/myocardium/build_native_bundle.py`
-- `common/evaluation_common/myocardium/legacy_masks.py`
-- `common/mlp/modules/module_05_signal_decoder/checkpoint_loader.py`
-- `common/mlp/modules/module_05_signal_decoder/decoder_factory.py`
-- `common/mlp/modules/module_05_signal_decoder/frozen_decoder.py`
-- `common/mlp/modules/module_05_signal_decoder/mlp_model.py`
-- `common/mlp/modules/module_05_signal_decoder/provenance.py`
-- `common/mlp/modules/module_05_signal_decoder/trad_teacher/trad_signal_simulator.py`
-- `common/mlp/modules/module_07_objective_training/mlp_trainer.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_bundles.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/direct_native_endpoint_audit.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_mask_audit.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_native_geometry.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_route_contract.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/frozen_native_support.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py`
-- `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
-- `common/reconstruction_core/orchestration.py`
-- `common/trad/evaluation/profiling/summarize_timing_profile.py`
-- `common/trad/evaluation/scmr/quality_control.py`
-- `common/trad/evaluation/scmr/reference_2d.py`
-- `common/trad/modules/module_02_data_bridge/geometry.py`
-- `common/trad/modules/module_03_dataset_geometry/quantitative_point_dataset.py`
-- `common/trad/modules/module_04_quantitative_inr/quantitative_inr.py`
-- `common/trad/modules/module_05_signal_decoder/decoder_factory.py`
-- `common/trad/modules/module_05_signal_decoder/trad_signal_simulator.py`
-- `common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py`
-- `common/trad/modules/module_06_rigid_psf/rigid_psf_forward.py`
-- `common/trad/modules/module_07_objective_training/experiment_infrastructure.py`
-- `common/trad/modules/module_07_objective_training/training_space.py`
-- `common/trad/modules/module_08_inference_export/export_quantitative.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_adapter.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_aha16.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_legacy_roi.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_myocardial_roi_metrics.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_postprocess.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_r3_fit_first_final_pose_bundle.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_runner.py`
+- `src/ismrm_v2/evaluation/aha/final5_adapter.py`
+- `src/ismrm_v2/evaluation/aha/final5_aha16.py`
+- `src/ismrm_v2/evaluation/aha/final5_myocardial_roi_metrics.py`
+- `src/ismrm_v2/evaluation/aha/legacy_aha16.py`
+- `src/ismrm_v2/evaluation/aha/paired_final_pose_lv_metrics.py`
+- `src/ismrm_v2/evaluation/current_native_central_component_mask.py`
+- `src/ismrm_v2/evaluation/direct_native_bundles.py`
+- `src/ismrm_v2/evaluation/direct_native_endpoint_audit.py`
+- `src/ismrm_v2/evaluation/evaluation.py`
+- `src/ismrm_v2/evaluation/final5_partitioned_native_metrics.py`
+- `src/ismrm_v2/evaluation/final5_publication_visualization.py`
+- `src/ismrm_v2/evaluation/final_cyj_reporting.py`
+- `src/ismrm_v2/evaluation/final_native_grid_metrics.py`
+- `src/ismrm_v2/evaluation/final_sparse_native_metrics.py`
+- `src/ismrm_v2/evaluation/heldout.py`
+- `src/ismrm_v2/evaluation/l100_mask_paired_eval.py`
+- `src/ismrm_v2/evaluation/matched_output.py`
+- `src/ismrm_v2/evaluation/myocardium/build_native_bundle.py`
+- `src/ismrm_v2/evaluation/myocardium/legacy_masks.py`
+- `src/ismrm_v2/evaluation/scmr/quality_control.py`
+- `src/ismrm_v2/evaluation/scmr/reference_2d.py`
+- `src/ismrm_v2/evaluation/visualization.py`
+- `src/ismrm_v2/fit_first/contracts.py`
+- `src/ismrm_v2/fit_first/dictionary.py`
+- `src/ismrm_v2/fit_first/fit_first.py`
+- `src/ismrm_v2/fit_first/fit_first_mask_audit.py`
+- `src/ismrm_v2/fit_first/fit_first_native_geometry.py`
+- `src/ismrm_v2/fit_first/fit_first_route_contract.py`
+- `src/ismrm_v2/fit_first/formal_l100_sparse_manifest.py`
+- `src/ismrm_v2/fit_first/frozen_native_support.py`
+- `src/ismrm_v2/fit_first/simulate_hhz_signals.py`
+- `src/ismrm_v2/observations/geometry.py`
+- `src/ismrm_v2/proposed/inference/export_quantitative.py`
+- `src/ismrm_v2/proposed/mlp_trainer.py`
+- `src/ismrm_v2/proposed/profiling/summarize_timing_profile.py`
+- `src/ismrm_v2/proposed/quantitative_point_dataset.py`
+- `src/ismrm_v2/proposed/reconstruction/orchestration.py`
+- `src/ismrm_v2/proposed/rigid_psf/hb1_stack_adapter.py`
+- `src/ismrm_v2/proposed/rigid_psf/rigid_psf_forward.py`
+- `src/ismrm_v2/proposed/signal_decoder/checkpoint_loader.py`
+- `src/ismrm_v2/proposed/signal_decoder/decoder_factory.py`
+- `src/ismrm_v2/proposed/signal_decoder/frozen_decoder.py`
+- `src/ismrm_v2/proposed/signal_decoder/mlp_model.py`
+- `src/ismrm_v2/proposed/signal_decoder/provenance.py`
+- `src/ismrm_v2/proposed/signal_decoder/trad_teacher/trad_signal_simulator.py`
+- `src/ismrm_v2/proposed/trad_quantitative_inr.py`
+- `src/ismrm_v2/proposed/trad_signal_decoder/decoder_factory.py`
+- `src/ismrm_v2/proposed/trad_signal_decoder/trad_signal_simulator.py`
+- `src/ismrm_v2/proposed/training/experiment_infrastructure.py`
+- `src/ismrm_v2/proposed/training/training_space.py`
 - `src/ismrm_v2/sampling/sparse.py`
 - `src/ismrm_v2/sampling/sparse_profile_manifest.py`
 
@@ -448,23 +448,23 @@ External runtime boundaries:
 - `cuda`
 
 Historical-name cleanup candidates:
-- `common/evaluation_common/myocardium/legacy_masks.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_postprocess.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_direct_final_pose_bundle.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_r3_fit_first_final_pose_bundle.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_paired_final_pose.sh`
-- `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_adapter.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_aha16.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_legacy_roi.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_myocardial_roi_metrics.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_postprocess.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_r3_direct_final_pose_bundle.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_r3_fit_first_final_pose_bundle.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_runner.py`
+- `src/ismrm_v2/evaluation/aha/final5_adapter.py`
+- `src/ismrm_v2/evaluation/aha/final5_aha16.py`
+- `src/ismrm_v2/evaluation/aha/final5_myocardial_roi_metrics.py`
+- `src/ismrm_v2/evaluation/aha/legacy_aha16.py`
+- `src/ismrm_v2/evaluation/final5_partitioned_native_metrics.py`
+- `src/ismrm_v2/evaluation/final5_publication_visualization.py`
+- `src/ismrm_v2/evaluation/myocardium/legacy_masks.py`
+- `src/ismrm_v2/fit_first/simulate_hhz_signals.py`
 
 ## Stage 08
 
@@ -484,47 +484,47 @@ Direct execution chain:
 - `src/ismrm_v2/io/validate_subject_id.py`
 
 Conditional direct execution:
-- `common/paper_experiments/joint_vs_2dfit/aha/common_native_all_stack_roi_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/common_native_metrics_qc.py`
+- `src/ismrm_v2/evaluation/aha/common_native_all_stack_roi_metrics.py`
+- `src/ismrm_v2/evaluation/aha/common_native_metrics_qc.py`
 
 Transitive implementation dependencies:
-- `common/evaluation_common/myocardium/build_native_bundle.py`
-- `common/evaluation_common/myocardium/legacy_masks.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/common_native.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/paired_final_pose_lv_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/contracts.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/current_native_central_component_mask.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/dictionary.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/evaluation.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final_cyj_reporting.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final_native_grid_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final_sparse_native_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final_stratified_native_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_mask_audit.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/fit_first_route_contract.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/formal_l100_sparse_manifest.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/frozen_native_support.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/heldout.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/l100_mask_paired_eval.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/matched_output.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/visualization.py`
-- `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
-- `common/trad/evaluation/scmr/quality_control.py`
-- `common/trad/evaluation/scmr/reference_2d.py`
-- `common/trad/modules/module_02_data_bridge/geometry.py`
-- `common/trad/modules/module_06_rigid_psf/hb1_stack_adapter.py`
+- `src/ismrm_v2/evaluation/aha/common_native.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_adapter.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_aha16.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_legacy_roi.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_myocardial_roi_metrics.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_runner.py`
+- `src/ismrm_v2/evaluation/aha/final5_adapter.py`
+- `src/ismrm_v2/evaluation/aha/final5_aha16.py`
+- `src/ismrm_v2/evaluation/aha/final5_myocardial_roi_metrics.py`
+- `src/ismrm_v2/evaluation/aha/legacy_aha16.py`
+- `src/ismrm_v2/evaluation/aha/paired_final_pose_lv_metrics.py`
+- `src/ismrm_v2/evaluation/current_native_central_component_mask.py`
+- `src/ismrm_v2/evaluation/evaluation.py`
+- `src/ismrm_v2/evaluation/final5_partitioned_native_metrics.py`
+- `src/ismrm_v2/evaluation/final5_publication_visualization.py`
+- `src/ismrm_v2/evaluation/final_cyj_reporting.py`
+- `src/ismrm_v2/evaluation/final_native_grid_metrics.py`
+- `src/ismrm_v2/evaluation/final_sparse_native_metrics.py`
+- `src/ismrm_v2/evaluation/final_stratified_native_metrics.py`
+- `src/ismrm_v2/evaluation/heldout.py`
+- `src/ismrm_v2/evaluation/l100_mask_paired_eval.py`
+- `src/ismrm_v2/evaluation/matched_output.py`
+- `src/ismrm_v2/evaluation/myocardium/build_native_bundle.py`
+- `src/ismrm_v2/evaluation/myocardium/legacy_masks.py`
+- `src/ismrm_v2/evaluation/scmr/quality_control.py`
+- `src/ismrm_v2/evaluation/scmr/reference_2d.py`
+- `src/ismrm_v2/evaluation/visualization.py`
+- `src/ismrm_v2/fit_first/contracts.py`
+- `src/ismrm_v2/fit_first/dictionary.py`
+- `src/ismrm_v2/fit_first/fit_first.py`
+- `src/ismrm_v2/fit_first/fit_first_mask_audit.py`
+- `src/ismrm_v2/fit_first/fit_first_route_contract.py`
+- `src/ismrm_v2/fit_first/formal_l100_sparse_manifest.py`
+- `src/ismrm_v2/fit_first/frozen_native_support.py`
+- `src/ismrm_v2/fit_first/simulate_hhz_signals.py`
+- `src/ismrm_v2/observations/geometry.py`
+- `src/ismrm_v2/proposed/rigid_psf/hb1_stack_adapter.py`
 - `src/ismrm_v2/sampling/sparse.py`
 - `src/ismrm_v2/sampling/sparse_profile_manifest.py`
 
@@ -554,21 +554,21 @@ Third-party runtime closure:
 External runtime boundaries:
 
 Historical-name cleanup candidates:
-- `common/evaluation_common/myocardium/legacy_masks.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_adapter.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_legacy_roi.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_myocardial_roi_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/cyj11_runner.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_adapter.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/final5_myocardial_roi_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/aha/legacy_aha16.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_partitioned_native_metrics.py`
-- `common/paper_experiments/joint_vs_2dfit/phase2_clean/final5_publication_visualization.py`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_all_stack_roi_metrics.sh`
 - `common/paper_experiments/joint_vs_2dfit/phase2_clean/server_commands/hhz_common_native_metrics_qc.sh`
-- `common/paper_experiments/joint_vs_2dfit/simulation/simulate_hhz_signals.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_adapter.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_aha16.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_legacy_roi.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_myocardial_roi_metrics.py`
+- `src/ismrm_v2/evaluation/aha/cyj11_runner.py`
+- `src/ismrm_v2/evaluation/aha/final5_adapter.py`
+- `src/ismrm_v2/evaluation/aha/final5_aha16.py`
+- `src/ismrm_v2/evaluation/aha/final5_myocardial_roi_metrics.py`
+- `src/ismrm_v2/evaluation/aha/legacy_aha16.py`
+- `src/ismrm_v2/evaluation/final5_partitioned_native_metrics.py`
+- `src/ismrm_v2/evaluation/final5_publication_visualization.py`
+- `src/ismrm_v2/evaluation/myocardium/legacy_masks.py`
+- `src/ismrm_v2/fit_first/simulate_hhz_signals.py`
 
 ## Stage 09
 

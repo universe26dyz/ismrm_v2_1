@@ -11,6 +11,10 @@ until the corresponding import migration and validation are complete.
 | Stage 02 preprocessed-MAT validator | `src/ismrm_v2/preprocessing/validation.py` | **COMPLETED** — moved from `common/trad/scripts/validate_transferred_preprocessed.py` | Stage 02 validation only | 2C |
 | Stage 03 observation preparation and data bridge | `src/ismrm_v2/observations/{prepare_all,build_manifest,mat_v73,timing,prepare_observations}.py` | **COMPLETED** — moved from the Stage 02 data bridge and Stage 03 wrapper | MAT v7.3 / observation-output contract | 2C |
 | Stage 04 sparse sampling and profile manifest | `src/ismrm_v2/sampling/{sparse,sparse_profile_manifest}.py` | **COMPLETED** — moved from `phase2_clean/` | sparse selection and profile validation | 2C |
+| Formal Proposed/Q002 scientific runtime | `src/ismrm_v2/proposed/` | **COMPLETED** — migrated active Q002, reconstruction, INR, decoder, PSF, training, inference, and export authorities | Q002S640 scientific freeze | 2D |
+| SCMR-v5 Fit-first and NeSVoR Python route | `src/ismrm_v2/fit_first/` | **COMPLETED** — migrated active Fit-first authority | dictionary matching and independent T1/T2 route | 2D |
+| Deferred geometry bridge | `src/ismrm_v2/observations/geometry.py` | **COMPLETED** — migrated from `module_02_data_bridge/geometry.py` | geometry contract shared across stages | 2D |
+| Stage 07/08 evaluation and AHA runtime | `src/ismrm_v2/evaluation/` | **COMPLETED** — migrated active AHA, common-native, and evaluation authorities | ROI/AHA/common-native semantics | 2D |
 | `phase2_clean/proposed.py` and Q002 | `src/ismrm_v2/proposed/` | Move implementation once | formal Proposed authority | 2 |
 | `phase2_clean/baseline.py`, `fit_first*.py` | `src/ismrm_v2/fit_first/` | Move after CLI/import migration | SCMR-v5 and NeSVoR route | 2 |
 | `common/mlp/` | `src/ismrm_v2/proposed/` | Merge later with TRAD only after validation | frozen decoder and checkpoint compatibility | 2 |
