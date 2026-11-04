@@ -20,12 +20,14 @@ def main() -> None:
         for name in ("README_zh-CN.md", "README_en.md"):
             if not (path / name).is_file():
                 raise SystemExit(f"missing module manual: {path / name}")
-    for directory in ("configs", "common", "runtime", "subjects", "runs", "docs", "tests"):
+    for directory in ("configs", "common", "runtime", "docs", "tests"):
         if not (root / directory).is_dir():
             raise SystemExit(f"missing project directory: {root / directory}")
+    # These paths are deliberately ignored server-local state.  A source-only
+    # local checkout may not contain them; server deployment verifies their
+    # presence before formal execution.
     json.loads((root / "runtime/runtime_contract.json").read_text())
     print(f"PROJECT INTEGRITY: PASS ({len(MODULES)} modules)")
 
 if __name__ == "__main__":
     main()
-

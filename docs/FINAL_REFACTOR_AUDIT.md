@@ -46,6 +46,9 @@ and PSF semantics are unchanged.
 MATLAB, CUDA, NeSVoR, and server-data execution are intentionally not run on
 the local CPU environment. Deployment validation is documented in
 [`FINAL_SERVER_DEPLOYMENT_COMMANDS.md`](FINAL_SERVER_DEPLOYMENT_COMMANDS.md).
+The integrity checker permits a source-only local checkout without ignored
+`subjects/` or `runs/`; the deployment commands require those protected server
+directories before formal execution.
 
 ## Local test status
 
