@@ -1674,7 +1674,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
-      "source_sha256": "755722037f6eae20e956f4f4714aeb15439ede7685cfa48a95e575b35145dca0",
+      "source_sha256": "a078fbda7a238c7bedd4db899389dc554b82e04df842fb94a4d3b7d5818d3690",
       "stage_roles": {
         "09": "ACTIVE_EXECUTED"
       }
@@ -3092,7 +3092,7 @@
   ],
   "entry_count": 151,
   "inventory_schema": "active-dependency-inventory/v3",
-  "inventory_source_runtime_fingerprint_sha256": "e7a7adc689e2f5ddcf2154e787fcd82b841da18e39f68cb8381f735e9dd0e563",
+  "inventory_source_runtime_fingerprint_sha256": "a7cafe7b4be3f93c2e3065ee83651c8c74470341ddf70fe409a207a945027217",
   "schema_version": "clean-code-migration/v1",
   "import_path_adaptations": [
     {

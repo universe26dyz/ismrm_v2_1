@@ -5483,7 +5483,7 @@
     "generator_sha256": "3af1305c588e0ed9bdaa9cde03c6bf55dbf331f76ee60d0130813ee00f02327d",
     "inventory_schema": "active-dependency-inventory/v3",
     "source_file_count": 151,
-    "source_runtime_fingerprint_sha256": "e7a7adc689e2f5ddcf2154e787fcd82b841da18e39f68cb8381f735e9dd0e563"
+    "source_runtime_fingerprint_sha256": "a7cafe7b4be3f93c2e3065ee83651c8c74470341ddf70fe409a207a945027217"
   },
   "nodes": [
     {
@@ -7125,7 +7125,7 @@
       "outputs": [],
       "path": "scripts/verify_project_integrity.py",
       "reason": "integrity checker",
-      "source_sha256": "755722037f6eae20e956f4f4714aeb15439ede7685cfa48a95e575b35145dca0",
+      "source_sha256": "a078fbda7a238c7bedd4db899389dc554b82e04df842fb94a4d3b7d5818d3690",
       "stage_roles": {
         "09": "ACTIVE_EXECUTED"
       },
