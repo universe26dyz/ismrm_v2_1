@@ -6,7 +6,7 @@ Run MATLAB on the server to convert the ten-weight DICOM groups into `preprocess
 
 ```bash
 bash "$PROJECT_ROOT/pipeline/02_PREPROCESS_MATLAB/run_stage.sh" \
-  "$RUN_ROOT" "$SUBJECT" "$PROJECT_ROOT/subjects/$SUBJECT/manifest.json" \
+  "$RUN_ROOT" "$SUBJECT" "$PROJECT_ROOT/subjects/$SUBJECT/deployment_manifest.json" \
   "$PROJECT_ROOT/configs/protocol_scmr_v5_10_100.yaml" matlab "$PYTHON"
 ```
 

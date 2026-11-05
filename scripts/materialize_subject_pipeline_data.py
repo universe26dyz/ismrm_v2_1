@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Copy one completed subject's pipeline inputs and outputs into ismrm_v2_1.
+"""Copy one completed subject into the project-local v2.1 data layout.
 
 The operation is copy-only and resumable. Existing destination files are
 accepted only when their SHA256 equals the source file. Large patient data and
-generated outputs remain outside Git; the subject manifest and SHA256 JSONL
-are the tracked provenance records.
+generated outputs remain outside Git; deployment and archive manifests keep
+their distinct meanings under ``subjects/<SUBJECT>/``.
 """
 
 from __future__ import annotations
@@ -84,19 +84,20 @@ def materialize_subject(*, project_root: str | Path, subject: str, run_root: str
                         supplemental_proposed_root: str | Path | None = None) -> Path:
     project = Path(project_root).resolve()
     subject_root = project / "subjects" / subject
-    input_root = subject_root / "inputs"
-    output_root = project / "runs" / subject
+    raw_root = project / "data" / "raw_dicom" / subject
+    roi_root = project / "data" / "roi" / subject / Path(roi_bundle).resolve().name
+    frozen_root = project / "runs" / "frozen_baseline" / subject
     records: list[dict[str, Any]] = []
 
-    _copy_tree(Path(raw_dicom_subject_root), input_root / "raw_dicom", records, label="input/raw_dicom")
-    _copy_tree(Path(preprocessed_subject_root), input_root / "preprocessed", records, label="input/preprocessed")
-    _copy_tree(Path(prepared_subject_root), input_root / "prepared", records, label="input/prepared")
-    _copy_tree(Path(roi_bundle), input_root / "roi", records, label="input/roi")
+    _copy_tree(Path(raw_dicom_subject_root), raw_root, records, label="data/raw_dicom")
+    _copy_tree(Path(preprocessed_subject_root), frozen_root / "preprocessed" / subject, records, label="frozen/preprocessed")
+    _copy_tree(Path(prepared_subject_root), frozen_root / "prepared" / subject, records, label="frozen/prepared")
+    _copy_tree(Path(roi_bundle), roi_root, records, label="data/roi")
 
     sparse_source = Path(run_root).resolve() / "sparse_inputs" / subject
-    _copy_tree(sparse_source, input_root / "sparse_inputs", records, label="input/sparse_inputs")
+    _copy_tree(sparse_source, frozen_root / "sparse_inputs" / subject, records, label="frozen/sparse_inputs")
 
-    _copy_run_outputs(Path(run_root).resolve(), output_root, records)
+    _copy_run_outputs(Path(run_root).resolve(), frozen_root, records)
 
     supplemental_source = None
     if supplemental_proposed_root is not None:
@@ -109,7 +110,7 @@ def materialize_subject(*, project_root: str | Path, subject: str, run_root: str
             )
         _copy_tree(
             supplemental_source,
-            output_root / "reconstruction" / "proposed" / subject,
+            frozen_root / "reconstruction" / "proposed" / subject,
             records,
             label="supplemental/proposed",
         )
@@ -120,12 +121,16 @@ def materialize_subject(*, project_root: str | Path, subject: str, run_root: str
 
     subject_root.mkdir(parents=True, exist_ok=True)
     sha_manifest = subject_root / "sha256.jsonl"
-    with sha_manifest.open("w", encoding="utf-8") as handle:
-        for record in sorted(records, key=lambda item: item["archive"]):
-            handle.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+    sha_content = "".join(
+        json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n"
+        for record in sorted(records, key=lambda item: item["archive"])
+    )
+    if sha_manifest.exists() and sha_manifest.read_text(encoding="utf-8") != sha_content:
+        raise ValueError(f"SHA256 manifest exists with different content: {sha_manifest}")
+    sha_manifest.write_text(sha_content, encoding="utf-8")
 
     manifest = {
-        "schema": "ismrm_v2_1_subject_pipeline_data/v1",
+        "schema": "ismrm_v2_1_subject_pipeline_data/v2",
         "subject": subject,
         "archive_policy": "copy-only; existing files must have identical SHA256",
         "source_run_root": str(Path(run_root).resolve()),
@@ -139,13 +144,19 @@ def materialize_subject(*, project_root: str | Path, subject: str, run_root: str
         "supplemental_sources": {
             "proposed": str(supplemental_source) if supplemental_source is not None else None,
         },
-        "archive_inputs": str(input_root.relative_to(project)),
-        "archive_outputs": str(output_root.relative_to(project)),
+        "project_data": {
+            "raw_dicom": str(raw_root.relative_to(project)),
+            "roi": str(roi_root.relative_to(project)),
+            "frozen_baseline": str(frozen_root.relative_to(project)),
+        },
         "file_count": len(records),
         "sha256_manifest": str(sha_manifest.relative_to(project)),
         "gitignored_data": True,
     }
-    (subject_root / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    archive_manifest = subject_root / "archive_manifest.json"
+    if archive_manifest.exists() and archive_manifest.read_bytes() != (json.dumps(manifest, indent=2, ensure_ascii=False) + "\n").encode("utf-8"):
+        raise ValueError(f"archive manifest exists with different content: {archive_manifest}")
+    archive_manifest.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return subject_root
 
 

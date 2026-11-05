@@ -6,7 +6,7 @@
   },
   "classification_summary": {
     "ACTIVE_ENTRYPOINT": 9,
-    "ACTIVE_EXECUTED": 22,
+    "ACTIVE_EXECUTED": 23,
     "ACTIVE_TRANSITIVE": 78,
     "COMPATIBILITY_IMPORT_ONLY": 3,
     "CONDITIONAL_ACTIVE": 10,
@@ -632,6 +632,14 @@
       "from": "pipeline/09_INTEGRITY_AND_REPORTING/run_stage.sh",
       "stage": "09",
       "to": "scripts/verify_scientific_freeze.py"
+    },
+    {
+      "condition": "always",
+      "edge_type": "SHELL_PYTHON_SCRIPT",
+      "evidence": "self-contained path checker",
+      "from": "pipeline/09_INTEGRITY_AND_REPORTING/run_stage.sh",
+      "stage": "09",
+      "to": "scripts/verify_self_contained_project.py"
     },
     {
       "condition": "import-time",
@@ -5463,10 +5471,10 @@
     }
   ],
   "generation_provenance": {
-    "generator_sha256": "f66f68045d741734e404ddc8c30a7491ebb289772e4befc29caed826d69eddc4",
+    "generator_sha256": "5c2cced4f923308b0f8219a092e8b17070befc9eb961a1f6c7611177f19bb6b8",
     "inventory_schema": "active-dependency-inventory/v3",
-    "source_file_count": 149,
-    "source_runtime_fingerprint_sha256": "fb1ceabe9517ba23998d7a7a2ae400371f471497c109d2cdc5e33235b48aaa53"
+    "source_file_count": 150,
+    "source_runtime_fingerprint_sha256": "0f26a64b383b97a513ed008842d7089de3e8da1478031d35d5790aa21a937af6"
   },
   "nodes": [
     {
@@ -5978,15 +5986,15 @@
       "historical_name": false,
       "historical_name_tokens": [],
       "inputs": [
-        "RAW_ROOT/SUBJECT/{sax,2ch,4ch}/*.dcm"
+        "data/raw_dicom/SUBJECT/{sax,2ch,4ch}/*.dcm"
       ],
       "language": "shell",
       "outputs": [
-        "subjects/SUBJECT/manifest.json"
+        "subjects/SUBJECT/deployment_manifest.json"
       ],
       "path": "pipeline/01_RAW_DICOM/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "9ab40d827b8336de9fdca53699f7251373dc179cc423a965daa02b6facb8bda9",
+      "source_sha256": "eb9b9ee011acf6fc11b6790891479f5ffa455df7a566920a224677f0f31cc56f",
       "stage_roles": {
         "01": "ACTIVE_ENTRYPOINT"
       },
@@ -6369,7 +6377,7 @@
       ],
       "path": "pipeline/09_INTEGRITY_AND_REPORTING/run_stage.sh",
       "reason": "Stage entrypoint",
-      "source_sha256": "2bc7dc08adcdea40f9b69e8be93cdf4762473ba8f49d30222b03b47ff1f73d84",
+      "source_sha256": "3d18883b8f8557f1c3842f62fcfff5cb934c1d7a1eeb7bd7a9b14aad19032b69",
       "stage_roles": {
         "09": "ACTIVE_ENTRYPOINT"
       },
@@ -6497,6 +6505,31 @@
       "path": "scripts/verify_scientific_freeze.py",
       "reason": "freeze checker",
       "source_sha256": "b781f22df350f48aa9b96f7770b7af7a84258be122f1fcef7719600f404264de",
+      "stage_roles": {
+        "09": "ACTIVE_EXECUTED"
+      },
+      "stages": [
+        "09"
+      ]
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "discovery_methods": [
+        "MANUAL_DYNAMIC_OVERRIDE"
+      ],
+      "evidence": [
+        "self-contained path checker"
+      ],
+      "functional_area": "stage_09",
+      "generic_runtime_usage": false,
+      "historical_name": false,
+      "historical_name_tokens": [],
+      "inputs": [],
+      "language": "python",
+      "outputs": [],
+      "path": "scripts/verify_self_contained_project.py",
+      "reason": "self-contained path checker",
+      "source_sha256": "0fb1668a79aa3d93aa4d7a29584b594707a97aea38c94ee47ff324a659243e1d",
       "stage_roles": {
         "09": "ACTIVE_EXECUTED"
       },
@@ -9680,10 +9713,10 @@
     "01": {
       "entrypoint": "pipeline/01_RAW_DICOM/run_stage.sh",
       "inputs": [
-        "RAW_ROOT/SUBJECT/{sax,2ch,4ch}/*.dcm"
+        "data/raw_dicom/SUBJECT/{sax,2ch,4ch}/*.dcm"
       ],
       "outputs": [
-        "subjects/SUBJECT/manifest.json"
+        "subjects/SUBJECT/deployment_manifest.json"
       ],
       "paths": [
         "pipeline/01_RAW_DICOM/run_stage.sh",
@@ -10104,7 +10137,8 @@
         "scripts/verify_no_legacy_code_path.py",
         "scripts/verify_project_integrity.py",
         "scripts/verify_runtime_contract.py",
-        "scripts/verify_scientific_freeze.py"
+        "scripts/verify_scientific_freeze.py",
+        "scripts/verify_self_contained_project.py"
       ]
     }
   }

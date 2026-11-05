@@ -6,3 +6,4 @@ PYTHON=${1:-python}
 "$PYTHON" "$PROJECT_ROOT/scripts/verify_no_legacy_code_path.py" "$PROJECT_ROOT"
 "$PYTHON" "$PROJECT_ROOT/scripts/verify_runtime_contract.py" --root "$PROJECT_ROOT"
 "$PYTHON" "$PROJECT_ROOT/scripts/verify_scientific_freeze.py" --root "$PROJECT_ROOT"
+"$PYTHON" "$PROJECT_ROOT/scripts/verify_self_contained_project.py" --root "$PROJECT_ROOT"

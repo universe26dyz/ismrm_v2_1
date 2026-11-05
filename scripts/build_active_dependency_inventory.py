@@ -23,7 +23,7 @@ STAGE_ENTRYPOINTS = {f"{number:02d}": f"pipeline/{name}/run_stage.sh" for number
     "05_SCMR_V5_FIT_FIRST", "06_PROPOSED", "07_FINAL_POSE", "08_EVALUATION_AND_VISUALIZATION",
     "09_INTEGRITY_AND_REPORTING"), 1)}
 STAGE_IO = {
-    "01": (['RAW_ROOT/SUBJECT/{sax,2ch,4ch}/*.dcm'], ['subjects/SUBJECT/manifest.json']),
+    "01": (['data/raw_dicom/SUBJECT/{sax,2ch,4ch}/*.dcm'], ['subjects/SUBJECT/deployment_manifest.json']),
     "02": (['deployment manifest', 'DICOM'], ['RUN_ROOT/preprocessed/SUBJECT/{stack}/preprocessed.mat']),
     "03": (['preprocessed MAT', 'deployment manifest', 'protocol YAML'], ['observations.npz', 'manifest.json', 'timing.npy', 'qc_summary.json']),
     "04": (['prepared observations', 'sparse profile'], ['sparse_inputs/SUBJECT/CASE/sparse_manifest.json']),
@@ -83,6 +83,7 @@ DECLARED_EDGES = [
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_no_legacy_code_path.py", "SHELL_PYTHON_SCRIPT", "always", "legacy checker", "ACTIVE_EXECUTED"),
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_runtime_contract.py", "SHELL_PYTHON_SCRIPT", "always", "runtime checker", "ACTIVE_EXECUTED"),
     ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_scientific_freeze.py", "SHELL_PYTHON_SCRIPT", "always", "freeze checker", "ACTIVE_EXECUTED"),
+    ("09", STAGE_ENTRYPOINTS["09"], "scripts/verify_self_contained_project.py", "SHELL_PYTHON_SCRIPT", "always", "self-contained path checker", "ACTIVE_EXECUTED"),
 ]
 KNOWN_RUNTIME_ASSETS = [
     ("04", "pipeline/04_SPARSE_PROFILES/internal/build_sparse_profiles.sh", f"configs/sparse_profiles/{name}.json", "always within Stage 04 batch", "PROFILE loop and --profile path")

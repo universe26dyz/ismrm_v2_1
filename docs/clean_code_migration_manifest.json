@@ -1135,7 +1135,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
-      "source_sha256": "9ab40d827b8336de9fdca53699f7251373dc179cc423a965daa02b6facb8bda9",
+      "source_sha256": "eb9b9ee011acf6fc11b6790891479f5ffa455df7a566920a224677f0f31cc56f",
       "stage_roles": {
         "01": "ACTIVE_ENTRYPOINT"
       }
@@ -1304,7 +1304,7 @@
       "phase1_action": "KEEP_CURRENT",
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
-      "source_sha256": "2bc7dc08adcdea40f9b69e8be93cdf4762473ba8f49d30222b03b47ff1f73d84",
+      "source_sha256": "3d18883b8f8557f1c3842f62fcfff5cb934c1d7a1eeb7bd7a9b14aad19032b69",
       "stage_roles": {
         "09": "ACTIVE_ENTRYPOINT"
       }
@@ -1370,6 +1370,19 @@
       "reason": "active path remains authoritative during Phase 1",
       "safe_to_delete_now": false,
       "source_sha256": "b781f22df350f48aa9b96f7770b7af7a84258be122f1fcef7719600f404264de",
+      "stage_roles": {
+        "09": "ACTIVE_EXECUTED"
+      }
+    },
+    {
+      "classification": "ACTIVE_EXECUTED",
+      "current_path": "scripts/verify_self_contained_project.py",
+      "future_action": "KEEP_CURRENT",
+      "future_target_path": "scripts/verify_self_contained_project.py",
+      "phase1_action": "KEEP_CURRENT",
+      "reason": "active project-local path contract checker",
+      "safe_to_delete_now": false,
+      "source_sha256": "0fb1668a79aa3d93aa4d7a29584b594707a97aea38c94ee47ff324a659243e1d",
       "stage_roles": {
         "09": "ACTIVE_EXECUTED"
       }
@@ -3072,7 +3085,7 @@
       }
     }
   ],
-  "entry_count": 149,
+  "entry_count": 150,
   "import_path_adaptations": [
     {
       "classification": "IMPORT_PATH_ADAPTATION_ONLY",

@@ -1,4 +1,10 @@
-# Server data-layout verification commands
+# Historical server data-layout verification commands
+
+> **Historical provenance only.** These commands audit the pre-materialization
+> source roots recorded on 2026-11-03. They are not the active project
+> verification procedure after project-local data materialization; use
+> `scripts/verify_self_contained_project.py`,
+> `scripts/verify_key_data_layout.sh`, and Stage 09 from the project root.
 
 这些命令是只读的。请在 CMRServer04 上执行。它们不运行 MATLAB、CUDA、NeSVoR、重建或评估，也不使用 cp、mv、rsync、rm、chmod、chown 或 git clean。
 

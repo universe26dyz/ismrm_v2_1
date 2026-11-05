@@ -1,6 +1,8 @@
-# Server-local subject archives and formal run outputs are never committed.
-subjects/
-runs/
+# Server-local patient data, frozen baselines and reruns are never committed.
+/data/
+/subjects/
+/runs/
+/cleanup_audit/
 
 # Server-local model binaries are never committed.
 runtime/model_assets/*.pth

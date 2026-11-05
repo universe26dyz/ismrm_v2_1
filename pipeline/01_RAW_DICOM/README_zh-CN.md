@@ -11,7 +11,7 @@
 ## 输入与输出
 
 - 输入：`sax/`、`2ch/`、`4ch/` 三个服务器 DICOM 目录；每个 group 必须恰好十个 weight。
-- 输出：`subjects/<SUBJECT>/manifest.json` 以及 DICOM 数量检查日志。
+- 输出：`subjects/<SUBJECT>/deployment_manifest.json` 以及 DICOM 数量检查日志。
 - 运行位置：服务器。原始 DICOM 不需要上传到 GitHub。
 
 ## 操作
@@ -19,10 +19,10 @@
 ```bash
 PROJECT_ROOT=/path/to/ismrm_v2_1
 SUBJECT=NEW_SUBJECT_001
-RAW_ROOT=/data/.../mapping_subject_dicom
+RAW_ROOT="$PROJECT_ROOT/data/raw_dicom"
 PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" python -m ismrm_v2.io.build_subject_deployment_manifest \
   --raw-root "$RAW_ROOT" --subject "$SUBJECT" \
-  --output "$PROJECT_ROOT/subjects/$SUBJECT/manifest.json"
+  --output "$PROJECT_ROOT/subjects/$SUBJECT/deployment_manifest.json"
 for s in sax 2ch 4ch; do
   find "$RAW_ROOT/$SUBJECT/$s" -maxdepth 1 -name '*.dcm' | wc -l
 done

@@ -6,7 +6,7 @@ This bridge reads the MAT outputs, DICOM identities and the SCMR-v5 10/100 proto
 
 ```bash
 python -m ismrm_v2.observations.prepare_all \
-  --manifest "$PROJECT_ROOT/subjects/$SUBJECT/manifest.json" \
+  --manifest "$PROJECT_ROOT/subjects/$SUBJECT/deployment_manifest.json" \
   --preprocessed-root "$RUN_ROOT/preprocessed" \
   --prepared-root "$RUN_ROOT/prepared" \
   --protocol "$PROJECT_ROOT/configs/protocol_scmr_v5_10_100.yaml"

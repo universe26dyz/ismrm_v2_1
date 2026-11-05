@@ -1,7 +1,13 @@
-# ISMRM Server Data Layout
+# ISMRM Historical Server Data Layout
 
 审计日期：2026-11-03
 审计范围：Code_10w / ismrm_v2_1 的五个正式 subject：CYJ、DYL_2、DYZ、HHZ、HJL
+
+> **Historical provenance only.** This record predates the completed
+> project-local materialization. It documents the immutable source locations
+> used for that migration and is not an active runtime contract. Active runs
+> use `data/raw_dicom`, `data/roi`, `runs/frozen_baseline`, and
+> `runtime/model_assets` below the project root.
 
 ## Scope and evidence policy
 
@@ -79,7 +85,7 @@ The frozen active route is:
 
 The active route uses SCMR-v5 timing TR=2.61 ms, VPS=87, TI=[10,100] ms, T2prep=[35,45,55] ms, FA=[45,45,45], ten weights per group. The active route does not use 12/15/10 slice standardization.
 
-## Canonical external roots
+## Historical pre-materialization source roots
 
 | Purpose | Path | Status | Protected |
 |---|---|---|---|
@@ -95,9 +101,12 @@ The active route uses SCMR-v5 timing TR=2.61 ms, VPS=87, TI=[10,100] ms, T2prep=
 | Archived project inputs | /data/dengyz/code/ismrm_v2_1/subjects/<SUBJECT>/inputs | CURRENT_RUNTIME_REFERENCE archive copy | Yes |
 | Archived project outputs | /data/dengyz/code/ismrm_v2_1/runs/<SUBJECT> | CURRENT_RUNTIME_REFERENCE archive copy | Yes |
 
-The ismrm_v2_1/subjects and runs trees are archive copies. They do not replace the original external source roots.
+The pre-materialization `ismrm_v2_1/subjects` and `runs` trees were archive
+copies. The active project-local layout is now `subjects/`,
+`runs/frozen_baseline/`, and `runs/v2_2/` under the project root; it does not
+depend on these historical source roots.
 
-## Five-subject layout
+## Historical five-subject source layout
 
 For CYJ, DYZ, DYL_2 and HJL, the formal run pattern is:
 
@@ -195,7 +204,7 @@ manual ROI archives
 
 The local archive keeps these under subjects/ and runs/ for reproducibility, but they are gitignored. Subject archive metadata such as manifest.json and sha256.jsonl are server-local ignored files together with the archived subject tree and are not uploaded to GitHub.
 
-## Code refactor boundary
+## Historical code-refactor boundary
 
 Allowed for future in-place refactoring:
 
@@ -221,7 +230,9 @@ Protected external-data roots:
 /data/dengyz/code/ismrm_v2_1/runs
 ~~~
 
-Future code must receive these locations through explicit deployment configuration, manifests, or CLI arguments. Server-specific paths must not be added to scientific algorithms or protocol semantics.
+These paths were preserved as migration evidence only. Current active code uses
+the project-local path contract; server-specific paths must not be added to
+scientific algorithms or protocol semantics.
 
 ## Unresolved items
 

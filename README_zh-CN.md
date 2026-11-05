@@ -1,6 +1,6 @@
 # ismrm_v2_1
 
-这是 HHZ corrected SCMR-v5 的当前 ISMRM submission frozen baseline。代码按流水线顺序放在 `pipeline/01_` 到 `pipeline/09_`；项目 Python 位于 `src/ismrm_v2/`、MATLAB 位于 `matlab/`、NeSVoR 位于 `third_party/nesvor/`。`configs/` 保存 protocol/manifest 模板，`subjects/` 保存本地 subject 输入副本，`runs/` 保存运行结果。后两类数据默认不进 Git。
+这是 HHZ corrected SCMR-v5 的当前 ISMRM submission frozen baseline。代码按流水线顺序放在 `pipeline/01_` 到 `pipeline/09_`；项目 Python 位于 `src/ismrm_v2/`、MATLAB 位于 `matlab/`、NeSVoR 位于 `third_party/nesvor/`。项目内服务器数据路径为 `data/raw_dicom/`、`data/roi/`、`runtime/model_assets/` 和 `runs/`；患者数据、模型二进制和结果默认不进 Git。
 
 ## 运行原则
 
@@ -8,7 +8,7 @@
 2. 服务器完成 DICOM 预处理、observations、SCMR-v5 MATLAB fitting、2D-fit-first、Proposed、final pose 和 metrics；本地只负责手工 ROI/mask，然后把 ROI 文件复制到服务器。
 3. frozen submission cohort 只允许 `CYJ`、`DYL_2`、`DYZ`、`HHZ`、`HJL`；旧 `DYL`（VPS=85）必须拒绝。
 4. protocol 必须是 TR=2.61、VPS=87、TI=[10,100]、T2prep=[35,45,55]、FA=[45,45,45]、ramp=10。Proposed 只使用 SHA 为 `338f2c...` 的正确 decoder；旧 `[50,150]` decoder 必须拒绝。
-5. 先完成前一模块并检查 manifest/SHA/PASS，再执行后一模块。所有重跑写入新的 `runs/<SUBJECT>/<RUN_ID>`。
+5. 先完成前一模块并检查 manifest/SHA/PASS，再执行后一模块。`runs/frozen_baseline/<SUBJECT>` 是只读 v2.1 参考；所有重跑写入新的 `runs/reproduction/<SUBJECT>/run_<timestamp>`；v2.2 服务器本地结果写入 `runs/v2_2/`。
 6. active route 不使用 SAX/2CH/4CH=12/15/10 的 slice standardization。Proposed 从 prepared signal observations/sparse profiles 直接开始；fit-first 先做 SCMR-v5 dictionary matching，再独立做 T1/T2 NeSVoR。历史闭包仅保留 provenance，不代表 active route；后续新方法必须 fork/branch，不能改变本冻结 baseline 的科学定义。
 
 ## 从 DICOM 开始
@@ -16,7 +16,8 @@
 ```bash
 PROJECT_ROOT=/data/dengyz/code/ismrm_v2_1
 SUBJECT=HHZ
-RUN_ROOT=/data/dengyz/dataset/Code_10w_v1/Code_10w_runs/ismrm_v2_1/$SUBJECT/run_$(date +%Y%m%d_%H%M%S)
+RUN_ROOT="$PROJECT_ROOT/runs/reproduction/$SUBJECT/run_$(date +%Y%m%d_%H%M%S)"
+MANIFEST="$PROJECT_ROOT/subjects/$SUBJECT/deployment_manifest.json"
 PYTHON=/home/dengyz/miniconda3/envs/cr_dreme/bin/python
 mkdir -p "$RUN_ROOT"
 ```
@@ -24,9 +25,9 @@ mkdir -p "$RUN_ROOT"
 依次阅读并运行：
 
 ```bash
-"$PROJECT_ROOT/pipeline/01_RAW_DICOM/run_stage.sh" "$SUBJECT" /data/dengyz/dataset/mapping_subject_dicom
-"$PROJECT_ROOT/pipeline/02_PREPROCESS_MATLAB/run_stage.sh" "$RUN_ROOT" "$SUBJECT" "$PROJECT_ROOT/subjects/$SUBJECT/manifest.json" matlab "$PYTHON"
-"$PROJECT_ROOT/pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh" "$RUN_ROOT" "$SUBJECT" "$PROJECT_ROOT/subjects/$SUBJECT/manifest.json" "$PYTHON"
+"$PROJECT_ROOT/pipeline/01_RAW_DICOM/run_stage.sh" "$SUBJECT"
+"$PROJECT_ROOT/pipeline/02_PREPROCESS_MATLAB/run_stage.sh" "$RUN_ROOT" "$SUBJECT" "$MANIFEST" matlab "$PYTHON"
+"$PROJECT_ROOT/pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh" "$RUN_ROOT" "$SUBJECT" "$MANIFEST" "$PYTHON"
 "$PROJECT_ROOT/pipeline/04_SPARSE_PROFILES/run_stage.sh" "$RUN_ROOT" "$SUBJECT" "$PYTHON"
 "$PROJECT_ROOT/pipeline/05_SCMR_V5_FIT_FIRST/run_stage.sh" "$RUN_ROOT" "$SUBJECT" matlab
 ```
