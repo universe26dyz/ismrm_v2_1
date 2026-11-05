@@ -15,8 +15,16 @@ from typing import Any, Sequence
 
 import numpy as np
 import torch
+try:
+    from scipy.spatial import cKDTree
+except ImportError:  # pragma: no cover - exercised only in unsupported runtimes
+    cKDTree = None
 
 from nesvor.transform import ax_transform_points
+from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
+
+
+SMALL_ALL_PAIRS_FALLBACK_MAX_PAIRS = 100_000
 
 
 def _points(name: str, value: np.ndarray) -> np.ndarray:
@@ -40,6 +48,14 @@ def match_lax_to_sax(
         raise ValueError("At least one SAX reference anchor is required.")
     if chunk_size < 1 or reference_chunk_size < 1:
         raise ValueError("chunk sizes must be positive.")
+    if cKDTree is not None:
+        distance_mm, reference_index = cKDTree(sax).query(lax, k=1)
+        return np.asarray(reference_index, dtype=np.int64), np.asarray(distance_mm, dtype=np.float64)
+    if sax.shape[0] * lax.shape[0] > SMALL_ALL_PAIRS_FALLBACK_MAX_PAIRS:
+        raise RuntimeError(
+            "SciPy cKDTree is required for production cross-view matching; "
+            "the small all-pairs fallback is limited to unit-scale fixtures."
+        )
     indices = np.empty(lax.shape[0], dtype=np.int64)
     distances = np.empty(lax.shape[0], dtype=np.float64)
     for start in range(0, lax.shape[0], chunk_size):
@@ -58,6 +74,12 @@ def match_lax_to_sax(
         indices[start:stop] = best_indices
         distances[start:stop] = np.sqrt(best_squared)
     return indices, distances
+
+
+def nearest_neighbor_backend() -> str:
+    """Describe the exact NN implementation selected by this runtime."""
+
+    return "scipy.spatial.cKDTree" if cKDTree is not None else "guarded small NumPy all-pairs fallback"
 
 
 def cosine_discrepancy(
@@ -269,6 +291,99 @@ def _timing_only_values(
     }
 
 
+def _timing_only_statistics(stack_payloads: dict[str, dict[str, Any]], status: dict[str, Any]) -> dict[str, Any]:
+    """Summarize timing-only discrepancy without treating missing simulation as data."""
+
+    if status["timing_only_simulator_status"] != "run":
+        return dict(status)
+    stacks: dict[str, Any] = {}
+    for stack_name, payload in stack_payloads.items():
+        values = payload["timing_only"]
+        if values is None:
+            stacks[stack_name] = {"count": 0, "valid_count": 0, "invalid_count": 0, **_summary(np.empty(0)), "corr_timing_only_vs_timing_abs_mean_ms": None, "corr_timing_only_vs_timing_l2_ms": None}
+            continue
+        values = np.asarray(values, dtype=np.float64)
+        valid = np.isfinite(values)
+        delta = payload["delta_timing9_ms"]
+        timing_abs_mean = np.abs(delta).mean(axis=1) if delta.size else np.empty(0)
+        timing_l2 = np.linalg.norm(delta, axis=1) if delta.size else np.empty(0)
+        stacks[stack_name] = {
+            "count": int(values.size), "valid_count": int(valid.sum()), "invalid_count": int((~valid).sum()),
+            **_summary(values[valid]),
+            "corr_timing_only_vs_timing_abs_mean_ms": _correlations(timing_abs_mean, values),
+            "corr_timing_only_vs_timing_l2_ms": _correlations(timing_l2, values),
+        }
+    return {
+        **status,
+        "timing_only_parameter_source": "external_anchor_aligned_npz",
+        "stacks": stacks,
+    }
+
+
+def _is_l100_case(value: object) -> bool:
+    text = str(value).upper()
+    return text == "L100" or text.startswith("L100_") or text.startswith("L100-")
+
+
+def validate_preflight_sparse_manifest(
+    manifest_path: str | Path,
+    *,
+    subject: str,
+    requested_case: str,
+    observation_root: str | Path,
+) -> dict[str, Any]:
+    """Validate and admit only an L100/full-long-axis manifest for this audit."""
+
+    if not _is_l100_case(requested_case):
+        raise ValueError("v2.2 preflight currently requires requested --case L100.")
+    manifest = validate_sparse_profile_manifest(manifest_path, subject=subject, strict=False)
+    if manifest.get("subject") != subject:
+        raise ValueError(f"sparse manifest subject {manifest.get('subject')!r} disagrees with --subject {subject!r}.")
+    resolved_case = manifest.get("case_id") or manifest.get("condition")
+    if not _is_l100_case(resolved_case):
+        raise ValueError(f"v2.2 preflight requires an L100/full-long-axis manifest, got {resolved_case!r}.")
+    root = Path(observation_root).resolve()
+    source_root = Path(str(manifest.get("source_prepared_root", ""))).resolve()
+    prepared_root = Path(str(manifest.get("prepared_root", ""))).resolve()
+    if source_root != root or prepared_root != root:
+        raise ValueError("L100 sparse-manifest source/prepared roots must equal the actual prepared-observation root.")
+    return {
+        "sparse_manifest_status": "validated",
+        "requested_case": requested_case,
+        "manifest_resolved_case": str(resolved_case),
+        "schema_version": manifest.get("schema_version"),
+        "profile_id": manifest.get("profile_id"),
+        "case_id": manifest.get("case_id"),
+        "fold_id": manifest.get("fold_id"),
+        "fold_count": manifest.get("fold_count"),
+        "path": str(manifest["_manifest_path"]),
+        "sha256": str(manifest["_manifest_sha256"]),
+    }
+
+
+def resolve_preflight_sparse_manifest(
+    manifest_path: str | Path | None,
+    *,
+    subject: str,
+    requested_case: str,
+    observation_root: str | Path,
+) -> dict[str, Any]:
+    """Return explicit provenance for either a validated L100 manifest or its absence."""
+
+    if manifest_path is None:
+        return {
+            "sparse_manifest_status": "not_supplied",
+            "requested_case": requested_case,
+            "manifest_resolved_case": None,
+        }
+    return validate_preflight_sparse_manifest(
+        manifest_path,
+        subject=subject,
+        requested_case=requested_case,
+        observation_root=observation_root,
+    )
+
+
 def run_cross_view_reliability_audit(
     joint_dataset: Any,
     *,
@@ -336,15 +451,16 @@ def run_cross_view_reliability_audit(
             "distance_bins": binned_cosine_statistics(distances, cosine, distance_edges),
             "timing_quantile_bins": _quantile_bins(timing_metric, cosine),
         }
+    timing_only_report = _timing_only_statistics(stack_payloads, timing_status)
     manifest = {
         "schema": "ismrm_v2_2/cross_view_reliability_preflight/v1",
         "subject": subject, "case": case_id, "case_id": case_id, "stack_mapping": STACK_NAMES,
         "reference_stack": "sax", "geometry_source": geometry_source,
         "post_hb1_fixed_geometry": geometry_source,
-        "nearest_neighbor_implementation": "chunked exact NumPy squared-distance search",
+        "nearest_neighbor_implementation": nearest_neighbor_backend(),
         "coverage_thresholds_mm": list(COVERAGE_THRESHOLDS_MM), "cosine_epsilon": cosine_epsilon,
         "timing_difference_definition": "timing_LAX - timing_SAX, in stored physical milliseconds",
-        "timing_only_simulator": timing_status,
+        "timing_only_simulator": timing_only_report,
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "joint_dataset_qc": getattr(joint_dataset, "qc", None),
         **dict(provenance or {}),
@@ -352,13 +468,13 @@ def run_cross_view_reliability_audit(
     return {
         "manifest": manifest, "pairs": pairs, "coverage_statistics": coverage,
         "timing_statistics": timing_stats, "fingerprint_statistics": fingerprint_stats,
-        "confounding_statistics": confounding, "timing_only_simulator": timing_status,
+        "confounding_statistics": confounding, "timing_only_simulator": timing_only_report,
         "summary": {
             "subject": subject, "case_id": case_id,
             "anchor_pairs": {name: int(payload["distance_mm"].size) for name, payload in stack_payloads.items()},
             "coverage_statistics": coverage, "timing_statistics": timing_stats,
             "fingerprint_statistics": fingerprint_stats, "confounding_statistics": confounding,
-            "timing_only_simulator": timing_status,
+            "timing_only_simulator": timing_only_report,
         },
     }
 
@@ -446,6 +562,17 @@ def _sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _joint_anchor_order_sha256(joint_dataset: Any) -> str:
+    """Hash the stable stack/group/native-pixel order required by parameter NPZs."""
+
+    identity = np.column_stack((
+        torch.as_tensor(joint_dataset.stack_idx).detach().cpu().numpy(),
+        torch.as_tensor(joint_dataset.group_idx).detach().cpu().numpy(),
+        torch.as_tensor(joint_dataset.row_col).detach().cpu().numpy(),
+    )).astype("<i8", copy=False)
+    return hashlib.sha256(identity.tobytes()).hexdigest()
+
+
 def _git_provenance() -> dict[str, str | None]:
     def query(*command: str) -> str | None:
         try:
@@ -455,18 +582,23 @@ def _git_provenance() -> dict[str, str | None]:
     return {"git_sha": query("git", "rev-parse", "HEAD"), "branch": query("git", "branch", "--show-current")}
 
 
-def _load_timing_only_parameters(path: str | Path, expected_anchors: int) -> dict[str, Any]:
+def _load_timing_only_parameters(path: str | Path, expected_anchors: int, expected_anchor_order_sha256: str) -> dict[str, Any]:
     source = Path(path)
     if not source.is_file():
         raise FileNotFoundError(f"timing-only parameter NPZ does not exist: {source}")
     with np.load(source, allow_pickle=False) as payload:
-        required = {"t1_ms", "t2_ms", "b1"}
+        required = {"t1_ms", "t2_ms", "b1", "anchor_order_sha256"}
         missing = required.difference(payload.files)
         if missing:
             raise ValueError(f"timing-only parameter NPZ lacks: {sorted(missing)}")
-        parameters = {name: np.asarray(payload[name]) for name in required}
+        parameters = {name: np.asarray(payload[name]) for name in ("t1_ms", "t2_ms", "b1")}
+        identity = np.asarray(payload["anchor_order_sha256"]).item()
     if any(value.shape != (expected_anchors,) for value in parameters.values()):
         raise ValueError(f"timing-only parameters must align with all {expected_anchors} joint anchors in joint-dataset order.")
+    if isinstance(identity, bytes):
+        identity = identity.decode("ascii")
+    if identity != expected_anchor_order_sha256:
+        raise ValueError("timing-only anchor_order_sha256 does not match the current JointAnchorDataset order.")
     parameters["source"] = str(source)
     parameters["sha256"] = _sha256_file(source)
     return parameters
@@ -484,6 +616,11 @@ def run_from_args(args: argparse.Namespace) -> dict[str, Path]:
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError(f"Requested CUDA device is unavailable: {device}")
     inputs = cropped_observation_paths(args.prepared_root, args.subject)
+    observation_root = inputs[0].parent.parent.resolve()
+    if any(path.parent.parent.resolve() != observation_root for path in inputs):
+        raise ValueError("prepared observations must share one SAX/2CH/4CH root.")
+    if not _is_l100_case(args.case):
+        raise ValueError("v2.2 Modification 1 preflight currently requires --case L100.")
     scalar_dataset = QuantPointDataset(inputs, device=device)
     joint_dataset = JointAnchorDataset(inputs, scalar_dataset)
     stack_initialization = initialize_group_poses_from_hb1(
@@ -499,22 +636,26 @@ def run_from_args(args: argparse.Namespace) -> dict[str, Path]:
         decoder = load_frozen_mlp_decoder_for_benchmark(args.signal_decoder_checkpoint, scalar_dataset, args.protocol_yaml, device=device)
     elif args.protocol_yaml:
         raise ValueError("--protocol-yaml requires --signal-decoder-checkpoint.")
-    parameters = _load_timing_only_parameters(args.timing_only_parameters_npz, int(joint_dataset.xyz.shape[0])) if args.timing_only_parameters_npz else None
+    anchor_order_sha256 = _joint_anchor_order_sha256(joint_dataset)
+    parameters = _load_timing_only_parameters(args.timing_only_parameters_npz, int(joint_dataset.xyz.shape[0]), anchor_order_sha256) if args.timing_only_parameters_npz else None
     if parameters is not None and decoder is None:
         raise ValueError("--timing-only-parameters-npz requires --signal-decoder-checkpoint.")
-    sparse_manifest: dict[str, Any] | None = None
-    if args.sparse_manifest:
-        manifest_path = Path(args.sparse_manifest)
-        if not manifest_path.is_file():
-            raise FileNotFoundError(f"sparse manifest does not exist: {manifest_path}")
-        sparse_manifest = {"path": str(manifest_path), "sha256": _sha256_file(manifest_path)}
+    sparse_manifest = resolve_preflight_sparse_manifest(
+        args.sparse_manifest,
+        subject=args.subject,
+        requested_case=args.case,
+        observation_root=observation_root,
+    )
     provenance = {
         **_git_provenance(), "prepared_root": str(Path(args.prepared_root).resolve()),
         "prepared_inputs": {str(path): _sha256_file(path) for path in inputs},
         "sparse_manifest": sparse_manifest, "device": str(device),
         "python_version": sys.version.split()[0], "numpy_version": np.__version__, "torch_version": torch.__version__,
         "timing_only_decoder_checkpoint": str(args.signal_decoder_checkpoint) if args.signal_decoder_checkpoint else None,
-        "timing_only_parameters": {"path": parameters["source"], "sha256": parameters["sha256"]} if parameters else None,
+        "joint_anchor_order_sha256": anchor_order_sha256,
+        "timing_only_parameters": {"path": parameters["source"], "sha256": parameters["sha256"], "anchor_order_sha256": anchor_order_sha256} if parameters else None,
+        "timing_only_parameter_source": "external_anchor_aligned_npz" if parameters else None,
+        "stack_initialization": {"enabled": True, "args_registration": None, "source": "existing initialize_group_poses_from_hb1 defaults"},
     }
     result = run_cross_view_reliability_audit(
         joint_dataset,
@@ -539,7 +680,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--device", default="cpu", help="Torch device; local validation uses cpu, server may use cuda:0.")
     parser.add_argument("--signal-decoder-checkpoint", help="Optional compatible frozen signal-decoder checkpoint for timing-only simulation.")
     parser.add_argument("--protocol-yaml", help="Protocol YAML required with --signal-decoder-checkpoint.")
-    parser.add_argument("--timing-only-parameters-npz", help="Optional NPZ with anchor-aligned t1_ms, t2_ms, b1 arrays for timing-only simulation.")
+    parser.add_argument("--timing-only-parameters-npz", help="Optional NPZ with anchor-aligned t1_ms/t2_ms/b1 [N] and required anchor_order_sha256; N is the full current JointAnchorDataset order.")
     return parser
 
 
