@@ -5,9 +5,9 @@
 `run_stage.sh`：对一个已完成 case 调用 paired final-pose bundle 入口。
 
 ```bash
-SUBJECT="$SUBJECT" REPO="$PROJECT_ROOT" PY="$PYTHON" \
-bash "$PROJECT_ROOT/pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh" \
-  "$RUN_ROOT" "$RUN_ROOT" "$PROJECT_ROOT/subjects/$SUBJECT/roi" L100_fold0
+ROI_BUNDLE="$PROJECT_ROOT/data/roi/$SUBJECT/20261026_scmr_native_roi_bundle"
+bash "$PROJECT_ROOT/pipeline/07_FINAL_POSE/run_stage.sh" \
+  "$RUN_ROOT" "$SUBJECT" "$ROI_BUNDLE" L100_fold0
 ```
 
 输出在 `$RUN_ROOT/evaluation/final_pose/$SUBJECT`。先检查 native-cache contract 和 prepared-SAX provenance PASS，再继续 metrics。

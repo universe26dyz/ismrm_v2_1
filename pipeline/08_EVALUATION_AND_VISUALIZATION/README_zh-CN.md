@@ -7,13 +7,9 @@ metrics、AHA、slice-pair 和 QC 必须使用 07 的 final-pose 输出。LV 使
 AHA16、final-five publication figures 与 multi-subject aggregation 属于可选 publication reporting，不是 Stage 08/09 自动生成的输出。
 
 ```bash
-SUBJECT="$SUBJECT" REPO="$PROJECT_ROOT" PY="$PYTHON" \
-bash "$PROJECT_ROOT/pipeline/08_EVALUATION_AND_VISUALIZATION/internal/hhz_common_native_metrics_qc.sh" \
-  "$RUN_ROOT" "$RUN_ROOT" "$PROJECT_ROOT/subjects/$SUBJECT/roi" L100_fold0
-OUTPUT_NAME=all_stack_roi_metrics_v2_blood_pool_zero_audit \
-SUBJECT="$SUBJECT" REPO="$PROJECT_ROOT" PY="$PYTHON" \
-bash "$PROJECT_ROOT/pipeline/08_EVALUATION_AND_VISUALIZATION/internal/hhz_common_native_all_stack_roi_metrics.sh" \
-  "$RUN_ROOT" "$RUN_ROOT" "$PROJECT_ROOT/subjects/$SUBJECT/roi" L100_fold0
+ROI_BUNDLE="$PROJECT_ROOT/data/roi/$SUBJECT/20261026_scmr_native_roi_bundle"
+bash "$PROJECT_ROOT/pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh" \
+  "$RUN_ROOT" "$SUBJECT" "$ROI_BUNDLE" L100_fold0
 ```
 
 图像与 metrics 必须引用同一 final-pose mask；若 shape 不同，停止并检查 plane/pose，不要裁剪数组来掩盖错误。

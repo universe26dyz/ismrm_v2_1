@@ -5,9 +5,9 @@ Project both completed methods into one acquisition-native final pose. This stag
 `run_stage.sh` invokes the paired final-pose bundle for one completed case.
 
 ```bash
-SUBJECT="$SUBJECT" REPO="$PROJECT_ROOT" PY="$PYTHON" \
-bash "$PROJECT_ROOT/pipeline/07_FINAL_POSE/internal/hhz_paired_final_pose.sh" \
-  "$RUN_ROOT" "$RUN_ROOT" "$PROJECT_ROOT/subjects/$SUBJECT/roi" L100_fold0
+ROI_BUNDLE="$PROJECT_ROOT/data/roi/$SUBJECT/20261026_scmr_native_roi_bundle"
+bash "$PROJECT_ROOT/pipeline/07_FINAL_POSE/run_stage.sh" \
+  "$RUN_ROOT" "$SUBJECT" "$ROI_BUNDLE" L100_fold0
 ```
 
 Continue only after native-cache and prepared-SAX provenance checks pass.

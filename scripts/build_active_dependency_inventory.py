@@ -98,12 +98,14 @@ COMPATIBILITY = {
 AUDITED_UNUSED = {
     "src/ismrm_v2/proposed/q002/run_q004_s640_k1_reconstruction.py": "Q004/K1 experiment is not reached by formal Q002S640 command",
 }
-EXTERNAL = [
+EXTERNAL_RUNTIME = [
     {"id": "matlab", "kind": "executable", "required_by_stages": ["02", "05"], "resolution": "MATLAB argument or PATH", "locally_available": False},
     {"id": "nesvor", "kind": "executable", "required_by_stages": ["05"], "resolution": "NESVOR environment variable or PATH", "locally_available": False},
     {"id": "cuda", "kind": "runtime_capability", "required_by_stages": ["06", "07"], "resolution": "cuda:0 requested by Stage commands", "locally_available": False},
-    {"id": "decoder_scmr_v5_10_100.pth", "kind": "model_asset", "required_by_stages": ["06"], "expected_sha256": "338f2c0b8db90851f733ed31caa2c99914605fed3f7215ec2f69f19eba59583b", "repository_embedded": False},
-    {"id": "b6_model.pt", "kind": "model_asset", "required_by_stages": ["06"], "expected_sha256": "15981fbe93d2c70e14755ea756a02856c9383481e7d92d239619268a628a29b5", "repository_embedded": False},
+]
+PROJECT_LOCAL_RUNTIME_ASSETS = [
+    {"id": "decoder_scmr_v5_10_100.pth", "path": "runtime/model_assets/decoder_scmr_v5_10_100.pth", "required_by_stages": ["06"], "expected_sha256": "338f2c0b8db90851f733ed31caa2c99914605fed3f7215ec2f69f19eba59583b", "git_tracked": False, "project_local": True},
+    {"id": "b6_model.pt", "path": "runtime/model_assets/b6_model.pt", "required_by_stages": ["06"], "expected_sha256": "15981fbe93d2c70e14755ea756a02856c9383481e7d92d239619268a628a29b5", "git_tracked": False, "project_local": True},
 ]
 PROXIES = [
     {"wrapper": "src/ismrm_v2/proposed/mlp_trainer.py", "implementation": "src/ismrm_v2/proposed/reconstruction/orchestration.py", "relationship": "FACADE", "evidence": "imports and re-exports the sole reconstruction engine", "active_caller": "MLP compatibility route", "cleanup_candidate": True},
@@ -296,7 +298,7 @@ def scan(root: Path) -> dict[str, Any]:
                 queue.append((dest, stage, "SHELL_PYTHON_MODULE", evidence))
     for path, reason in COMPATIBILITY.items():
         if (root / path).is_file(): add_node(path, "05", "COMPATIBILITY_IMPORT_ONLY", reason, "AUDIT_EXCLUSION")
-    for item in EXTERNAL:
+    for item in EXTERNAL_RUNTIME:
         for stage in item["required_by_stages"]:
             source = STAGE_ENTRYPOINTS[stage]
             edges.append({"from": source, "to": f"external:{item['id']}", "edge_type": "EXTERNAL_RUNTIME", "stage": stage, "condition": "runtime", "evidence": item.get("resolution", "runtime-provided model asset")})
@@ -310,7 +312,7 @@ def scan(root: Path) -> dict[str, Any]:
         node["stages"].sort(); node["evidence"] = sorted(set(node["evidence"])); node["discovery_methods"] = sorted(set(node["discovery_methods"]))
         node["classification"] = max(node["stage_roles"].values(), key=lambda role: ROLE_PRIORITY[role])
     summary = dict(sorted(Counter(node["classification"] for node in nodes.values()).items()))
-    return {"schema_version": "active-dependency-inventory/v3", "generation_provenance": _generation_provenance(root, nodes), "entrypoints": list(STAGE_ENTRYPOINTS.values()), "nodes": sorted(nodes.values(), key=lambda n: n["path"]), "edges": sorted(unique.values(), key=lambda e: (e["from"], e["to"], e["edge_type"], e["stage"])), "stages": {stage: {"entrypoint": STAGE_ENTRYPOINTS[stage], "paths": sorted(paths), "inputs": STAGE_IO[stage][0], "outputs": STAGE_IO[stage][1]} for stage, paths in sorted(stage_paths.items())}, "external_runtime_boundaries": EXTERNAL, "duplicate_or_proxy_modules": PROXIES, "classification_summary": summary, "audit_notes": {"formal_proposed_route": "Q002S640_B6_roi_same_anchor_mse; K8, anchor batch 640, 10 weights, 6400 residuals, A2000/B4000", "fit_first": "MATLAB SCMR-v5 native cache and L100/sparse reuse are active; Python fit_native and standardized routes are compatibility-only", "historical_names": "Historical filename tokens are metadata, never a legacy classification heuristic."}}
+    return {"schema_version": "active-dependency-inventory/v3", "generation_provenance": _generation_provenance(root, nodes), "entrypoints": list(STAGE_ENTRYPOINTS.values()), "nodes": sorted(nodes.values(), key=lambda n: n["path"]), "edges": sorted(unique.values(), key=lambda e: (e["from"], e["to"], e["edge_type"], e["stage"])), "stages": {stage: {"entrypoint": STAGE_ENTRYPOINTS[stage], "paths": sorted(paths), "inputs": STAGE_IO[stage][0], "outputs": STAGE_IO[stage][1]} for stage, paths in sorted(stage_paths.items())}, "external_runtime_boundaries": EXTERNAL_RUNTIME, "project_local_runtime_assets": PROJECT_LOCAL_RUNTIME_ASSETS, "duplicate_or_proxy_modules": PROXIES, "classification_summary": summary, "audit_notes": {"formal_proposed_route": "Q002S640_B6_roi_same_anchor_mse; K8, anchor batch 640, 10 weights, 6400 residuals, A2000/B4000", "fit_first": "MATLAB SCMR-v5 native cache and L100/sparse reuse are active; Python fit_native and standardized routes are compatibility-only", "historical_names": "Historical filename tokens are metadata, never a legacy classification heuristic.", "runtime_assets": "Model binaries are project-local Git-ignored assets; their expected paths and hashes are recorded without requiring local files."}}
 
 
 def markdown(inventory: dict[str, Any]) -> str:
@@ -328,7 +330,10 @@ def markdown(inventory: dict[str, Any]) -> str:
         boundaries = [item["id"] for item in inventory["external_runtime_boundaries"] if stage in item["required_by_stages"]]
         historical = [path for path in paths if path in nodes and nodes[path]["historical_name"]]
         lines += ["", "External runtime boundaries:"] + [f"- `{item}`" for item in boundaries] + ["", "Historical-name cleanup candidates:"] + [f"- `{path}`" for path in sorted(historical)] + [""]
-    lines += ["## Historical-name cleanup candidates", "", "Historical `cyj11`, `final5`, `hhz`, and `legacy` names are recorded as metadata; reachability, not spelling, decides classification.", ""]
+    lines += ["## Project-local runtime assets", ""]
+    for item in inventory["project_local_runtime_assets"]:
+        lines.append(f"- `{item['id']}`: `{item['path']}`; SHA256 `{item['expected_sha256']}`; Git-tracked: `{item['git_tracked']}`; required at server runtime.")
+    lines += ["", "## Historical-name cleanup candidates", "", "Historical `cyj11`, `final5`, `hhz`, and `legacy` names are recorded as metadata; reachability, not spelling, decides classification.", ""]
     return "\n".join(lines)
 
 

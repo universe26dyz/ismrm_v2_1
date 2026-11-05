@@ -5,8 +5,8 @@ Derive L100, L25, L50 and five cross-stack profiles directly from one correct pr
 `run_stage.sh` invokes the sparse profile builder and creates the eight case manifests.
 
 ```bash
-bash "$PROJECT_ROOT/pipeline/04_SPARSE_PROFILES/internal/build_sparse_profiles.sh" \
-  "$RUN_ROOT/prepared" "$SUBJECT" "$RUN_ROOT/sparse_inputs" "$PYTHON"
+bash "$PROJECT_ROOT/pipeline/04_SPARSE_PROFILES/run_stage.sh" \
+  "$RUN_ROOT" "$SUBJECT" "$PYTHON"
 ```
 
 Check prepared-root identity, source-observation SHA, generator git SHA and selected groups in every sparse manifest. Existing sparse subject directories are never overwritten.

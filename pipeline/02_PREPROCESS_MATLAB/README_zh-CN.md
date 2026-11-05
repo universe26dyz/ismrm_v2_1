@@ -10,11 +10,10 @@
 
 ```bash
 RUN_ROOT="$PROJECT_ROOT/runs/reproduction/$SUBJECT/run_$(date +%Y%m%d_%H%M%S)"
-MATLAB=matlab
 PYTHON=/path/to/python
 bash "$PROJECT_ROOT/pipeline/02_PREPROCESS_MATLAB/run_stage.sh" \
   "$RUN_ROOT" "$SUBJECT" "$PROJECT_ROOT/subjects/$SUBJECT/deployment_manifest.json" \
-  "$PROJECT_ROOT/configs/protocol_scmr_v5_10_100.yaml" "$MATLAB" "$PYTHON"
+  matlab "$PYTHON"
 ```
 
 ## 检查

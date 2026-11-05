@@ -4,4 +4,9 @@ Proposed consumes sparse observations, the corrected `[10,100]` decoder, B6, pro
 
 `run_stage.sh` runs one case at a time and checks the manifest and fresh output root before launching.
 
+```bash
+bash "$PROJECT_ROOT/pipeline/06_PROPOSED/run_stage.sh" \
+  "$RUN_ROOT" "$SUBJECT" "$CASE" "$PYTHON"
+```
+
 Pass all expected SHA256 values explicitly. Each completed case must contain T1/T2 NIfTI, an experiment manifest and run provenance. A pre-existing partial output is an error, not a reason to overwrite.

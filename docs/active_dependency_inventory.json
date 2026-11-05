@@ -2,7 +2,8 @@
   "audit_notes": {
     "fit_first": "MATLAB SCMR-v5 native cache and L100/sparse reuse are active; Python fit_native and standardized routes are compatibility-only",
     "formal_proposed_route": "Q002S640_B6_roi_same_anchor_mse; K8, anchor batch 640, 10 weights, 6400 residuals, A2000/B4000",
-    "historical_names": "Historical filename tokens are metadata, never a legacy classification heuristic."
+    "historical_names": "Historical filename tokens are metadata, never a legacy classification heuristic.",
+    "runtime_assets": "Model binaries are project-local Git-ignored assets; their expected paths and hashes are recorded without requiring local files."
   },
   "classification_summary": {
     "ACTIVE_ENTRYPOINT": 9,
@@ -380,26 +381,10 @@
     {
       "condition": "runtime",
       "edge_type": "EXTERNAL_RUNTIME",
-      "evidence": "runtime-provided model asset",
-      "from": "pipeline/06_PROPOSED/run_stage.sh",
-      "stage": "06",
-      "to": "external:b6_model.pt"
-    },
-    {
-      "condition": "runtime",
-      "edge_type": "EXTERNAL_RUNTIME",
       "evidence": "cuda:0 requested by Stage commands",
       "from": "pipeline/06_PROPOSED/run_stage.sh",
       "stage": "06",
       "to": "external:cuda"
-    },
-    {
-      "condition": "runtime",
-      "edge_type": "EXTERNAL_RUNTIME",
-      "evidence": "runtime-provided model asset",
-      "from": "pipeline/06_PROPOSED/run_stage.sh",
-      "stage": "06",
-      "to": "external:decoder_scmr_v5_10_100.pth"
     },
     {
       "condition": "always",
@@ -5450,31 +5435,13 @@
         "07"
       ],
       "resolution": "cuda:0 requested by Stage commands"
-    },
-    {
-      "expected_sha256": "338f2c0b8db90851f733ed31caa2c99914605fed3f7215ec2f69f19eba59583b",
-      "id": "decoder_scmr_v5_10_100.pth",
-      "kind": "model_asset",
-      "repository_embedded": false,
-      "required_by_stages": [
-        "06"
-      ]
-    },
-    {
-      "expected_sha256": "15981fbe93d2c70e14755ea756a02856c9383481e7d92d239619268a628a29b5",
-      "id": "b6_model.pt",
-      "kind": "model_asset",
-      "repository_embedded": false,
-      "required_by_stages": [
-        "06"
-      ]
     }
   ],
   "generation_provenance": {
-    "generator_sha256": "5c2cced4f923308b0f8219a092e8b17070befc9eb961a1f6c7611177f19bb6b8",
+    "generator_sha256": "fbe3ec6475b9b19b0ba476300bf58d37cd1c5a250c9229d28aea63e5c2d5b471",
     "inventory_schema": "active-dependency-inventory/v3",
     "source_file_count": 150,
-    "source_runtime_fingerprint_sha256": "0f26a64b383b97a513ed008842d7089de3e8da1478031d35d5790aa21a937af6"
+    "source_runtime_fingerprint_sha256": "6aa16f0e4e5bc7f58e7d2dde43a91738f1df49272d1575e2523a5a92928fc91b"
   },
   "nodes": [
     {
@@ -9705,6 +9672,28 @@
         "06",
         "07",
         "08"
+      ]
+    }
+  ],
+  "project_local_runtime_assets": [
+    {
+      "expected_sha256": "338f2c0b8db90851f733ed31caa2c99914605fed3f7215ec2f69f19eba59583b",
+      "git_tracked": false,
+      "id": "decoder_scmr_v5_10_100.pth",
+      "path": "runtime/model_assets/decoder_scmr_v5_10_100.pth",
+      "project_local": true,
+      "required_by_stages": [
+        "06"
+      ]
+    },
+    {
+      "expected_sha256": "15981fbe93d2c70e14755ea756a02856c9383481e7d92d239619268a628a29b5",
+      "git_tracked": false,
+      "id": "b6_model.pt",
+      "path": "runtime/model_assets/b6_model.pt",
+      "project_local": true,
+      "required_by_stages": [
+        "06"
       ]
     }
   ],

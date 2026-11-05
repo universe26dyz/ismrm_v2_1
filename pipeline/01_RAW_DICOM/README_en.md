@@ -9,10 +9,7 @@ Inputs are three server-resident DICOM directories, with exactly ten weights per
 ```bash
 PROJECT_ROOT=/path/to/ismrm_v2_1
 SUBJECT=NEW_SUBJECT_001
-RAW_ROOT="$PROJECT_ROOT/data/raw_dicom"
-PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" python -m ismrm_v2.io.build_subject_deployment_manifest \
-  --raw-root "$RAW_ROOT" --subject "$SUBJECT" \
-  --output "$PROJECT_ROOT/subjects/$SUBJECT/deployment_manifest.json"
+bash "$PROJECT_ROOT/pipeline/01_RAW_DICOM/run_stage.sh" "$SUBJECT"
 ```
 
 The builder resolves both `local_dicom_dir` and `server_dicom_dir` to absolute paths from the actual stack directories. Do not substitute NIfTI: SOP UID, acquisition timing and DICOM geometry are required downstream.

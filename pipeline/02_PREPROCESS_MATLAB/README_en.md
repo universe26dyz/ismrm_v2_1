@@ -7,7 +7,7 @@ Run MATLAB on the server to convert the ten-weight DICOM groups into `preprocess
 ```bash
 bash "$PROJECT_ROOT/pipeline/02_PREPROCESS_MATLAB/run_stage.sh" \
   "$RUN_ROOT" "$SUBJECT" "$PROJECT_ROOT/subjects/$SUBJECT/deployment_manifest.json" \
-  "$PROJECT_ROOT/configs/protocol_scmr_v5_10_100.yaml" matlab "$PYTHON"
+  matlab "$PYTHON"
 ```
 
 Verify ten channels, MP-PCA enabled and `center_data=true`. The launcher refuses to overwrite existing preprocessed or prepared roots.

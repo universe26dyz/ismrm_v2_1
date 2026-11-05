@@ -7,8 +7,8 @@
 `run_stage.sh`：调用 sparse profile builder，创建八个 case 的 manifest。
 
 ```bash
-bash "$PROJECT_ROOT/pipeline/04_SPARSE_PROFILES/internal/build_sparse_profiles.sh" \
-  "$RUN_ROOT/prepared" "$SUBJECT" "$RUN_ROOT/sparse_inputs" "$PYTHON"
+bash "$PROJECT_ROOT/pipeline/04_SPARSE_PROFILES/run_stage.sh" \
+  "$RUN_ROOT" "$SUBJECT" "$PYTHON"
 ```
 
 必须确认每个 `$RUN_ROOT/sparse_inputs/$SUBJECT/<CASE>/sparse_manifest.json` 的 prepared-root、source observation SHA、generator git SHA 和选择的层。脚本拒绝覆盖已有 sparse subject 目录。

@@ -76,7 +76,11 @@ def test_stage08_paths_and_external_boundaries_are_semantically_separate(tmp_pat
         assert path in paths
     assert not any("phase2_clean/common_native" in path for path in paths)
     boundaries = {item["id"] for item in inventory["external_runtime_boundaries"]}
-    assert {"matlab", "nesvor", "cuda", "decoder_scmr_v5_10_100.pth", "b6_model.pt"} <= boundaries
+    assert {"matlab", "nesvor", "cuda"} <= boundaries
+    assert not boundaries.intersection({"decoder_scmr_v5_10_100.pth", "b6_model.pt"})
+    assets = {item["id"]: item for item in inventory["project_local_runtime_assets"]}
+    assert assets["decoder_scmr_v5_10_100.pth"]["project_local"] is True
+    assert assets["b6_model.pt"]["project_local"] is True
     assert not any(node["classification"] == "EXTERNAL_RUNTIME_BOUNDARY" for node in inventory["nodes"])
 
 
@@ -134,7 +138,8 @@ def test_markdown_uses_the_stage_specific_role_not_global_role(tmp_path: Path) -
 def test_external_runtime_edges_cover_every_declared_stage(tmp_path: Path) -> None:
     inventory = _inventory(tmp_path)
     external_edges = {(edge["to"].removeprefix("external:"), edge["stage"]) for edge in inventory["edges"] if edge["edge_type"] == "EXTERNAL_RUNTIME"}
-    assert {("matlab", "02"), ("matlab", "05"), ("nesvor", "05"), ("cuda", "06"), ("cuda", "07"), ("decoder_scmr_v5_10_100.pth", "06"), ("b6_model.pt", "06")} <= external_edges
+    assert {("matlab", "02"), ("matlab", "05"), ("nesvor", "05"), ("cuda", "06"), ("cuda", "07")} <= external_edges
+    assert not {("decoder_scmr_v5_10_100.pth", "06"), ("b6_model.pt", "06")} & external_edges
 
 
 def test_edges_are_resolved_and_classifications_are_meaningful(tmp_path: Path) -> None:

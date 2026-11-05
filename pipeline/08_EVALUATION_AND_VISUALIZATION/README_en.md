@@ -6,4 +6,12 @@ All metrics, AHA maps, slice-pairs and QC use outputs from module 07. LV is `out
 
 AHA16, final-five publication figures, and multi-subject aggregation remain optional publication reporting: they are not claimed as automatic Stage 08/09 outputs.
 
-Use the two server command wrappers shown in the Chinese manual, with explicit `SUBJECT`, `REPO`, `PY` and ROI paths. A shape mismatch is a pose/plane error; never hide it by cropping arrays.
+Use the public stage wrapper with the project-local ROI bundle:
+
+```bash
+ROI_BUNDLE="$PROJECT_ROOT/data/roi/$SUBJECT/20261026_scmr_native_roi_bundle"
+bash "$PROJECT_ROOT/pipeline/08_EVALUATION_AND_VISUALIZATION/run_stage.sh" \
+  "$RUN_ROOT" "$SUBJECT" "$ROI_BUNDLE" L100_fold0
+```
+
+A shape mismatch is a pose/plane error; never hide it by cropping arrays.

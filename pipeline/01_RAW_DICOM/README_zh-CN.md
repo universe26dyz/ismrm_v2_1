@@ -19,13 +19,7 @@
 ```bash
 PROJECT_ROOT=/path/to/ismrm_v2_1
 SUBJECT=NEW_SUBJECT_001
-RAW_ROOT="$PROJECT_ROOT/data/raw_dicom"
-PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" python -m ismrm_v2.io.build_subject_deployment_manifest \
-  --raw-root "$RAW_ROOT" --subject "$SUBJECT" \
-  --output "$PROJECT_ROOT/subjects/$SUBJECT/deployment_manifest.json"
-for s in sax 2ch 4ch; do
-  find "$RAW_ROOT/$SUBJECT/$s" -maxdepth 1 -name '*.dcm' | wc -l
-done
+bash "$PROJECT_ROOT/pipeline/01_RAW_DICOM/run_stage.sh" "$SUBJECT"
 ```
 
 清单中的 `local_dicom_dir` 和 `server_dicom_dir` 从实际 stack 目录解析为绝对路径。不要用 NIfTI 代替 DICOM，因为 UID、采集时间和空间几何会在后续使用。

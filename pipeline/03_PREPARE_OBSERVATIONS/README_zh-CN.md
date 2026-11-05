@@ -13,11 +13,9 @@
 ## 命令
 
 ```bash
-python -m ismrm_v2.observations.prepare_all \
-  --manifest "$PROJECT_ROOT/subjects/$SUBJECT/deployment_manifest.json" \
-  --preprocessed-root "$RUN_ROOT/preprocessed" \
-  --prepared-root "$RUN_ROOT/prepared" \
-  --protocol "$PROJECT_ROOT/configs/protocol_scmr_v5_10_100.yaml"
+bash "$PROJECT_ROOT/pipeline/03_PREPARE_OBSERVATIONS/run_stage.sh" \
+  "$RUN_ROOT" "$SUBJECT" \
+  "$PROJECT_ROOT/subjects/$SUBJECT/deployment_manifest.json" "$PYTHON"
 ```
 
 若出现 source observation SHA mismatch，先检查 prepared root、subject 和 manifest 是否来自同一次运行，不要覆盖修补。
