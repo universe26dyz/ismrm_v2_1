@@ -2,6 +2,7 @@ import numpy as np
 import json
 import subprocess
 import sys
+from types import SimpleNamespace
 import torch
 
 import ismrm_v2.v2_2.preflight.cross_view_reliability_audit as audit
@@ -139,6 +140,10 @@ def test_synthetic_audit_writes_only_explicit_output_root(tmp_path):
 
     assert {pair["target_stack"] for pair in result["pairs"]} == {"2ch", "4ch"}
     assert result["coverage_statistics"]["2ch"]["<= 1 mm"] == 2
+    assert np.isclose(result["coverage_statistics"]["2ch"]["distance_mm_summary"]["median"], 0.35)
+    assert np.isclose(result["coverage_statistics"]["2ch"]["distance_mm_summary"]["p90"], 0.47)
+    assert np.isclose(result["coverage_statistics"]["2ch"]["distance_mm_summary"]["max"], 0.5)
+    assert result["summary"]["coverage_statistics"]["2ch"]["distance_mm_summary"] == result["coverage_statistics"]["2ch"]["distance_mm_summary"]
     assert result["fingerprint_statistics"]["2ch"]["valid_count"] == 2
     assert result["summary"]["timing_statistics"]["2ch"]["count"] == 2
     assert result["confounding_statistics"]["2ch"]["distance_bins"][-1]["upper"] is None
@@ -199,46 +204,119 @@ def test_timing_only_parameter_npz_requires_exact_joint_anchor_order(tmp_path):
         audit._load_timing_only_parameters(parameter_file, 2, expected_hash)
 
 
-def test_preflight_sparse_manifest_rejects_wrong_subject_or_non_l100(monkeypatch, tmp_path):
-    manifest = tmp_path / "sparse_manifest.json"
-    manifest.write_text("{}")
-    base = {
-        "schema_version": "phase4r_sparse_profile_v2", "subject": "OTHER", "profile_id": "L100",
-        "case_id": "L100_fold0", "fold_id": None, "fold_count": 1,
-        "source_prepared_root": str(tmp_path), "prepared_root": str(tmp_path),
-        "_manifest_path": str(manifest), "_manifest_sha256": "a" * 64,
+def _observation_paths(root):
+    return {stack: root / stack / "observations.npz" for stack in ("sax", "2ch", "4ch")}
+
+
+def _profile_l100_manifest(tmp_path):
+    source_paths = _observation_paths(tmp_path / "source")
+    derived_paths = _observation_paths(tmp_path / "derived")
+    stacks = {}
+    for stack in ("sax", "2ch", "4ch"):
+        stacks[stack] = {
+            "source_observation": {"path": str(source_paths[stack]), "sha256": "a" * 64},
+            "derived_observation": {"path": str(derived_paths[stack]), "sha256": "b" * 64},
+            "training_stack_present": True,
+            "ordered_source_group_ids": [0, 1],
+            "retained_original_group_ids": [0, 1],
+            "heldout_original_group_ids": [],
+            "source_count": 2,
+            "retained_count": 2,
+            "heldout_count": 0,
+        }
+    return {
+        "schema_version": "phase4r_sparse_profile_v2", "subject": "CYJ", "profile_id": "L100",
+        "case_id": "L100", "fold_id": None, "fold_count": 1,
+        "source_prepared_root": str(tmp_path / "source"), "prepared_root": str(tmp_path / "derived"),
+        "stacks": stacks, "_manifest_path": str(tmp_path / "derived" / "sparse_manifest.json"), "_manifest_sha256": "b" * 64,
+    }, source_paths, derived_paths
+
+
+def test_preflight_sparse_manifest_accepts_legacy_l100_source_inputs(monkeypatch, tmp_path):
+    source_paths = _observation_paths(tmp_path / "source")
+    manifest = {
+        "schema_version": "phase4r_sparse_v1", "subject": "CYJ", "condition": "L100",
+        "profile_id": "legacy_group_id_modulo_L100", "case_id": "L100_fold0", "fold_id": 0, "fold_count": 1,
+        "source_prepared_root": str(tmp_path / "source"), "prepared_root": str(tmp_path / "source"),
+        "stacks": {
+            stack: {"source_observation": {"path": str(path), "sha256": "a" * 64}, "retained_original_group_ids": [0, 1], "heldout_original_group_ids": []}
+            for stack, path in source_paths.items()
+        },
+        "_manifest_path": str(tmp_path / "legacy_manifest.json"), "_manifest_sha256": "a" * 64,
     }
-    monkeypatch.setattr(audit, "validate_sparse_profile_manifest", lambda *args, **kwargs: dict(base))
+    monkeypatch.setattr(audit, "validate_sparse_profile_manifest", lambda *args, **kwargs: dict(manifest))
+
+    provenance = audit.validate_preflight_sparse_manifest(tmp_path / "legacy_manifest.json", subject="CYJ", requested_case="L100", observation_paths=source_paths)
+
+    assert provenance["input_observation_mode"] == "source"
+    assert provenance["l100_full_retention_verified"] is True
+    assert provenance["legacy_identity_full_retention"] is True
+
+
+def test_preflight_sparse_manifest_accepts_profile_l100_source_inputs(monkeypatch, tmp_path):
+    manifest, source_paths, _derived_paths = _profile_l100_manifest(tmp_path)
+    monkeypatch.setattr(audit, "validate_sparse_profile_manifest", lambda *args, **kwargs: dict(manifest))
+
+    provenance = audit.validate_preflight_sparse_manifest(tmp_path / "derived" / "sparse_manifest.json", subject="CYJ", requested_case="L100", observation_paths=source_paths)
+
+    assert provenance["input_observation_mode"] == "source"
+    assert provenance["l100_full_retention_verified"] is True
+
+
+def test_preflight_sparse_manifest_accepts_profile_l100_derived_inputs(monkeypatch, tmp_path):
+    manifest, _source_paths, derived_paths = _profile_l100_manifest(tmp_path)
+    monkeypatch.setattr(audit, "validate_sparse_profile_manifest", lambda *args, **kwargs: dict(manifest))
+
+    provenance = audit.validate_preflight_sparse_manifest(tmp_path / "derived" / "sparse_manifest.json", subject="CYJ", requested_case="L100", observation_paths=derived_paths)
+
+    assert provenance["input_observation_mode"] == "derived"
+
+
+def test_preflight_sparse_manifest_rejects_mixed_profile_observation_modes(monkeypatch, tmp_path):
+    manifest, source_paths, derived_paths = _profile_l100_manifest(tmp_path)
+    mixed_paths = dict(source_paths); mixed_paths["4ch"] = derived_paths["4ch"]
+    monkeypatch.setattr(audit, "validate_sparse_profile_manifest", lambda *args, **kwargs: dict(manifest))
+
+    with np.testing.assert_raises_regex(ValueError, "coherent"):
+        audit.validate_preflight_sparse_manifest(tmp_path / "derived" / "sparse_manifest.json", subject="CYJ", requested_case="L100", observation_paths=mixed_paths)
+
+
+def test_preflight_sparse_manifest_rejects_profile_l100_with_heldout_groups(monkeypatch, tmp_path):
+    manifest, source_paths, _derived_paths = _profile_l100_manifest(tmp_path)
+    manifest["stacks"]["2ch"]["heldout_original_group_ids"] = [1]
+    manifest["stacks"]["2ch"]["retained_original_group_ids"] = [0]
+    manifest["stacks"]["2ch"]["retained_count"] = 1
+    manifest["stacks"]["2ch"]["heldout_count"] = 1
+    monkeypatch.setattr(audit, "validate_sparse_profile_manifest", lambda *args, **kwargs: dict(manifest))
+
+    with np.testing.assert_raises_regex(ValueError, "full retention"):
+        audit.validate_preflight_sparse_manifest(tmp_path / "derived" / "sparse_manifest.json", subject="CYJ", requested_case="L100", observation_paths=source_paths)
+
+
+def test_preflight_sparse_manifest_rejects_wrong_subject(monkeypatch, tmp_path):
+    manifest, source_paths, _derived_paths = _profile_l100_manifest(tmp_path)
+    manifest["subject"] = "OTHER"
+    monkeypatch.setattr(audit, "validate_sparse_profile_manifest", lambda *args, **kwargs: dict(manifest))
 
     with np.testing.assert_raises_regex(ValueError, "subject"):
-        audit.validate_preflight_sparse_manifest(manifest, subject="CYJ", requested_case="L100", observation_root=tmp_path)
-
-    base["subject"] = "CYJ"; base["case_id"] = "L50_fold0"
-    with np.testing.assert_raises_regex(ValueError, "L100"):
-        audit.validate_preflight_sparse_manifest(manifest, subject="CYJ", requested_case="L100", observation_root=tmp_path)
-
-    base["case_id"] = "L100_fold0"; base["source_prepared_root"] = str(tmp_path / "other")
-    with np.testing.assert_raises_regex(ValueError, "roots"):
-        audit.validate_preflight_sparse_manifest(manifest, subject="CYJ", requested_case="L100", observation_root=tmp_path)
+        audit.validate_preflight_sparse_manifest(tmp_path / "derived" / "sparse_manifest.json", subject="CYJ", requested_case="L100", observation_paths=source_paths)
 
 
-def test_preflight_sparse_manifest_records_valid_l100_provenance(monkeypatch, tmp_path):
-    manifest = tmp_path / "sparse_manifest.json"
-    manifest.write_text("{}")
-    payload = {
-        "schema_version": "phase4r_sparse_profile_v2", "subject": "CYJ", "profile_id": "L100",
-        "case_id": "L100_fold0", "fold_id": None, "fold_count": 1,
-        "source_prepared_root": str(tmp_path), "prepared_root": str(tmp_path),
-        "_manifest_path": str(manifest), "_manifest_sha256": "b" * 64,
-    }
-    monkeypatch.setattr(audit, "validate_sparse_profile_manifest", lambda *args, **kwargs: dict(payload))
+def test_stack_initialization_provenance_hashes_post_hb1_geometry_deterministically():
+    initialization = SimpleNamespace(
+        post_stack_init_axisangle_physical=torch.tensor([[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]]),
+        stack_pose_records=({"prepared_input": "sax/observations.npz", "group_count": 1},),
+    )
+    altered = SimpleNamespace(
+        post_stack_init_axisangle_physical=torch.tensor([[1.0, 2.0, 3.0, 4.0, 5.0, 7.0]]),
+        stack_pose_records=initialization.stack_pose_records,
+    )
 
-    provenance = audit.validate_preflight_sparse_manifest(manifest, subject="CYJ", requested_case="L100", observation_root=tmp_path)
+    provenance = audit.stack_initialization_provenance(initialization)
 
-    assert provenance["sparse_manifest_status"] == "validated"
-    assert provenance["requested_case"] == "L100"
-    assert provenance["manifest_resolved_case"] == "L100_fold0"
-    assert provenance["profile_id"] == "L100"
+    assert provenance["post_stack_init_axisangle_physical_sha256"] == audit.stack_initialization_provenance(initialization)["post_stack_init_axisangle_physical_sha256"]
+    assert provenance["post_stack_init_axisangle_physical_sha256"] != audit.stack_initialization_provenance(altered)["post_stack_init_axisangle_physical_sha256"]
+    assert provenance["stack_pose_records"] == [{"prepared_input": "sax/observations.npz", "group_count": 1}]
 
 
 def test_sparse_manifest_provenance_records_not_supplied_status(tmp_path):
@@ -246,7 +324,7 @@ def test_sparse_manifest_provenance_records_not_supplied_status(tmp_path):
         None,
         subject="CYJ",
         requested_case="L100",
-        observation_root=tmp_path,
+        observation_paths=_observation_paths(tmp_path),
     )
 
     assert provenance == {

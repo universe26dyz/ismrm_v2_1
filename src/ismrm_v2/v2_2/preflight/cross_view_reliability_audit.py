@@ -21,10 +21,11 @@ except ImportError:  # pragma: no cover - exercised only in unsupported runtimes
     cKDTree = None
 
 from nesvor.transform import ax_transform_points
-from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
+from ismrm_v2.sampling.sparse_profile_manifest import LEGACY_SCHEMA_VERSION, SCHEMA_VERSION, validate_sparse_profile_manifest
 
 
 SMALL_ALL_PAIRS_FALLBACK_MAX_PAIRS = 100_000
+OBSERVATION_STACKS = ("sax", "2ch", "4ch")
 
 
 def _points(name: str, value: np.ndarray) -> np.ndarray:
@@ -325,14 +326,83 @@ def _is_l100_case(value: object) -> bool:
     return text == "L100" or text.startswith("L100_") or text.startswith("L100-")
 
 
+def _resolved_observation_paths(observation_paths: dict[str, str | Path]) -> dict[str, Path]:
+    if set(observation_paths) != set(OBSERVATION_STACKS):
+        raise ValueError("preflight observations must contain exactly sax, 2ch, and 4ch.")
+    return {stack: Path(observation_paths[stack]).resolve() for stack in OBSERVATION_STACKS}
+
+
+def _manifest_observation_path(stack_record: dict[str, Any], field: str, *, stack: str) -> Path:
+    observation = stack_record.get(field)
+    if not isinstance(observation, dict) or not isinstance(observation.get("path"), str):
+        raise ValueError(f"sparse manifest {stack}.{field} is missing its validated observation path.")
+    return Path(observation["path"]).resolve()
+
+
+def _profile_l100_full_retention(manifest: dict[str, Any]) -> None:
+    """Prove all profile-v2 stacks retain every ordered source group."""
+
+    stacks = manifest.get("stacks")
+    if not isinstance(stacks, dict):
+        raise ValueError("L100 profile manifest has no stack records.")
+    for stack in OBSERVATION_STACKS:
+        record = stacks.get(stack)
+        if not isinstance(record, dict):
+            raise ValueError(f"L100 profile manifest lacks {stack}.")
+        ordered = record.get("ordered_source_group_ids")
+        retained = record.get("retained_original_group_ids")
+        heldout = record.get("heldout_original_group_ids")
+        source_count = record.get("source_count")
+        retained_count = record.get("retained_count")
+        if (
+            record.get("training_stack_present") is not True
+            or not isinstance(ordered, list)
+            or not isinstance(retained, list)
+            or heldout != []
+            or source_count != len(ordered)
+            or retained_count != len(retained)
+            or retained_count != source_count
+            or retained != ordered
+        ):
+            raise ValueError(f"L100 profile manifest does not prove full retention for {stack}.")
+
+
+def _admit_manifest_observation_mode(manifest: dict[str, Any], observation_paths: dict[str, Path]) -> str:
+    """Admit exactly one validated source or derived three-stack observation set."""
+
+    stacks = manifest["stacks"]
+    source_paths = {
+        stack: _manifest_observation_path(stacks[stack], "source_observation", stack=stack)
+        for stack in OBSERVATION_STACKS
+    }
+    source_match = all(observation_paths[stack] == source_paths[stack] for stack in OBSERVATION_STACKS)
+    if manifest["schema_version"] == LEGACY_SCHEMA_VERSION:
+        if not source_match:
+            raise ValueError("legacy L100 audit inputs must be the manifest source observations.")
+        return "source"
+    derived_paths = {
+        stack: _manifest_observation_path(stacks[stack], "derived_observation", stack=stack)
+        for stack in OBSERVATION_STACKS
+    }
+    derived_match = all(observation_paths[stack] == derived_paths[stack] for stack in OBSERVATION_STACKS)
+    if source_match:
+        return "source"
+    if derived_match:
+        return "derived"
+    declared_paths = set(source_paths.values()) | set(derived_paths.values())
+    if any(path in declared_paths for path in observation_paths.values()):
+        raise ValueError("L100 profile audit inputs must be one coherent source or derived observation set, not mixed stacks.")
+    raise ValueError("L100 profile audit inputs do not match the manifest source or derived observations.")
+
+
 def validate_preflight_sparse_manifest(
     manifest_path: str | Path,
     *,
     subject: str,
     requested_case: str,
-    observation_root: str | Path,
+    observation_paths: dict[str, str | Path],
 ) -> dict[str, Any]:
-    """Validate and admit only an L100/full-long-axis manifest for this audit."""
+    """Validate an L100 manifest against the exact three observation archives in use."""
 
     if not _is_l100_case(requested_case):
         raise ValueError("v2.2 preflight currently requires requested --case L100.")
@@ -342,11 +412,18 @@ def validate_preflight_sparse_manifest(
     resolved_case = manifest.get("case_id") or manifest.get("condition")
     if not _is_l100_case(resolved_case):
         raise ValueError(f"v2.2 preflight requires an L100/full-long-axis manifest, got {resolved_case!r}.")
-    root = Path(observation_root).resolve()
-    source_root = Path(str(manifest.get("source_prepared_root", ""))).resolve()
-    prepared_root = Path(str(manifest.get("prepared_root", ""))).resolve()
-    if source_root != root or prepared_root != root:
-        raise ValueError("L100 sparse-manifest source/prepared roots must equal the actual prepared-observation root.")
+    paths = _resolved_observation_paths(observation_paths)
+    schema = manifest.get("schema_version")
+    if schema == SCHEMA_VERSION:
+        _profile_l100_full_retention(manifest)
+    elif schema == LEGACY_SCHEMA_VERSION:
+        for stack in OBSERVATION_STACKS:
+            record = manifest.get("stacks", {}).get(stack)
+            if not isinstance(record, dict) or record.get("heldout_original_group_ids") != [] or "derived_observation" in record:
+                raise ValueError(f"legacy L100 manifest does not prove source identity/full retention for {stack}.")
+    else:  # The project validator should have rejected this before admission.
+        raise ValueError(f"unsupported sparse manifest schema for v2.2 preflight: {schema!r}.")
+    mode = _admit_manifest_observation_mode(manifest, paths)
     return {
         "sparse_manifest_status": "validated",
         "requested_case": requested_case,
@@ -358,6 +435,9 @@ def validate_preflight_sparse_manifest(
         "fold_count": manifest.get("fold_count"),
         "path": str(manifest["_manifest_path"]),
         "sha256": str(manifest["_manifest_sha256"]),
+        "l100_full_retention_verified": True,
+        "legacy_identity_full_retention": schema == LEGACY_SCHEMA_VERSION,
+        "input_observation_mode": mode,
     }
 
 
@@ -366,7 +446,7 @@ def resolve_preflight_sparse_manifest(
     *,
     subject: str,
     requested_case: str,
-    observation_root: str | Path,
+    observation_paths: dict[str, str | Path],
 ) -> dict[str, Any]:
     """Return explicit provenance for either a validated L100 manifest or its absence."""
 
@@ -380,7 +460,7 @@ def resolve_preflight_sparse_manifest(
         manifest_path,
         subject=subject,
         requested_case=requested_case,
-        observation_root=observation_root,
+        observation_paths=observation_paths,
     )
 
 
@@ -441,6 +521,7 @@ def run_cross_view_reliability_audit(
         coverage[stack_name] = {f"<= {threshold:g} mm": int((distances <= threshold).sum()) for threshold in COVERAGE_THRESHOLDS_MM}
         coverage[stack_name]["anchor_count"] = int(distances.size)
         coverage[stack_name]["coverage_fraction"] = {f"<= {threshold:g} mm": (float((distances <= threshold).mean()) if distances.size else None) for threshold in COVERAGE_THRESHOLDS_MM}
+        coverage[stack_name]["distance_mm_summary"] = _summary(distances)
         timing_stats[stack_name] = timing_statistics(delta)
         fingerprint_stats[stack_name] = _summary(cosine[valid]) | {"valid_count": int(valid.sum()), "invalid_count": int((~valid).sum())}
         timing_metric = np.abs(delta).mean(axis=1) if delta.size else np.empty(0)
@@ -573,6 +654,32 @@ def _joint_anchor_order_sha256(joint_dataset: Any) -> str:
     return hashlib.sha256(identity.tobytes()).hexdigest()
 
 
+def _canonical_cpu_numeric_sha256(value: torch.Tensor | np.ndarray) -> str:
+    """Hash a finite numeric array in a shape-aware, little-endian CPU representation."""
+
+    array = torch.as_tensor(value).detach().cpu().numpy()
+    if not np.issubdtype(array.dtype, np.number) or not np.isfinite(array).all():
+        raise ValueError("geometry provenance requires a finite numeric array.")
+    canonical = np.ascontiguousarray(array, dtype="<f8")
+    shape = np.asarray(canonical.shape, dtype="<i8")
+    return hashlib.sha256(shape.tobytes() + canonical.tobytes()).hexdigest()
+
+
+def stack_initialization_provenance(stack_initialization: Any) -> dict[str, Any]:
+    """Record the existing default HB1 initialization without changing its geometry."""
+
+    post = torch.as_tensor(stack_initialization.post_stack_init_axisangle_physical)
+    if post.ndim != 2 or post.shape[1] != 6:
+        raise ValueError("post-stack-init geometry must be [G,6] axis-angle poses.")
+    return {
+        "enabled": True,
+        "args_registration": None,
+        "source": "existing initialize_group_poses_from_hb1 defaults",
+        "post_stack_init_axisangle_physical_sha256": _canonical_cpu_numeric_sha256(post),
+        "stack_pose_records": list(stack_initialization.stack_pose_records),
+    }
+
+
 def _git_provenance() -> dict[str, str | None]:
     def query(*command: str) -> str | None:
         try:
@@ -616,9 +723,7 @@ def run_from_args(args: argparse.Namespace) -> dict[str, Path]:
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError(f"Requested CUDA device is unavailable: {device}")
     inputs = cropped_observation_paths(args.prepared_root, args.subject)
-    observation_root = inputs[0].parent.parent.resolve()
-    if any(path.parent.parent.resolve() != observation_root for path in inputs):
-        raise ValueError("prepared observations must share one SAX/2CH/4CH root.")
+    observation_paths = dict(zip(OBSERVATION_STACKS, inputs, strict=True))
     if not _is_l100_case(args.case):
         raise ValueError("v2.2 Modification 1 preflight currently requires --case L100.")
     scalar_dataset = QuantPointDataset(inputs, device=device)
@@ -644,7 +749,7 @@ def run_from_args(args: argparse.Namespace) -> dict[str, Path]:
         args.sparse_manifest,
         subject=args.subject,
         requested_case=args.case,
-        observation_root=observation_root,
+        observation_paths=observation_paths,
     )
     provenance = {
         **_git_provenance(), "prepared_root": str(Path(args.prepared_root).resolve()),
@@ -655,7 +760,7 @@ def run_from_args(args: argparse.Namespace) -> dict[str, Path]:
         "joint_anchor_order_sha256": anchor_order_sha256,
         "timing_only_parameters": {"path": parameters["source"], "sha256": parameters["sha256"], "anchor_order_sha256": anchor_order_sha256} if parameters else None,
         "timing_only_parameter_source": "external_anchor_aligned_npz" if parameters else None,
-        "stack_initialization": {"enabled": True, "args_registration": None, "source": "existing initialize_group_poses_from_hb1 defaults"},
+        "stack_initialization": stack_initialization_provenance(stack_initialization),
     }
     result = run_cross_view_reliability_audit(
         joint_dataset,
