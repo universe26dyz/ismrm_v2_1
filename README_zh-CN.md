@@ -10,6 +10,7 @@
 4. protocol 必须是 TR=2.61、VPS=87、TI=[10,100]、T2prep=[35,45,55]、FA=[45,45,45]、ramp=10。Proposed 只使用 SHA 为 `338f2c...` 的正确 decoder；旧 `[50,150]` decoder 必须拒绝。
 5. 先完成前一模块并检查 manifest/SHA/PASS，再执行后一模块。`runs/frozen_baseline/<SUBJECT>` 是只读 v2.1 参考；所有重跑写入新的 `runs/reproduction/<SUBJECT>/run_<timestamp>`；v2.2 服务器本地结果写入 `runs/v2_2/`。
 6. active route 不使用 SAX/2CH/4CH=12/15/10 的 slice standardization。Proposed 从 prepared signal observations/sparse profiles 直接开始；fit-first 先做 SCMR-v5 dictionary matching，再独立做 T1/T2 NeSVoR。历史闭包仅保留 provenance，不代表 active route；后续新方法必须 fork/branch，不能改变本冻结 baseline 的科学定义。
+7. self-contained 检查会拒绝 `data/`、`runs/`、`subjects/` 和 `runtime/model_assets/` 项目数据面下解析到项目外的符号链接及断链。
 
 ## 从 DICOM 开始
 

@@ -4,6 +4,8 @@
 
 `run_stage.sh`：顺序运行项目结构、legacy path、runtime contract、scientific freeze 与 self-contained active-path 五个检查。AHA/final-five/multi-subject publication reporting 为 optional，不由本阶段自动生成。
 
+self-contained 检查要求输出 `EXTERNAL SYMLINKS: 0`，并拒绝断链或解析到项目根目录之外的项目数据面符号链接。
+
 ```bash
 python "$PROJECT_ROOT/scripts/verify_project_integrity.py" "$PROJECT_ROOT"
 python "$PROJECT_ROOT/scripts/verify_runtime_contract.py" --root "$PROJECT_ROOT"

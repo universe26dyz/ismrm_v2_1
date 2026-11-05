@@ -97,6 +97,66 @@ def test_self_contained_validator_rejects_active_path_but_not_migration_provenan
 def test_self_contained_validator_accepts_current_active_tree() -> None:
     result = subprocess.run([sys.executable, str(SELF_CONTAINED), "--root", str(ROOT)], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr + result.stdout
+    assert "SELF-CONTAINED ACTIVE PATHS: PASS" in result.stdout
+
+
+def _run_self_contained(root: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run([sys.executable, str(SELF_CONTAINED), "--root", str(root)], capture_output=True, text=True)
+
+
+def test_self_contained_validator_rejects_external_absolute_symlink(tmp_path: Path) -> None:
+    root, external = tmp_path / "project", tmp_path / "external_dataset"
+    external.mkdir()
+    link = root / "runs" / "frozen_baseline" / "CYJ" / "preprocessed"
+    link.parent.mkdir(parents=True)
+    link.symlink_to(external, target_is_directory=True)
+
+    result = _run_self_contained(root)
+
+    assert result.returncode != 0
+    assert "external" in result.stderr
+    assert str(link) in result.stderr
+    assert str(external) in result.stderr
+
+
+def test_self_contained_validator_rejects_external_relative_symlink(tmp_path: Path) -> None:
+    root, external = tmp_path / "project", tmp_path / "external_dataset"
+    external.mkdir()
+    link = root / "runs" / "frozen_baseline" / "CYJ" / "preprocessed"
+    link.parent.mkdir(parents=True)
+    link.symlink_to(Path("../../../../external_dataset"), target_is_directory=True)
+
+    result = _run_self_contained(root)
+
+    assert result.returncode != 0
+    assert "reason: external" in result.stderr
+    assert "../../../../external_dataset" in result.stderr
+
+
+def test_self_contained_validator_rejects_broken_symlink(tmp_path: Path) -> None:
+    root = tmp_path / "project"
+    link = root / "subjects" / "CYJ" / "missing"
+    link.parent.mkdir(parents=True)
+    link.symlink_to("missing_target")
+
+    result = _run_self_contained(root)
+
+    assert result.returncode != 0
+    assert "reason: broken" in result.stderr
+    assert str(link) in result.stderr
+
+
+def test_self_contained_validator_allows_internal_symlink(tmp_path: Path) -> None:
+    root = tmp_path / "project"
+    real = root / "data" / "real"
+    real.mkdir(parents=True)
+    (real / "marker").write_text("ok", encoding="utf-8")
+    (root / "data" / "alias").symlink_to(real, target_is_directory=True)
+
+    result = _run_self_contained(root)
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "EXTERNAL SYMLINKS: 0" in result.stdout
 
 
 def test_frozen_layout_audit_uses_only_project_local_contracts() -> None:

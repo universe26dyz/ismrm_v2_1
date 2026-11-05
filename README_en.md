@@ -8,6 +8,8 @@ Use only paths derived from `PROJECT_ROOT`: raw DICOM is in `data/raw_dicom/<SUB
 
 Run all new experiments from this root, with explicit `SUBJECT`, run roots and manifests. The server performs DICOM preprocessing, observation preparation, SCMR-v5 MATLAB fitting, 2D-fit-first, Proposed, final-pose and metrics. Local work is limited to manual ROI/mask drawing and copying the ROI bundle to the server.
 
+The self-contained validator also rejects broken or external symlinks under project-owned `data/`, `runs/`, `subjects/` and `runtime/model_assets/` surfaces.
+
 The immutable contract is TR 2.61 ms, VPS 87, TI `[10,100]`, T2-preparation `[35,45,55]`, FA `[45,45,45]`, ramp-up 10, ten weights per group. Proposed accepts only decoder SHA `338f2c...`; the historical `[50,150]` decoder is invalid. The active submission cohort is `CYJ`, `DYL_2`, `DYZ`, `HHZ`, `HJL`; legacy `DYL` is rejected.
 
 The active route never uses 12/15/10 slice standardization. Proposed starts from prepared signal observations and sparse profiles, while fit-first performs SCMR-v5 dictionary matching followed by independent T1/T2 NeSVoR reconstructions. Historical code remains for provenance only. New method development must fork/branch from this freeze rather than changing its scientific definition.
