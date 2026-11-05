@@ -11,6 +11,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from collections.abc import Mapping
 from typing import Any, Sequence
 
 import numpy as np
@@ -26,6 +27,8 @@ from ismrm_v2.sampling.sparse_profile_manifest import LEGACY_SCHEMA_VERSION, SCH
 
 SMALL_ALL_PAIRS_FALLBACK_MAX_PAIRS = 100_000
 OBSERVATION_STACKS = ("sax", "2ch", "4ch")
+GEOMETRY_CHECKPOINT_KEY = "group_axisangle_post_stack_init_physical"
+GEOMETRY_ABS_TOLERANCE = 1e-5
 
 
 def _points(name: str, value: np.ndarray) -> np.ndarray:
@@ -665,6 +668,124 @@ def _canonical_cpu_numeric_sha256(value: torch.Tensor | np.ndarray) -> str:
     return hashlib.sha256(shape.tobytes() + canonical.tobytes()).hexdigest()
 
 
+def _geometry_tensor(value: Any, name: str) -> torch.Tensor:
+    try:
+        tensor = torch.as_tensor(value).detach().cpu()
+    except (TypeError, RuntimeError) as error:
+        raise ValueError(f"{name} must be a numeric tensor/array.") from error
+    if not np.issubdtype(tensor.numpy().dtype, np.number):
+        raise ValueError(f"{name} must be a numeric tensor/array.")
+    if not torch.isfinite(tensor.to(dtype=torch.float64)).all():
+        raise ValueError(f"{name} must contain only finite values.")
+    return tensor
+
+
+def _geometry_max_abs_diff(left: torch.Tensor, right: torch.Tensor) -> float:
+    if left.numel() == 0:
+        return 0.0
+    return float((left.to(dtype=torch.float64) - right.to(dtype=torch.float64)).abs().max().item())
+
+
+def _compare_geometry(
+    checkpoint_value: torch.Tensor,
+    prepared_value: torch.Tensor,
+    name: str,
+    *,
+    tolerance: float,
+) -> float:
+    if checkpoint_value.shape != prepared_value.shape:
+        raise ValueError(f"{name} shape mismatch: checkpoint {tuple(checkpoint_value.shape)} != prepared {tuple(prepared_value.shape)}.")
+    maximum = _geometry_max_abs_diff(checkpoint_value, prepared_value)
+    if not torch.allclose(checkpoint_value.to(dtype=torch.float64), prepared_value.to(dtype=torch.float64), rtol=0.0, atol=tolerance):
+        raise ValueError(f"{name} mismatch: maximum absolute difference {maximum:g} exceeds tolerance {tolerance:g} (rtol=0).")
+    return maximum
+
+
+def load_geometry_checkpoint(
+    path: str | Path,
+    prepared_dicom_geometry: torch.Tensor | np.ndarray,
+    prepared_group_resolution: torch.Tensor | np.ndarray,
+    *,
+    tolerance: float = GEOMETRY_ABS_TOLERANCE,
+) -> tuple[torch.Tensor, dict[str, Any]]:
+    """Load and fail-closed validate the frozen Q002 post-HB1 geometry."""
+
+    checkpoint_path = Path(path).resolve()
+    if not checkpoint_path.is_file():
+        raise FileNotFoundError(f"geometry checkpoint does not exist: {checkpoint_path}")
+    if tolerance < 0:
+        raise ValueError("geometry tolerance must be non-negative.")
+    try:
+        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+    except TypeError as error:  # pragma: no cover - only unsupported old Torch releases
+        raise RuntimeError("CPU-safe geometry checkpoint loading requires torch.load(..., weights_only=False).") from error
+    if not isinstance(checkpoint, Mapping):
+        raise ValueError("geometry checkpoint must contain a mapping payload.")
+
+    prepared_dicom = _geometry_tensor(prepared_dicom_geometry, "prepared DICOM geometry")
+    prepared_resolution = _geometry_tensor(prepared_group_resolution, "prepared group resolution")
+    if prepared_dicom.ndim != 2 or prepared_dicom.shape[1] != 6:
+        raise ValueError("prepared DICOM geometry must have shape [G,6].")
+    group_count = int(prepared_dicom.shape[0])
+    if prepared_resolution.shape != (group_count, 3):
+        raise ValueError("prepared group resolution must have shape [G,3] matching the prepared DICOM geometry group count.")
+
+    missing = {GEOMETRY_CHECKPOINT_KEY, "group_axisangle_dicom_physical", "group_resolution_xyz_mm"}.difference(checkpoint)
+    if missing:
+        raise ValueError(f"geometry checkpoint missing required field(s): {sorted(missing)}")
+    post = _geometry_tensor(checkpoint[GEOMETRY_CHECKPOINT_KEY], GEOMETRY_CHECKPOINT_KEY)
+    dicom = _geometry_tensor(checkpoint["group_axisangle_dicom_physical"], "checkpoint group_axisangle_dicom_physical")
+    resolution = _geometry_tensor(checkpoint["group_resolution_xyz_mm"], "checkpoint group_resolution_xyz_mm")
+    for name, value in ((GEOMETRY_CHECKPOINT_KEY, post), ("group_axisangle_dicom_physical", dicom), ("group_resolution_xyz_mm", resolution)):
+        if value.shape[0] != group_count:
+            raise ValueError(f"geometry checkpoint group count mismatch for {name}: checkpoint {value.shape[0]} != prepared {group_count}.")
+    if post.shape != (group_count, 6):
+        raise ValueError(f"{GEOMETRY_CHECKPOINT_KEY} must have shape [G,6], got {tuple(post.shape)}.")
+    if dicom.shape != (group_count, 6):
+        raise ValueError(f"checkpoint group_axisangle_dicom_physical must have shape [G,6], got {tuple(dicom.shape)}.")
+    if resolution.shape != (group_count, 3):
+        raise ValueError(f"checkpoint group_resolution_xyz_mm must have shape [G,3], got {tuple(resolution.shape)}.")
+
+    dicom_max_abs_diff = _compare_geometry(dicom, prepared_dicom, "DICOM geometry", tolerance=tolerance)
+    resolution_max_abs_diff = _compare_geometry(resolution, prepared_resolution, "group resolution", tolerance=tolerance)
+
+    training_space = checkpoint.get("training_space")
+    if not isinstance(training_space, Mapping):
+        raise ValueError("geometry checkpoint training_space mapping is required for internal consistency validation.")
+    training_required = {"group_axisangle_init_physical", "group_axisangle_dicom_physical", "group_resolution_xyz_mm"}
+    missing_training = training_required.difference(training_space)
+    if missing_training:
+        raise ValueError(f"geometry checkpoint training_space missing required field(s): {sorted(missing_training)}")
+    training_init = _geometry_tensor(training_space["group_axisangle_init_physical"], "training_space group_axisangle_init_physical")
+    training_dicom = _geometry_tensor(training_space["group_axisangle_dicom_physical"], "training_space group_axisangle_dicom_physical")
+    training_resolution = _geometry_tensor(training_space["group_resolution_xyz_mm"], "training_space group_resolution_xyz_mm")
+    _compare_geometry(training_init, post, "training_space group_axisangle_init_physical", tolerance=tolerance)
+    _compare_geometry(training_dicom, dicom, "training_space group_axisangle_dicom_physical", tolerance=tolerance)
+    _compare_geometry(training_resolution, resolution, "training_space group_resolution_xyz_mm", tolerance=tolerance)
+    if "group_axisangle_init_physical" in checkpoint:
+        checkpoint_init = _geometry_tensor(checkpoint["group_axisangle_init_physical"], "checkpoint group_axisangle_init_physical")
+        _compare_geometry(checkpoint_init, post, "checkpoint group_axisangle_init_physical", tolerance=tolerance)
+
+    provenance = {
+        "path": str(checkpoint_path),
+        "sha256": _sha256_file(checkpoint_path),
+        "source": f"frozen Q002 checkpoint: {GEOMETRY_CHECKPOINT_KEY}",
+        "selected_key": GEOMETRY_CHECKPOINT_KEY,
+        "group_count": group_count,
+        "post_hb1_geometry_sha256": _canonical_cpu_numeric_sha256(post),
+        "dicom_geometry_sha256": _canonical_cpu_numeric_sha256(dicom),
+        "prepared_dicom_geometry_sha256": _canonical_cpu_numeric_sha256(prepared_dicom),
+        "group_resolution_sha256": _canonical_cpu_numeric_sha256(resolution),
+        "prepared_group_resolution_sha256": _canonical_cpu_numeric_sha256(prepared_resolution),
+        "dicom_geometry_max_abs_diff": dicom_max_abs_diff,
+        "group_resolution_max_abs_diff": resolution_max_abs_diff,
+        "geometry_abs_tolerance": tolerance,
+        "internal_training_space_consistency": True,
+        "trained_pose_key_not_used": "trained_axisangle_train",
+    }
+    return post.clone(), provenance
+
+
 def stack_initialization_provenance(stack_initialization: Any) -> dict[str, Any]:
     """Record the existing default HB1 initialization without changing its geometry."""
 
@@ -712,12 +833,11 @@ def _load_timing_only_parameters(path: str | Path, expected_anchors: int, expect
 
 
 def run_from_args(args: argparse.Namespace) -> dict[str, Path]:
-    """Build the existing fixed geometry and run the diagnostic-only audit CLI."""
+    """Load frozen checkpoint geometry and run the diagnostic-only audit CLI."""
 
     from ismrm_v2.proposed.q002.contracts import cropped_observation_paths
     from ismrm_v2.proposed.q002.joint_dataset import JointAnchorDataset
     from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
-    from ismrm_v2.proposed.rigid_psf.hb1_stack_adapter import initialize_group_poses_from_hb1
 
     device = torch.device(args.device)
     if device.type == "cuda" and not torch.cuda.is_available():
@@ -728,10 +848,10 @@ def run_from_args(args: argparse.Namespace) -> dict[str, Path]:
         raise ValueError("v2.2 Modification 1 preflight currently requires --case L100.")
     scalar_dataset = QuantPointDataset(inputs, device=device)
     joint_dataset = JointAnchorDataset(inputs, scalar_dataset)
-    stack_initialization = initialize_group_poses_from_hb1(
+    group_axisangle_physical, geometry_checkpoint = load_geometry_checkpoint(
+        args.geometry_checkpoint,
         scalar_dataset.group_axisangle_init,
-        inputs,
-        device=device,
+        scalar_dataset.group_resolution_xyz_mm,
     )
     decoder = None
     if args.signal_decoder_checkpoint:
@@ -760,14 +880,14 @@ def run_from_args(args: argparse.Namespace) -> dict[str, Path]:
         "joint_anchor_order_sha256": anchor_order_sha256,
         "timing_only_parameters": {"path": parameters["source"], "sha256": parameters["sha256"], "anchor_order_sha256": anchor_order_sha256} if parameters else None,
         "timing_only_parameter_source": "external_anchor_aligned_npz" if parameters else None,
-        "stack_initialization": stack_initialization_provenance(stack_initialization),
+        "geometry_checkpoint": geometry_checkpoint,
     }
     result = run_cross_view_reliability_audit(
         joint_dataset,
-        group_axisangle_physical=stack_initialization.post_stack_init_axisangle_physical,
+        group_axisangle_physical=group_axisangle_physical,
         subject=args.subject,
         case_id=args.case,
-        geometry_source="existing initialize_group_poses_from_hb1 post_stack_init_axisangle_physical in physical RAS mm",
+        geometry_source=geometry_checkpoint["source"],
         timing_only_decoder=decoder,
         timing_only_parameters=parameters,
         provenance=provenance,
@@ -780,6 +900,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--subject", default="CYJ", help="Subject identifier under the prepared root.")
     parser.add_argument("--case", required=True, help="Case identifier recorded in every output artifact.")
     parser.add_argument("--prepared-root", required=True, help="Existing cropped prepared-observations root; never a v2.1 output root.")
+    parser.add_argument("--geometry-checkpoint", required=True, help="Frozen Q002 checkpoint containing group_axisangle_post_stack_init_physical; loaded on CPU without model construction.")
     parser.add_argument("--sparse-manifest", help="Optional sparse-manifest provenance record; it does not change the required SAX/2CH/4CH inputs.")
     parser.add_argument("--output-dir", required=True, help="Required new or empty v2.2 output directory.")
     parser.add_argument("--device", default="cpu", help="Torch device; local validation uses cpu, server may use cuda:0.")

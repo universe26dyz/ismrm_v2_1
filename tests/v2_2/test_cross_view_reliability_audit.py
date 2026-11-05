@@ -1,8 +1,10 @@
 import numpy as np
 import json
+import inspect
 import subprocess
 import sys
 from types import SimpleNamespace
+import pytest
 import torch
 
 import ismrm_v2.v2_2.preflight.cross_view_reliability_audit as audit
@@ -345,3 +347,100 @@ def test_module_cli_help_exposes_explicit_isolated_output_arguments():
     assert completed.returncode == 0
     assert "--prepared-root" in completed.stdout
     assert "--output-dir" in completed.stdout
+
+
+def _geometry_checkpoint(tmp_path, *, post=None, dicom=None, resolution=None, training_space=None, trained=None):
+    post = torch.tensor([[0.0, 0.1, 0.2, 1.0, 2.0, 3.0], [0.3, 0.4, 0.5, 4.0, 5.0, 6.0]]) if post is None else torch.as_tensor(post)
+    dicom = torch.tensor([[0.0, 0.0, 0.0, 1.0, 2.0, 3.0], [0.0, 0.0, 0.0, 4.0, 5.0, 6.0]]) if dicom is None else torch.as_tensor(dicom)
+    resolution = torch.tensor([[1.0, 1.1, 1.2], [1.3, 1.4, 1.5]]) if resolution is None else torch.as_tensor(resolution)
+    if training_space is None:
+        training_space = {
+            "group_axisangle_init_physical": post.clone(),
+            "group_axisangle_dicom_physical": dicom.clone(),
+            "group_resolution_xyz_mm": resolution.clone(),
+        }
+    payload = {
+        "group_axisangle_post_stack_init_physical": post,
+        "group_axisangle_dicom_physical": dicom,
+        "group_axisangle_init_physical": post.clone(),
+        "group_resolution_xyz_mm": resolution,
+        "training_space": training_space,
+        "trained_axisangle_train": torch.full_like(post, 99.0) if trained is None else torch.as_tensor(trained),
+    }
+    path = tmp_path / "geometry_checkpoint.pt"
+    torch.save(payload, path)
+    return path, post, dicom, resolution
+
+
+def test_geometry_checkpoint_selects_post_hb1_geometry_and_records_provenance(tmp_path):
+    checkpoint, post, dicom, resolution = _geometry_checkpoint(tmp_path)
+
+    selected, provenance = audit.load_geometry_checkpoint(checkpoint, dicom, resolution)
+
+    assert torch.equal(selected, post)
+    assert not torch.equal(selected, torch.full_like(post, 99.0))
+    assert provenance["selected_key"] == "group_axisangle_post_stack_init_physical"
+    assert provenance["source"] == "frozen Q002 checkpoint: group_axisangle_post_stack_init_physical"
+    assert provenance["group_count"] == 2
+    assert provenance["internal_training_space_consistency"] is True
+    assert provenance["dicom_geometry_max_abs_diff"] == 0.0
+    assert provenance["group_resolution_max_abs_diff"] == 0.0
+    assert provenance == audit.load_geometry_checkpoint(checkpoint, dicom, resolution)[1]
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        (lambda payload: payload.pop("group_axisangle_post_stack_init_physical"), "group_axisangle_post_stack_init_physical"),
+        (lambda payload: payload.__setitem__("group_axisangle_post_stack_init_physical", torch.zeros((2, 5))), "shape"),
+        (lambda payload: payload.__setitem__("group_axisangle_post_stack_init_physical", torch.tensor([[float("nan")] * 6, [0.0] * 6])), "finite"),
+    ],
+)
+def test_geometry_checkpoint_fails_closed_for_missing_bad_shape_or_nonfinite_post_geometry(tmp_path, mutation, message):
+    checkpoint, _post, dicom, resolution = _geometry_checkpoint(tmp_path)
+    payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
+    mutation(payload)
+    torch.save(payload, checkpoint)
+
+    with pytest.raises(ValueError, match=message):
+        audit.load_geometry_checkpoint(checkpoint, dicom, resolution)
+
+
+def test_geometry_checkpoint_fails_closed_for_dataset_geometry_mismatches(tmp_path):
+    checkpoint, _post, dicom, resolution = _geometry_checkpoint(tmp_path)
+
+    with pytest.raises(ValueError, match="DICOM geometry mismatch"):
+        audit.load_geometry_checkpoint(checkpoint, dicom + 1e-4, resolution)
+    with pytest.raises(ValueError, match="group resolution mismatch"):
+        audit.load_geometry_checkpoint(checkpoint, dicom, resolution + 1e-4)
+
+
+def test_geometry_checkpoint_fails_closed_for_group_count_and_training_space_inconsistency(tmp_path):
+    checkpoint, _post, dicom, resolution = _geometry_checkpoint(tmp_path)
+    with pytest.raises(ValueError, match="group count"):
+        audit.load_geometry_checkpoint(checkpoint, torch.cat((dicom, dicom[:1])), torch.cat((resolution, resolution[:1])))
+
+    inconsistent = {
+        "group_axisangle_init_physical": torch.zeros((2, 6)),
+        "group_axisangle_dicom_physical": dicom,
+        "group_resolution_xyz_mm": resolution,
+    }
+    checkpoint, _post, dicom, resolution = _geometry_checkpoint(tmp_path, training_space=inconsistent)
+    with pytest.raises(ValueError, match="training_space.*group_axisangle_init_physical"):
+        audit.load_geometry_checkpoint(checkpoint, dicom, resolution)
+
+
+def test_formal_cli_requires_geometry_checkpoint_and_does_not_rerun_hb1():
+    parser = audit.build_parser()
+    assert parser.parse_args(["--case", "L100", "--prepared-root", "prepared", "--output-dir", "out", "--geometry-checkpoint", "checkpoint.pt"]).geometry_checkpoint == "checkpoint.pt"
+    with pytest.raises(SystemExit):
+        parser.parse_args(["--case", "L100", "--prepared-root", "prepared", "--output-dir", "out"])
+    assert "initialize_group_poses_from_hb1" not in inspect.getsource(audit.run_from_args)
+
+    completed = subprocess.run(
+        [sys.executable, "-m", "ismrm_v2.v2_2.preflight.cross_view_reliability_audit", "--help"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert "--geometry-checkpoint" in completed.stdout
