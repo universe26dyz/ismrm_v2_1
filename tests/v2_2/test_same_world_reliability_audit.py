@@ -113,6 +113,20 @@ def test_timing_parameter_export_records_frozen_geometry_and_anchor_order(tmp_pa
     assert provenance["scientific_decoder_content_changed"] is False
 
 
+def test_training_space_difference_is_cpu_float64_and_shape_checked():
+    difference = timing_export._max_abs_cpu_float64_difference(
+        torch.tensor([1.0, 2.0], dtype=torch.float32),
+        np.array([1.0, 2.000001], dtype=np.float32),
+        name="bbox_train",
+    )
+    assert isinstance(difference, float)
+    assert difference > 0.0
+    with pytest.raises(ValueError, match="bbox_train shape mismatch"):
+        timing_export._max_abs_cpu_float64_difference(
+            torch.zeros((2, 3)), torch.zeros((2,)), name="bbox_train"
+        )
+
+
 def test_cpu_audit_loader_translates_packed_tinycudann_hashgrid_state():
     config = timing_export.QuantitativeINRConfig(
         coarsest_resolution_mm=2.0,

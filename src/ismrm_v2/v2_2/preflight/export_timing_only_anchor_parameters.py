@@ -26,6 +26,25 @@ def _tensor_hash(value: Any) -> str:
     return hashlib.sha256(tensor.numpy().tobytes()).hexdigest()
 
 
+def _cpu_float64(value: Any) -> torch.Tensor:
+    """Canonicalize validation data without inheriting a caller's device."""
+    return torch.as_tensor(value).detach().to(device="cpu", dtype=torch.float64)
+
+
+def _max_abs_cpu_float64_difference(left: Any, right: Any, *, name: str) -> float:
+    """Compare validation tensors on detached CPU float64 copies."""
+    left_cpu = _cpu_float64(left)
+    right_cpu = _cpu_float64(right)
+    if left_cpu.shape != right_cpu.shape:
+        raise ValueError(
+            f"{name} shape mismatch: checkpoint {tuple(left_cpu.shape)} != "
+            f"current {tuple(right_cpu.shape)}"
+        )
+    if left_cpu.numel() == 0:
+        return 0.0
+    return float(torch.max(torch.abs(left_cpu - right_cpu)).item())
+
+
 def _translate_packed_tcnn_encoding_state(
     inr_state: dict[str, Any], model: QuantitativeINR
 ) -> dict[str, Any]:
@@ -156,7 +175,7 @@ def load_frozen_quantitative_state_for_timing_audit(
         }
         differences = {}
         for name, (left, right) in comparisons.items():
-            differences[name] = float(torch.max(torch.abs(torch.as_tensor(left, dtype=torch.float64) - torch.as_tensor(right, dtype=torch.float64))))
+            differences[name] = _max_abs_cpu_float64_difference(left, right, name=name)
             if differences[name] > 1e-5:
                 raise ValueError(f"checkpoint training_space {name} mismatch: {differences[name]:g} > 1e-5")
     provenance = {
