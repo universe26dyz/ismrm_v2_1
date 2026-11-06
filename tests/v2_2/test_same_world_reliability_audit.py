@@ -2,6 +2,7 @@ import numpy as np
 import json
 import torch
 import importlib.util
+import pytest
 from pathlib import Path
 from nesvor.transform import RigidTransform, ax_transform_points
 
@@ -17,6 +18,7 @@ from ismrm_v2.v2_2.preflight.reference_sampling import (
     sample_slice_stack,
 )
 from ismrm_v2.v2_2.preflight.export_timing_only_anchor_parameters import export_anchor_parameters
+import ismrm_v2.v2_2.preflight.export_timing_only_anchor_parameters as timing_export
 import ismrm_v2.v2_2.preflight.same_world_reliability_audit as same_world
 
 
@@ -101,6 +103,45 @@ def test_timing_parameter_export_records_frozen_geometry_and_anchor_order(tmp_pa
         assert len(values["anchor_order_sha256"].item()) == 64
     sidecar = output.with_suffix(".json")
     assert json.loads(sidecar.read_text())["trained_pose_key_not_used"] == "trained_axisangle_train"
+    export_anchor_parameters(tmp_path / "timing_with_decoder.npz", t1_ms=np.array([1., 2.]), t2_ms=np.array([3., 4.]), b1=np.array([.9, 1.]), amplitude=np.array([2., 3.]), joint_dataset=Dataset(), reconstruction_checkpoint=checkpoint, geometry_checkpoint=geometry, geometry_provenance={}, decoder_provenance={"historical_decoder_path_from_b6": "/retired/decoder.pth", "runtime_decoder_path": "/project/runtime/model_assets/decoder.pth", "runtime_decoder_sha256": timing_export.APPROVED_DECODER_SHA256, "scientific_decoder_content_changed": False})
+    provenance = json.loads((tmp_path / "timing_with_decoder.json").read_text())
+    assert provenance["historical_decoder_path_from_b6"] == "/retired/decoder.pth"
+    assert provenance["scientific_decoder_content_changed"] is False
+
+
+def test_timing_export_relocates_decoder_before_model_construction(monkeypatch, tmp_path):
+    runtime_decoder = tmp_path / "decoder.pth"; runtime_decoder.write_bytes(b"runtime")
+    captured = {}
+    class Model(torch.nn.Module):
+        intensity_scale = torch.ones(())
+        def inr(self, points):
+            return {"t1_ms": torch.ones(points.shape[0]), "t2_ms": torch.ones(points.shape[0]), "b1": torch.ones(points.shape[0]), "amplitude": torch.ones(points.shape[0])}
+    class Space:
+        def physical_ras_to_train(self, points): return points
+    monkeypatch.setattr(timing_export, "_sha256_file", lambda path: timing_export.APPROVED_DECODER_SHA256)
+    monkeypatch.setattr("ismrm_v2.proposed.q001_config.load_b6_resolved_config", lambda path: {"decoder": {"checkpoint": "/retired/old/path/model.pth"}})
+    def build(_scalar, config, *_args, **_kwargs):
+        captured["checkpoint"] = config["decoder"]["checkpoint"]
+        return Model(), Space(), None, {}
+    monkeypatch.setattr("ismrm_v2.proposed.mlp_trainer.build_mlp_training_model", build)
+    monkeypatch.setattr("ismrm_v2.proposed.mlp_trainer.load_mlp_reconstruction_checkpoint", lambda *args, **kwargs: {})
+    monkeypatch.setattr(timing_export, "_dataset_arrays", lambda *_args: {"physical_xyz": np.zeros((1, 3))})
+    monkeypatch.setattr(timing_export, "export_anchor_parameters", lambda *args, **kwargs: kwargs["geometry_provenance"].update(kwargs.get("decoder_provenance", {})) or Path(kwargs.get("output_path", tmp_path / "out.npz")))
+    result = timing_export.export_from_frozen_checkpoint(output_path=tmp_path / "out.npz", joint_dataset=object(), scalar_dataset=object(), group_axisangle_physical=torch.zeros((1, 6)), b6_model=tmp_path / "b6.pt", protocol_yaml=tmp_path / "protocol.yaml", reconstruction_checkpoint=tmp_path / "recon.pt", geometry_checkpoint=tmp_path / "geom.pt", geometry_provenance={}, signal_decoder_checkpoint=runtime_decoder, device=torch.device("cpu"))
+    assert captured["checkpoint"] == str(runtime_decoder.resolve())
+    assert result is not None
+
+
+def test_timing_export_rejects_wrong_decoder_sha_before_model_construction(monkeypatch, tmp_path):
+    runtime_decoder = tmp_path / "decoder.pth"; runtime_decoder.write_bytes(b"wrong")
+    monkeypatch.setattr(timing_export, "_sha256_file", lambda path: "0" * 64)
+    with pytest.raises(ValueError, match="approved frozen decoder"):
+        timing_export.export_from_frozen_checkpoint(output_path=tmp_path / "out.npz", joint_dataset=object(), scalar_dataset=object(), group_axisangle_physical=torch.zeros((1, 6)), b6_model=tmp_path / "b6.pt", protocol_yaml=tmp_path / "protocol.yaml", reconstruction_checkpoint=tmp_path / "recon.pt", geometry_checkpoint=tmp_path / "geom.pt", geometry_provenance={}, signal_decoder_checkpoint=runtime_decoder, device=torch.device("cpu"))
+
+
+def test_eight_case_runner_passes_runtime_decoder_to_exporter():
+    script = Path("scripts/v2_2/run_reliability_audit_8case.sh").read_text()
+    assert '--signal-decoder-checkpoint "${DECODER_PATH}"' in script
 
 
 def test_legacy_sparse_l50_uses_derived_observation_not_source(monkeypatch, tmp_path):

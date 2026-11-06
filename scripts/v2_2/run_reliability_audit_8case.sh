@@ -55,7 +55,7 @@ for row in "${CASE_ROWS[@]}"; do
   if [[ -f "${timing_npz}" ]]; then export TIMING_ONLY_PARAMETERS_NPZ="${timing_npz}"; else unset TIMING_ONLY_PARAMETERS_NPZ || true; fi
   if [[ "${EXPORT_TIMING_ONLY:-0}" == "1" ]]; then
     [[ -f "${reconstruction_checkpoint}" ]] || { echo "timing export reconstruction checkpoint missing for ${label}" >&2; exit 2; }
-    PYTHONPATH="${ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}" python -m ismrm_v2.v2_2.preflight.export_timing_only_anchor_parameters --subject "${subject}" --case "${case_id}" --prepared-root "${prepared_root}" --sparse-manifest "${sparse_manifest}" --geometry-checkpoint "${geometry_checkpoint}" --b6-model "${B6_PATH}" --protocol-yaml "${PROTOCOL_PATH}" --reconstruction-checkpoint "${reconstruction_checkpoint}" --output "${input_dir}/timing_only_parameters.npz" --device "${DEVICE:-cpu}"
+    PYTHONPATH="${ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}" python -m ismrm_v2.v2_2.preflight.export_timing_only_anchor_parameters --subject "${subject}" --case "${case_id}" --prepared-root "${prepared_root}" --sparse-manifest "${sparse_manifest}" --geometry-checkpoint "${geometry_checkpoint}" --b6-model "${B6_PATH}" --protocol-yaml "${PROTOCOL_PATH}" --signal-decoder-checkpoint "${DECODER_PATH}" --reconstruction-checkpoint "${reconstruction_checkpoint}" --output "${input_dir}/timing_only_parameters.npz" --device "${DEVICE:-cpu}"
     export TIMING_ONLY_PARAMETERS_NPZ="${input_dir}/timing_only_parameters.npz"
   fi
   "${ROOT}/scripts/v2_2/run_reliability_audit_case.sh"
