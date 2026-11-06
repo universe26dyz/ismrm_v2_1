@@ -134,26 +134,36 @@ def sample_slice_stack(
         raise ValueError("query coordinates must be finite [N,3]")
     channels = int(reference.planes[0].values.shape[-1])
     sampled = np.full((query.shape[0], channels), np.nan); valid = np.zeros(query.shape[0], dtype=bool); distances = np.full((query.shape[0], len(reference.planes)), np.nan)
+    support_groups = np.full((query.shape[0], 2), -1, dtype=np.int64); support_weights = np.zeros((query.shape[0], 2), dtype=np.float64); in_plane_valid = np.zeros(query.shape[0], dtype=bool); exact_plane = np.zeros(query.shape[0], dtype=bool); bracketed = np.zeros(query.shape[0], dtype=bool)
     for index, point in enumerate(query):
-        candidates: list[tuple[float, np.ndarray]] = []
-        positive: list[tuple[float, np.ndarray]] = []; negative: list[tuple[float, np.ndarray]] = []
+        candidates: list[tuple[float, int, np.ndarray]] = []
+        positive: list[tuple[float, int, np.ndarray]] = []; negative: list[tuple[float, int, np.ndarray]] = []
         for plane_index, plane in enumerate(reference.planes):
             value, plane_valid, distance = _bilinear_plane(plane, point, tolerance_mm=in_plane_tolerance_mm)
             distances[index, plane_index] = distance
             if not plane_valid:
                 continue
+            in_plane_valid[index] = True
             if abs(distance) <= plane_tolerance_mm:
-                candidates.append((abs(distance), value))
+                candidates.append((abs(distance), plane_index, value))
             elif distance < 0:
-                negative.append((abs(distance), value))
+                negative.append((abs(distance), plane_index, value))
             else:
-                positive.append((abs(distance), value))
+                positive.append((abs(distance), plane_index, value))
         if candidates:
-            sampled[index] = min(candidates, key=lambda item: item[0])[1]; valid[index] = True; continue
+            selected = min(candidates, key=lambda item: item[0]); selected_index = selected[1]
+            sampled[index] = selected[2]; valid[index] = True; exact_plane[index] = True; support_groups[index] = (reference.planes[selected_index].group_idx, -1); support_weights[index] = (1.0, 0.0); continue
         if negative and positive:
-            d0, v0 = min(negative, key=lambda item: item[0]); d1, v1 = min(positive, key=lambda item: item[0])
-            sampled[index] = (d1 * v0 + d0 * v1) / (d0 + d1); valid[index] = True
-    support = {"signed_plane_distance_mm": distances, "orientation_spread_deg": np.asarray(reference.orientation_spread_deg), "median_inter_plane_angle_deg": np.asarray(reference.median_inter_plane_angle_deg), "invalid_reason": np.where(valid, "inside_bilinear_and_bracketed_support", "no_valid_plane_or_bracket").astype(object)}
+            d0, negative_index, v0 = min(negative, key=lambda item: item[0]); d1, positive_index, v1 = min(positive, key=lambda item: item[0])
+            sampled[index] = (d1 * v0 + d0 * v1) / (d0 + d1); valid[index] = True; bracketed[index] = True
+            ordered_support = [(negative_index, reference.planes[negative_index].group_idx, d1 / (d0 + d1)), (positive_index, reference.planes[positive_index].group_idx, d0 / (d0 + d1))]
+            # Keep support metadata in deterministic lower-to-upper plane order;
+            # signed distances depend on the normal orientation and are not a
+            # stable ordering key across frozen pose conventions.
+            reference_axis = reference.planes[0].normal_ras
+            ordered_support.sort(key=lambda item: float(np.dot(reference.planes[item[0]].origin_ras_mm, reference_axis)))
+            support_groups[index] = (ordered_support[0][1], ordered_support[1][1]); support_weights[index] = (ordered_support[0][2], ordered_support[1][2])
+    support = {"signed_plane_distance_mm": distances, "support_group_idx": support_groups, "support_weights": support_weights, "in_plane_valid": in_plane_valid, "exact_plane": exact_plane, "bracketed": bracketed, "orientation_spread_deg": np.asarray(reference.orientation_spread_deg), "median_inter_plane_angle_deg": np.asarray(reference.median_inter_plane_angle_deg), "invalid_reason": np.where(valid, "inside_bilinear_and_bracketed_support", "no_valid_plane_or_bracket").astype(object)}
     return sampled, valid, support
 
 

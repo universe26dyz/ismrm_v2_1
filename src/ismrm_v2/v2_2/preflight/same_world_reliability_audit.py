@@ -117,6 +117,29 @@ def _anchor_identity_hash(arrays: dict[str, np.ndarray], indices: np.ndarray) ->
     return hashlib.sha256(identity.tobytes()).hexdigest()
 
 
+def _checkpoint_training_space_sha256(path: str | Path) -> str:
+    checkpoint = torch.load(Path(path).resolve(), map_location="cpu", weights_only=False)
+    if not isinstance(checkpoint, dict) or not isinstance(checkpoint.get("training_space"), dict):
+        raise ValueError("checkpoint training_space mapping is required for timing provenance")
+    payload = {key: (value.tolist() if isinstance(value, torch.Tensor) else value) for key, value in checkpoint["training_space"].items()}
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
+
+
+def validate_decoder_timing_domain(decoder_checkpoint: str | Path, timing9_ms: np.ndarray, *, tolerance_ms: float = 1e-4) -> dict[str, Any]:
+    checkpoint = torch.load(Path(decoder_checkpoint).resolve(), map_location="cpu", weights_only=False)
+    if not isinstance(checkpoint, dict) or "train_timing9_min_ms" not in checkpoint or "train_timing9_max_ms" not in checkpoint:
+        raise ValueError("approved decoder lacks train_timing9_min_ms/train_timing9_max_ms")
+    lower, upper = np.asarray(checkpoint["train_timing9_min_ms"], dtype=np.float64), np.asarray(checkpoint["train_timing9_max_ms"], dtype=np.float64)
+    values = np.asarray(timing9_ms, dtype=np.float64)
+    if lower.shape != (9,) or upper.shape != (9,) or values.ndim != 2 or values.shape[1] != 9:
+        raise ValueError("decoder timing-domain contract must be nine-dimensional")
+    bad = (values < lower[None, :] - tolerance_ms) | (values > upper[None, :] + tolerance_ms)
+    if bad.any():
+        details = [{"timing_dimension": int(index), "observed_min_ms": float(values[:, index].min()), "observed_max_ms": float(values[:, index].max()), "decoder_min_ms": float(lower[index]), "decoder_max_ms": float(upper[index])} for index in np.flatnonzero(bad.any(axis=0))]
+        raise ValueError(json.dumps({"status": "BLOCKED_TIMING_DOMAIN", "details": details}, sort_keys=True))
+    return {"status": "admitted", "train_timing9_min_ms": lower.tolist(), "train_timing9_max_ms": upper.tolist(), "timing_storage_tolerance_ms": tolerance_ms}
+
+
 def _sample_timing_grid(points: np.ndarray, timing: np.ndarray, *, tolerance: float = 1e-5) -> RegularGridReference:
     return build_regular_grid_reference(points, np.column_stack((timing, np.zeros((timing.shape[0], 1)))).reshape(timing.shape[0], 10), tolerance=tolerance)
 
@@ -129,6 +152,9 @@ def _timing_only_pair(
     timing_reference: np.ndarray,
     reference_valid: np.ndarray,
     normalization: JointRobustNormalization | None = None,
+    reference_timing_by_group: dict[int, np.ndarray] | None = None,
+    support_group_idx: np.ndarray | None = None,
+    support_weights: np.ndarray | None = None,
 ) -> tuple[np.ndarray | None, np.ndarray | None, dict[str, Any]]:
     if decoder is None:
         return None, None, {"status": "not_run", "reason": "no decoder was supplied"}
@@ -155,7 +181,20 @@ def _timing_only_pair(
     t1, t2, b1, amplitude_tensor = parameter_values
     with torch.no_grad():
         observed_target = decoder(t1, t2, b1, target_timing).detach().cpu().numpy()
-        reference_target = decoder(t1, t2, b1, reference_timing).detach().cpu().numpy()
+        if reference_timing_by_group is None or support_group_idx is None or support_weights is None:
+            reference_target = decoder(t1, t2, b1, reference_timing).detach().cpu().numpy()
+        else:
+            if support_group_idx.shape != (count, 2) or support_weights.shape != (count, 2):
+                raise ValueError("same-world timing support must be [N,2] group IDs and weights")
+            reference_target = np.zeros_like(observed_target)
+            for slot in range(2):
+                active = reference_valid & (support_group_idx[:, slot] >= 0) & (support_weights[:, slot] > 0)
+                if not active.any():
+                    continue
+                timing_values = np.stack([reference_timing_by_group[int(group)] for group in support_group_idx[active, slot]], axis=0)
+                timing_tensor = torch.as_tensor(timing_values, dtype=torch.float32, device=device)
+                simulated = decoder(t1[active], t2[active], b1[active], timing_tensor).detach().cpu().numpy()
+                reference_target[active] += simulated * support_weights[active, slot, None]
     amplitude = amplitude_tensor.detach().cpu().numpy()
     observed_target = observed_target * amplitude[:, None]
     reference_target = reference_target * amplitude[:, None]
@@ -167,7 +206,7 @@ def _timing_only_pair(
         l1_valid &= reference_valid
     from .discrepancy import raw_cosine_discrepancy
     cosine, cosine_valid = raw_cosine_discrepancy(observed_target, reference_target)
-    return l1, cosine, {"status": "run", "source": str(parameters.get("source", "external anchor-aligned parameters")), "l1_valid_count": int(l1_valid.sum()), "cosine_valid_count": int(cosine_valid.sum())}
+    return l1, cosine, {"status": "run", "source": str(parameters.get("source", "external anchor-aligned parameters")), "reference_timing_simulation": "mixture_of_plane_signals" if reference_timing_by_group is not None else "effective_interpolated_timing", "l1_valid_count": int(l1_valid.sum()), "cosine_valid_count": int(cosine_valid.sum())}
 
 
 def _timing_l1(target: np.ndarray, reference: np.ndarray, reference_valid: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -199,6 +238,7 @@ def run_same_world_reliability_audit(
     cosine_epsilon: float = 1e-8,
     provenance: dict[str, Any] | None = None,
     sax_observation_path: str | Path | None = None,
+    formal: bool = False,
 ) -> dict[str, Any]:
     arrays = _dataset_arrays(joint_dataset, group_axisangle_physical)
     sax_indices = np.flatnonzero(arrays["stack_idx"] == 0)
@@ -206,6 +246,7 @@ def run_same_world_reliability_audit(
     result: dict[str, Any] = {"manifest": {}, "pairs": [], "fingerprints": {}, "status": "PASS", "stack_payloads": {}}
     if sax_indices.size == 0:
         raise ValueError("same-world audit requires at least one SAX anchor.")
+    timing_by_group: dict[int, np.ndarray] = {}
     try:
         if sax_observation_path is not None:
             reference_stack = build_slice_stack_reference(str(sax_observation_path), np.asarray(group_axisangle_physical.detach().cpu() if isinstance(group_axisangle_physical, torch.Tensor) else group_axisangle_physical))
@@ -218,7 +259,10 @@ def run_same_world_reliability_audit(
             for plane in reference_stack.planes:
                 rows = np.flatnonzero((groups == plane.group_idx) & (weights >= 0))
                 ordered = rows[np.argsort(weights[rows], kind="stable")]
+                if ordered.size != 10 or not np.allclose(timing9[ordered], timing9[ordered[0]], rtol=0.0, atol=1e-5):
+                    raise ValueError(f"SAX group {plane.group_idx} has inconsistent timing9_ms across ten weights")
                 timing_values[plane.group_idx] = np.broadcast_to(timing9[ordered[0]][None, None, :], (*images.shape[1:], 9)).copy()
+                timing_by_group[plane.group_idx] = timing9[ordered[0]].copy()
             timing_stack = replace_slice_values(reference_stack, timing_values)
             sampling_admission = {"status": "admitted", "implementation": "slice-stack bilinear plus bracketed through-plane interpolation", "coordinate_convention": reference_stack.coordinate_convention, "plane_count": len(reference_stack.planes), "orientation_spread_deg": reference_stack.orientation_spread_deg, "median_inter_plane_angle_deg": reference_stack.median_inter_plane_angle_deg}
         else:
@@ -236,6 +280,7 @@ def run_same_world_reliability_audit(
         return result
 
     sampling_qc = dict(sampling_admission)
+    support_qc: list[dict[str, np.ndarray]] = []
     all_valid_target, all_valid_reference = [], []
     for stack, indices in target_indices_by_stack.items():
         if indices.size == 0:
@@ -244,6 +289,7 @@ def run_same_world_reliability_audit(
         if reference_stack is not None:
             sampled, valid, support = sample_slice_stack(reference_stack, arrays["physical_xyz"][indices])
             sampled_timing, timing_valid, _ = sample_slice_stack(timing_stack, arrays["physical_xyz"][indices])
+            support_qc.append(support)
         else:
             sampled, valid, support = sample_regular_grid_trilinear(reference_grid, arrays["physical_xyz"][indices])
             sampled_timing, timing_valid, _ = sample_regular_grid_trilinear(timing_grid, arrays["physical_xyz"][indices])
@@ -252,6 +298,11 @@ def run_same_world_reliability_audit(
         result["stack_payloads"][stack] = {"target_indices": indices, "target_fingerprints": arrays["observed"][indices], "reference": sampled, "reference_valid": valid & timing_valid, "timing_reference": sampled_timing[:, :9], "nearest_distance_mm": nearest_distance, "timing_delta": delta, "support": support}
         all_valid_target.append(arrays["observed"][indices][valid])
         all_valid_reference.append(sampled[valid])
+    if support_qc:
+        support_valid = np.concatenate([item["in_plane_valid"] for item in support_qc])
+        support_exact = np.concatenate([item["exact_plane"] for item in support_qc])
+        support_bracketed = np.concatenate([item["bracketed"] for item in support_qc])
+        sampling_qc.update({"in_plane_valid_fraction": float(support_valid.mean()) if support_valid.size else None, "exact_plane_fraction": float(support_exact.mean()) if support_exact.size else None, "bracketed_fraction": float(support_bracketed.mean()) if support_bracketed.size else None, "invalid_no_bracket_fraction": float((~support_valid | (~support_exact & ~support_bracketed)).mean()) if support_valid.size else None})
     has_target_stack = any(payload["target_indices"].size for payload in result["stack_payloads"].values())
     active_stack_values = {stack: arrays["observed"][np.flatnonzero(arrays["stack_idx"] == code)] for code, stack in ((0, "sax"), (1, "2ch"), (2, "4ch")) if np.any(arrays["stack_idx"] == code)}
     try:
@@ -274,11 +325,15 @@ def run_same_world_reliability_audit(
             l1[~valid] = np.nan; norm_cosine[~valid] = np.nan; l1_valid &= valid; norm_cosine_valid &= valid
         raw_cosine, raw_valid = raw_cosine_discrepancy(target, reference, epsilon=cosine_epsilon)
         raw_cosine[~valid] = np.nan; raw_valid &= valid
-        timing_l1, timing_cosine, timing_status = _timing_only_pair(timing_only_decoder, timing_only_parameters, arrays, indices, payload["timing_reference"], valid, stats)
+        support_groups = payload.get("support", {}).get("support_group_idx")
+        support_weights = payload.get("support", {}).get("support_weights")
+        timing_l1, timing_cosine, timing_status = _timing_only_pair(timing_only_decoder, timing_only_parameters, arrays, indices, payload["timing_reference"], valid, stats, reference_timing_by_group=timing_by_group if reference_stack is not None else None, support_group_idx=support_groups, support_weights=support_weights)
         payload.update({"observed_l1": l1, "observed_l1_valid": l1_valid, "observed_cosine_raw": raw_cosine, "observed_cosine_raw_valid": raw_valid, "observed_cosine_normalized": norm_cosine, "observed_cosine_normalized_valid": norm_cosine_valid, "timing_only_l1": timing_l1, "timing_only_cosine": timing_cosine, "timing_only_status": timing_status})
         for offset, anchor in enumerate(indices):
             pair = {"subject": subject, "case_id": case_id, "target_stack": stack, "target_anchor_index": int(anchor), "target_group_idx": int(arrays["group_idx"][anchor]), "target_row": int(arrays["row_col"][anchor, 0]), "target_col": int(arrays["row_col"][anchor, 1]), "world_x_mm": float(arrays["physical_xyz"][anchor, 0]), "world_y_mm": float(arrays["physical_xyz"][anchor, 1]), "world_z_mm": float(arrays["physical_xyz"][anchor, 2]), "reference_valid": bool(valid[offset]), "reference_support_info": str(payload.get("support", {}).get("invalid_reason", np.array(["inside_reference_fov"] * indices.size, dtype=object))[offset]), "observed_l1_normalized": float(l1[offset]) if np.isfinite(l1[offset]) else None, "observed_cosine_raw": float(raw_cosine[offset]) if np.isfinite(raw_cosine[offset]) else None, "observed_cosine_normalized": float(norm_cosine[offset]) if np.isfinite(norm_cosine[offset]) else None, "timing_only_l1_normalized": float(timing_l1[offset]) if timing_l1 is not None and np.isfinite(timing_l1[offset]) else None, "timing_only_cosine": float(timing_cosine[offset]) if timing_cosine is not None and np.isfinite(timing_cosine[offset]) else None, "timing_abs_mean_ms": float(np.abs(payload["timing_delta"][offset]).mean()) if valid[offset] else None, "timing_l2_ms": float(np.linalg.norm(payload["timing_delta"][offset])) if valid[offset] else None, "nearest_neighbor_distance_mm": float(payload["nearest_distance_mm"][offset]), "nearest_neighbor_cosine": None}
             result["pairs"].append(pair)
+    if formal and has_target_stack and any(payload.get("timing_only_status", {}).get("status") != "run" for payload in result["stack_payloads"].values() if payload["target_indices"].size):
+        result["status"] = "BLOCKED_TIMING_PARAMETERS"
     result["pairs"].sort(key=lambda row: (row["target_stack"], row["target_anchor_index"]))
     result["normalization_statistics"] = stats.as_dict() if stats is not None else {"status": "not_run" if result["status"] == "PASS_NO_TARGET_STACK" else "blocked", "reason": "no target stack anchors" if result["status"] == "PASS_NO_TARGET_STACK" else result.get("normalization_error", "normalization unavailable")}
     result["observed_l1_statistics"] = {stack: _summary(payload["observed_l1"]) for stack, payload in result["stack_payloads"].items()}
@@ -357,20 +412,31 @@ def main() -> None:
     except (FileNotFoundError, ValueError) as error:
         raise RuntimeError(f"BLOCKED_CASE_GEOMETRY: case-specific checkpoint does not match active dataset: {error}") from error
     decoder = None
+    timing_domain = None
     if args.signal_decoder_checkpoint:
         if not args.protocol_yaml:
             raise ValueError("--signal-decoder-checkpoint requires --protocol-yaml")
+        try:
+            timing_domain = validate_decoder_timing_domain(args.signal_decoder_checkpoint, scalar.timing.detach().cpu().numpy())
+        except (FileNotFoundError, ValueError) as error:
+            raise RuntimeError(f"BLOCKED_TIMING_DOMAIN: {error}") from error
         from ismrm_v2.proposed.signal_decoder.checkpoint_loader import load_frozen_mlp_decoder_for_benchmark
         decoder = load_frozen_mlp_decoder_for_benchmark(args.signal_decoder_checkpoint, scalar, args.protocol_yaml, device=device)
     elif args.protocol_yaml:
         raise ValueError("--protocol-yaml requires --signal-decoder-checkpoint")
     anchor_order = _joint_anchor_order_sha256(joint)
-    parameters = _load_timing_only_parameters(args.timing_only_parameters_npz, int(joint.xyz.shape[0]), anchor_order) if args.timing_only_parameters_npz else None
+    expected_timing_provenance = None
+    if args.timing_only_parameters_npz:
+        expected_timing_provenance = {"subject": args.subject, "requested_case": args.case, "resolved_case": manifest_inputs.get("resolved_case", args.case), "anchor_order_sha256": anchor_order, "anchor_count": int(joint.xyz.shape[0]), "reconstruction_checkpoint_sha256": geometry_provenance.get("sha256"), "geometry_checkpoint_sha256": geometry_provenance.get("sha256"), "post_hb1_geometry_sha256": geometry_provenance.get("post_hb1_geometry_sha256"), "checkpoint_training_space_sha256": _checkpoint_training_space_sha256(args.geometry_checkpoint), "sparse_working_manifest_sha256": manifest_inputs.get("sha256"), "active_observation_records": manifest_inputs.get("observation_records", {}), "protocol_sha256": _sha256_file(Path(args.protocol_yaml).resolve()) if args.protocol_yaml else None, "approved_runtime_decoder_sha256": _sha256_file(Path(args.signal_decoder_checkpoint).resolve()) if args.signal_decoder_checkpoint else None}
+    try:
+        parameters = _load_timing_only_parameters(args.timing_only_parameters_npz, int(joint.xyz.shape[0]), anchor_order, expected_provenance=expected_timing_provenance) if args.timing_only_parameters_npz else None
+    except (FileNotFoundError, ValueError) as error:
+        raise RuntimeError(f"BLOCKED_TIMING_PARAMETERS: {error}") from error
     if parameters is not None and decoder is None:
         raise ValueError("--timing-only-parameters-npz requires --signal-decoder-checkpoint")
     sparse_manifest = manifest_inputs
     sax_path = next((path for path in inputs if path.parent.name == "sax"), None)
-    result = run_same_world_reliability_audit(joint, group_axisangle_physical=geometry, subject=args.subject, case_id=args.case, geometry_source=geometry_provenance["source"], timing_only_decoder=decoder, timing_only_parameters=parameters, normalization_low_quantile=args.normalization_low_quantile, normalization_high_quantile=args.normalization_high_quantile, gate_quantile=args.gate_quantile, gate_power=args.gate_power, gate_epsilon=args.gate_epsilon, srpan_tau_min=args.srpan_tau_min, sax_observation_path=sax_path, provenance={**_git_provenance(), "device": str(device), "geometry_checkpoint": geometry_provenance, "prepared_root": str(Path(args.prepared_root).resolve()), "sparse_manifest": sparse_manifest, "joint_anchor_order_sha256": anchor_order, "timing_only_parameters": {"path": parameters["source"], "sha256": parameters["sha256"], "anchor_order_sha256": anchor_order} if parameters else None, "timing_only_decoder_checkpoint": str(args.signal_decoder_checkpoint) if args.signal_decoder_checkpoint else None})
+    result = run_same_world_reliability_audit(joint, group_axisangle_physical=geometry, subject=args.subject, case_id=args.case, geometry_source=geometry_provenance["source"], timing_only_decoder=decoder, timing_only_parameters=parameters, normalization_low_quantile=args.normalization_low_quantile, normalization_high_quantile=args.normalization_high_quantile, gate_quantile=args.gate_quantile, gate_power=args.gate_power, gate_epsilon=args.gate_epsilon, srpan_tau_min=args.srpan_tau_min, sax_observation_path=sax_path, formal=True, provenance={**_git_provenance(), "device": str(device), "geometry_checkpoint": geometry_provenance, "prepared_root": str(Path(args.prepared_root).resolve()), "sparse_manifest": sparse_manifest, "joint_anchor_order_sha256": anchor_order, "timing_only_parameters": {"path": parameters["source"], "sha256": parameters["sha256"], "anchor_order_sha256": anchor_order} if parameters else None, "timing_only_decoder_checkpoint": str(args.signal_decoder_checkpoint) if args.signal_decoder_checkpoint else None, "decoder_timing_domain": timing_domain})
     print(json.dumps({name: str(path) for name, path in write_same_world_audit_outputs(result, args.output_dir).items()}, indent=2, sort_keys=True))
 
 

@@ -816,7 +816,7 @@ def _git_provenance() -> dict[str, str | None]:
     return {"git_sha": query("git", "rev-parse", "HEAD"), "branch": query("git", "branch", "--show-current")}
 
 
-def _load_timing_only_parameters(path: str | Path, expected_anchors: int, expected_anchor_order_sha256: str) -> dict[str, Any]:
+def _load_timing_only_parameters(path: str | Path, expected_anchors: int, expected_anchor_order_sha256: str, *, expected_provenance: dict[str, Any] | None = None) -> dict[str, Any]:
     source = Path(path)
     if not source.is_file():
         raise FileNotFoundError(f"timing-only parameter NPZ does not exist: {source}")
@@ -835,6 +835,18 @@ def _load_timing_only_parameters(path: str | Path, expected_anchors: int, expect
         raise ValueError("timing-only anchor_order_sha256 does not match the current JointAnchorDataset order.")
     parameters["source"] = str(source)
     parameters["sha256"] = _sha256_file(source)
+    sidecar = source.with_suffix(".json")
+    if expected_provenance is not None:
+        if not sidecar.is_file():
+            raise ValueError(f"timing-only parameter sidecar is required: {sidecar}")
+        try:
+            provenance = json.loads(sidecar.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise ValueError(f"invalid timing-only parameter sidecar: {sidecar}") from error
+        for key, expected in expected_provenance.items():
+            if expected is not None and provenance.get(key) != expected:
+                raise ValueError(f"timing-only parameter provenance mismatch for {key}: {provenance.get(key)!r} != {expected!r}")
+        parameters["provenance"] = provenance
     return parameters
 
 

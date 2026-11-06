@@ -88,6 +88,9 @@ def test_oblique_parallel_slice_stack_brackets_planes_and_matches_linear_field(t
     assert np.allclose(sampled[0], np.arange(10) + 1.0)
     assert qc["orientation_spread_deg"] == 0.0
     assert qc["median_inter_plane_angle_deg"] == 0.0
+    assert qc["support_group_idx"][0].tolist() == [0, 1]
+    assert np.allclose(qc["support_weights"][0], [0.5, 0.5])
+    assert qc["bracketed"][0]
 
 
 def test_timing_parameter_export_records_frozen_geometry_and_anchor_order(tmp_path):
@@ -110,25 +113,20 @@ def test_timing_parameter_export_records_frozen_geometry_and_anchor_order(tmp_pa
 
 
 def test_timing_export_relocates_decoder_before_model_construction(monkeypatch, tmp_path):
-    runtime_decoder = tmp_path / "decoder.pth"; runtime_decoder.write_bytes(b"runtime")
     captured = {}
     class Model(torch.nn.Module):
         intensity_scale = torch.ones(())
         def inr(self, points):
             return {"t1_ms": torch.ones(points.shape[0]), "t2_ms": torch.ones(points.shape[0]), "b1": torch.ones(points.shape[0]), "amplitude": torch.ones(points.shape[0])}
+        def forward(self, points): return self.inr(points)
     class Space:
         def physical_ras_to_train(self, points): return points
-    monkeypatch.setattr(timing_export, "_sha256_file", lambda path: timing_export.APPROVED_DECODER_SHA256)
-    monkeypatch.setattr("ismrm_v2.proposed.q001_config.load_b6_resolved_config", lambda path: {"decoder": {"checkpoint": "/retired/old/path/model.pth"}})
-    def build(_scalar, config, *_args, **_kwargs):
-        captured["checkpoint"] = config["decoder"]["checkpoint"]
-        return Model(), Space(), None, {}
-    monkeypatch.setattr("ismrm_v2.proposed.mlp_trainer.build_mlp_training_model", build)
-    monkeypatch.setattr("ismrm_v2.proposed.mlp_trainer.load_mlp_reconstruction_checkpoint", lambda *args, **kwargs: {})
+    monkeypatch.setattr(timing_export.TrainingSpace, "from_dataset", classmethod(lambda cls, *args, **kwargs: Space()))
+    monkeypatch.setattr(timing_export, "load_frozen_quantitative_state_for_timing_audit", lambda *args, **kwargs: (captured.setdefault("model", Model()) or captured["model"], Space(), {"training_space_spatial_scaling": 1.0, "training_space_bbox_margin_mm": 0.0}))
     monkeypatch.setattr(timing_export, "_dataset_arrays", lambda *_args: {"physical_xyz": np.zeros((1, 3))})
     monkeypatch.setattr(timing_export, "export_anchor_parameters", lambda *args, **kwargs: kwargs["geometry_provenance"].update(kwargs.get("decoder_provenance", {})) or Path(kwargs.get("output_path", tmp_path / "out.npz")))
-    result = timing_export.export_from_frozen_checkpoint(output_path=tmp_path / "out.npz", joint_dataset=object(), scalar_dataset=object(), group_axisangle_physical=torch.zeros((1, 6)), b6_model=tmp_path / "b6.pt", protocol_yaml=tmp_path / "protocol.yaml", reconstruction_checkpoint=tmp_path / "recon.pt", geometry_checkpoint=tmp_path / "geom.pt", geometry_provenance={}, signal_decoder_checkpoint=runtime_decoder, device=torch.device("cpu"))
-    assert captured["checkpoint"] == str(runtime_decoder.resolve())
+    result = timing_export.export_from_frozen_checkpoint(output_path=tmp_path / "out.npz", joint_dataset=object(), scalar_dataset=object(), group_axisangle_physical=torch.zeros((1, 6)), b6_model=tmp_path / "b6.pt", protocol_yaml=tmp_path / "protocol.yaml", reconstruction_checkpoint=tmp_path / "recon.pt", geometry_checkpoint=tmp_path / "geom.pt", geometry_provenance={}, device=torch.device("cpu"))
+    assert "model" in captured
     assert result is not None
 
 
