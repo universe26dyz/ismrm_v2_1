@@ -1,0 +1,14 @@
+{
+  "schema": "ismrm_v2_2/reliability_audit_case_plan/v1",
+  "cases": [
+    {"label": "L100", "subject": "DYL_2", "case_id": "L100_fold0"},
+    {"label": "L50", "subject": "CYJ", "case_id": "L50_fold0"},
+    {"label": "L25", "subject": "DYZ", "case_id": "L25_fold0"},
+    {"label": "SAX-only", "subject": "HHZ", "case_id": "SAX100_2CH0_4CH0"},
+    {"label": "SAX + 2CH", "subject": "HJL", "case_id": "SAX100_2CH100_4CH0"},
+    {"label": "SAX + 4CH", "subject": "CYJ", "case_id": "SAX100_2CH0_4CH100"},
+    {"label": "SAX + 2CH + 50% 4CH", "subject": "DYL_2", "case_id": "S2CH100_4CH50"},
+    {"label": "SAX + 50% 2CH + 4CH", "subject": "DYZ", "case_id": "S2CH50_4CH100"}
+  ],
+  "note": "Example only. Resolve case IDs through the project-local sparse manifest on the server; do not hard-code server paths."
+}

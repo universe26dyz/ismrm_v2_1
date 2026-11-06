@@ -23,5 +23,11 @@ def test_completed_migrations_define_the_clean_package_implementation_set() -> N
         and entry.get("migration_status", "").startswith("MIGRATED_PHASE_")
     }
     experimental = {path for path in implementation if path.startswith(VERSIONED_EXPERIMENTAL_PREFIX)}
-    assert experimental == {"v2_2/preflight/cross_view_reliability_audit.py"}
+    assert experimental == {
+        "v2_2/preflight/cross_view_reliability_audit.py",
+        "v2_2/preflight/reference_sampling.py",
+        "v2_2/preflight/discrepancy.py",
+        "v2_2/preflight/same_world_reliability_audit.py",
+        "v2_2/preflight/aggregate_reliability_audits.py",
+    }
     assert implementation - experimental == expected
