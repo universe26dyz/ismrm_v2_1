@@ -42,7 +42,8 @@ for item in cases:
     metadata = json.load(runtime.open(encoding="utf-8"))
     if metadata.get("geometry_checkpoint") != metadata.get("reconstruction_checkpoint") or not str(metadata.get("geometry_checkpoint", "")).endswith("/model.pt"):
         raise SystemExit(f"formal case runtime must use one staged model.pt for both checkpoint roles: {runtime}")
-    fields = (metadata["sparse_manifest"], metadata["prepared_root"], metadata["geometry_checkpoint"], metadata.get("timing_only_parameters", ""), metadata["reconstruction_checkpoint"], ",".join(metadata.get("active_stacks", [])))
+    timing_only_parameters = metadata.get("timing_only_parameters", "") or "__NONE__"
+    fields = (metadata["sparse_manifest"], metadata["prepared_root"], metadata["geometry_checkpoint"], timing_only_parameters, metadata["reconstruction_checkpoint"], ",".join(metadata.get("active_stacks", [])))
     print("\t".join((item["label"], item["subject"], planned_case, str(input_dir), *fields)))
 PY
 )
@@ -52,6 +53,9 @@ mkdir -p "${RUN_ROOT}"
 OUTPUT_DIRS=()
 for row in "${CASE_ROWS[@]}"; do
   IFS=$'\t' read -r label subject case_id input_dir sparse_manifest prepared_root geometry_checkpoint timing_npz reconstruction_checkpoint active_stacks <<< "${row}"
+  if [[ "${timing_npz}" == "__NONE__" ]]; then
+    timing_npz=""
+  fi
   [[ -d "${input_dir}" && -f "${sparse_manifest}" && -d "${prepared_root}" && -f "${geometry_checkpoint}" ]] || { echo "missing case input for ${label}: ${input_dir}" >&2; exit 2; }
   output_dir="${RUN_ROOT}/${subject}/${case_id}"
   export SUBJECT="${subject}" CASE="${case_id}" PREPARED_ROOT="${prepared_root}" GEOMETRY_CHECKPOINT="${geometry_checkpoint}" OUTPUT_DIR="${output_dir}" SPARSE_MANIFEST="${sparse_manifest}"

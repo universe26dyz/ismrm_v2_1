@@ -3,6 +3,7 @@ import json
 import torch
 import importlib.util
 import pytest
+import subprocess
 from pathlib import Path
 from nesvor.transform import RigidTransform, ax_transform_points
 
@@ -215,6 +216,20 @@ def test_formal_runner_consumes_resolved_plan_and_skips_sax_only_timing_export()
     assert 'f"{item[\'profile_id\']}_fold' not in script
     assert 'if [[ "${active_stacks}" == "sax" ]]' in script
     assert '--device "${DEVICE:-cpu}"' in Path("scripts/v2_2/run_reliability_audit_case.sh").read_text()
+
+
+def test_formal_runner_preserves_empty_timing_field_and_sax_only_row():
+    script = Path("scripts/v2_2/run_reliability_audit_8case.sh").read_text()
+    assert 'or "__NONE__"' in script
+    assert 'if [[ "${timing_npz}" == "__NONE__" ]]; then' in script
+    parser = r'''
+row=$'L100\tDYL_2\tL100_fold0\t/input\t/manifest\t/prepared\t/model.pt\t__NONE__\t/model.pt\tsax'
+IFS=$'\t' read -r label subject case_id input_dir sparse_manifest prepared_root geometry_checkpoint timing_npz reconstruction_checkpoint active_stacks <<< "${row}"
+if [[ "${timing_npz}" == "__NONE__" ]]; then timing_npz=""; fi
+printf '%s|%s|%s\n' "${timing_npz}" "${reconstruction_checkpoint}" "${active_stacks}"
+'''
+    completed = subprocess.run(["bash", "-eu", "-c", parser], check=True, capture_output=True, text=True)
+    assert completed.stdout == "|/model.pt|sax\n"
 
 
 def test_legacy_sparse_l50_uses_derived_observation_not_source(monkeypatch, tmp_path):
