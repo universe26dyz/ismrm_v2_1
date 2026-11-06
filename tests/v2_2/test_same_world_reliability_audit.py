@@ -113,6 +113,40 @@ def test_timing_parameter_export_records_frozen_geometry_and_anchor_order(tmp_pa
     assert provenance["scientific_decoder_content_changed"] is False
 
 
+def test_cpu_audit_loader_translates_packed_tinycudann_hashgrid_state():
+    config = timing_export.QuantitativeINRConfig(
+        coarsest_resolution_mm=2.0,
+        finest_resolution_mm=1.0,
+        level_scale=1.5,
+        n_features_per_level=2,
+        log2_hashmap_size=10,
+        latent_features=2,
+        width=4,
+        depth=1,
+    )
+    bbox = torch.tensor([[0.0, 0.0, 0.0], [10.0, 10.0, 10.0]])
+    source = timing_export.QuantitativeINR(bbox, config)
+    source_state = source.state_dict()
+    packed_parts = []
+    expected_entries = []
+    for level in range(source.encoding.n_levels):
+        resolution = int(np.ceil(source.encoding.base_resolution * source.encoding.b**level))
+        entries = min(2 ** config.log2_hashmap_size, resolution ** 3)
+        expected_entries.append(entries)
+        packed_parts.append(source_state[f"encoding.embeddings.{level}.weight"][:entries].reshape(-1))
+    packed = torch.cat(packed_parts)
+    packed_state = {key: value for key, value in source_state.items() if not key.startswith("encoding.")}
+    packed_state["encoding.params"] = packed
+    target = timing_export.QuantitativeINR(bbox, config)
+    translated = timing_export._translate_packed_tcnn_encoding_state(packed_state, target)
+    target.load_state_dict(translated, strict=True)
+    for level, entries in enumerate(expected_entries):
+        source_weight = source_state[f"encoding.embeddings.{level}.weight"]
+        target_weight = target.state_dict()[f"encoding.embeddings.{level}.weight"]
+        assert torch.equal(source_weight[:entries], target_weight[:entries])
+        assert torch.count_nonzero(target_weight[entries:]) == 0
+
+
 def test_timing_export_sidecar_round_trips_through_audit_loader(tmp_path):
     class Dataset:
         xyz = torch.zeros((2, 3)); stack_idx = torch.tensor([0, 1]); group_idx = torch.tensor([0, 1]); row_col = torch.tensor([[0, 0], [1, 1]])

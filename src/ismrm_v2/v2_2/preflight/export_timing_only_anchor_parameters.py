@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,55 @@ APPROVED_DECODER_SHA256 = "338f2c0b8db90851f733ed31caa2c99914605fed3f7215ec2f69f
 def _tensor_hash(value: Any) -> str:
     tensor = torch.as_tensor(value).detach().cpu().contiguous()
     return hashlib.sha256(tensor.numpy().tobytes()).hexdigest()
+
+
+def _translate_packed_tcnn_encoding_state(
+    inr_state: dict[str, Any], model: QuantitativeINR
+) -> dict[str, Any]:
+    """Translate a tiny-cuda-nn HashGrid state for the CPU audit backend.
+
+    tiny-cuda-nn stores all HashGrid tables in one ``encoding.params`` tensor,
+    whereas NeSVoR's vendored CPU implementation exposes one embedding weight
+    per level.  This translation is used only by the CPU admission/export
+    path; CUDA loads the native tiny-cuda-nn state directly.  Keeping the
+    conversion here (rather than changing the training model) preserves the
+    frozen checkpoint and makes the backend choice explicit in provenance.
+    """
+    packed = inr_state.get("encoding.params")
+    embeddings = getattr(getattr(model, "encoding", None), "embeddings", None)
+    if packed is None or embeddings is None:
+        raise ValueError("checkpoint uses encoding.params but the CPU HashGrid backend is unavailable")
+    flat = torch.as_tensor(packed).detach().reshape(-1)
+    log2_hashmap_size = int(getattr(model.encoding, "log2_hashmap_size"))
+    max_entries = 2 ** log2_hashmap_size
+    n_features = int(getattr(model.encoding, "n_features_per_level"))
+    base_resolution = int(getattr(model.encoding, "base_resolution"))
+    level_scale = float(getattr(model.encoding, "b"))
+    translated = {key: value for key, value in inr_state.items() if key != "encoding.params"}
+    offset = 0
+    for level, embedding in enumerate(embeddings):
+        # tiny-cuda-nn rounds each level's grid resolution upward before
+        # deciding whether that level is dense or hashed.
+        resolution = math.ceil(base_resolution * level_scale**level)
+        entries = min(max_entries, resolution**3)
+        required = entries * n_features
+        if offset + required > flat.numel():
+            raise ValueError(
+                "encoding.params is truncated for CPU HashGrid translation: "
+                f"level {level} needs {required} values, only {flat.numel() - offset} remain"
+            )
+        weight = torch.zeros_like(embedding.weight)
+        values = flat[offset : offset + required].to(dtype=weight.dtype, device=weight.device)
+        weight[:entries].copy_(values.reshape(entries, n_features))
+        translated[f"encoding.embeddings.{level}.weight"] = weight
+        offset += required
+    if offset != flat.numel():
+        raise ValueError(
+            "encoding.params has an unexpected size for CPU HashGrid translation: "
+            f"consumed {offset} values, found {flat.numel()}"
+        )
+    translated["encoding.box_offsets"] = model.encoding.box_offsets.detach().clone()
+    return translated
 
 
 def load_frozen_quantitative_state_for_timing_audit(
@@ -67,7 +117,19 @@ def load_frozen_quantitative_state_for_timing_audit(
     required_inr = ("coarsest_resolution_mm", "finest_resolution_mm", "level_scale", "n_features_per_level", "log2_hashmap_size", "latent_features", "width", "depth")
     if any(key not in inr_config for key in required_inr):
         raise ValueError("checkpoint quantitative config lacks architecture-critical INR fields")
-    model = QuantitativeINR(space.bbox_train, QuantitativeINRConfig(**{key: inr_config[key] for key in required_inr}), spatial_scaling=space.spatial_scaling).to(device)
+    checkpoint_encoding_backend = "tinycudann" if "encoding.params" in inr_state else "torch_hashgrid"
+    # Construct on CUDA when requested so a tiny-cuda-nn checkpoint is loaded
+    # by its native backend.  CPU admission remains deterministic by translating
+    # the packed table into NeSVoR's vendored HashGrid representation.
+    model_bbox = space.bbox_train.to(device) if device.type == "cuda" else space.bbox_train
+    model = QuantitativeINR(model_bbox, QuantitativeINRConfig(**{key: inr_config[key] for key in required_inr}), spatial_scaling=space.spatial_scaling).to(device)
+    runtime_encoding_backend = "tinycudann" if "params" in model.encoding.state_dict() else "torch_hashgrid"
+    load_mode = "native"
+    if checkpoint_encoding_backend == "tinycudann" and runtime_encoding_backend == "torch_hashgrid":
+        if device.type != "cpu":
+            raise ValueError("tiny-cuda-nn checkpoint requires the native tiny-cuda-nn backend on CUDA")
+        inr_state = _translate_packed_tcnn_encoding_state(inr_state, model)
+        load_mode = "packed_tcnn_to_torch_compatibility"
     model.load_state_dict(inr_state, strict=True)
     scale = torch.as_tensor(state["intensity_scale"], dtype=torch.float64)
     if scale.numel() != 1 or not torch.isfinite(scale).all() or scale.item() <= 0:
@@ -101,6 +163,9 @@ def load_frozen_quantitative_state_for_timing_audit(
         "intensity_scale": float(scale.item()), "intensity_normalization_scale": normalization_scale,
         "training_space_spatial_scaling": float(training.get("spatial_scaling")), "training_space_bbox_margin_mm": float(resolved.get("bbox", {}).get("margin_mm", 0.0)),
         "reconstruction_decoder_provenance_status": "fallback_config" if fallback_used else "optional_fields_present_or_not_required",
+        "quantitative_encoding_checkpoint_backend": checkpoint_encoding_backend,
+        "quantitative_encoding_runtime_backend": runtime_encoding_backend,
+        "quantitative_encoding_load_mode": load_mode,
         "missing_optional_reconstruction_provenance": [key for key in ("source_mlp_checkpoint_metadata", "source_mlp_checkpoint_sha256", "scientific_checkpoint", "decoder_metadata") if key not in checkpoint],
     }
     return model, space, provenance

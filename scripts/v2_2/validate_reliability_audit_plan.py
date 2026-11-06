@@ -114,7 +114,7 @@ def validate_plan(*, root: str | Path, case_plan: str | Path, decoder: str | Pat
                 _, _, checkpoint_provenance = load_frozen_quantitative_state_for_timing_audit(model_path, device=torch.device("cpu"), fallback_b6_model=b6_model)
                 current_space = TrainingSpace.from_dataset(scalar, float(checkpoint_provenance["training_space_spatial_scaling"]), group_axisangle_init_physical=geometry, bbox_margin_mm=float(checkpoint_provenance["training_space_bbox_margin_mm"]))
                 load_frozen_quantitative_state_for_timing_audit(model_path, device=torch.device("cpu"), fallback_b6_model=b6_model, current_space=current_space)
-            except ValueError as error:
+            except (RuntimeError, ValueError) as error:
                 status = "BLOCKED_TRAINING_SPACE" if "training_space" in str(error) or "intensity" in str(error) else "BLOCKED_CHECKPOINT_COMPATIBILITY"
                 raise AdmissionBlocked(status, str(error)) from error
             try:
