@@ -15,9 +15,10 @@ class JointRobustNormalization:
     low_quantile: float
     high_quantile: float
     pooled_row_count: int
+    pooled_stack_counts: dict[str, int] | None = None
 
     def as_dict(self) -> dict[str, Any]:
-        return {"low": self.low.tolist(), "high": self.high.tolist(), "low_quantile": self.low_quantile, "high_quantile": self.high_quantile, "pooled_row_count": self.pooled_row_count, "range_definition": "per-weight pooled case SAX/target percentiles; no clipping"}
+        return {"low": self.low.tolist(), "high": self.high.tolist(), "low_quantile": self.low_quantile, "high_quantile": self.high_quantile, "pooled_row_count": self.pooled_row_count, "pooled_stack_counts": dict(self.pooled_stack_counts or {}), "range_definition": "per-weight pooled actual active case anchors; no clipping"}
 
 
 def fit_joint_robust_normalization(target: np.ndarray, reference: np.ndarray, *, low_quantile: float = 0.005, high_quantile: float = 0.995) -> JointRobustNormalization:
@@ -33,6 +34,18 @@ def fit_joint_robust_normalization(target: np.ndarray, reference: np.ndarray, *,
     if not np.isfinite(low).all() or not np.isfinite(high).all() or np.any(high <= low):
         raise ValueError("per-weight robust normalization range is non-finite or degenerate.")
     return JointRobustNormalization(low, high, low_quantile, high_quantile, int(pooled.shape[0]))
+
+
+def fit_case_joint_robust_normalization(stack_values: dict[str, np.ndarray], *, low_quantile: float = .005, high_quantile: float = .995) -> JointRobustNormalization:
+    """Fit one shared normalization from the actual observed active anchors."""
+    arrays = {name: np.asarray(values, dtype=np.float64) for name, values in stack_values.items() if np.asarray(values).size}
+    if not arrays:
+        raise ValueError("case normalization requires at least one active observed stack")
+    if any(value.ndim != 2 or value.shape[1] != 10 or not np.isfinite(value).all() for value in arrays.values()):
+        raise ValueError("active observed stack fingerprints must be finite [N,10]")
+    pooled = np.vstack(list(arrays.values()))
+    fitted = fit_joint_robust_normalization(pooled, pooled[:0], low_quantile=low_quantile, high_quantile=high_quantile)
+    return JointRobustNormalization(fitted.low, fitted.high, fitted.low_quantile, fitted.high_quantile, fitted.pooled_row_count, {name: int(value.shape[0]) for name, value in arrays.items()})
 
 
 def _normalized(values: np.ndarray, stats: JointRobustNormalization) -> np.ndarray:

@@ -29,5 +29,6 @@ def test_completed_migrations_define_the_clean_package_implementation_set() -> N
         "v2_2/preflight/discrepancy.py",
         "v2_2/preflight/same_world_reliability_audit.py",
         "v2_2/preflight/aggregate_reliability_audits.py",
+        "v2_2/preflight/export_timing_only_anchor_parameters.py",
     }
     assert implementation - experimental == expected

@@ -29,11 +29,12 @@ from .cross_view_reliability_audit import (
 from .discrepancy import (
     JointRobustNormalization,
     fit_joint_robust_normalization,
+    fit_case_joint_robust_normalization,
     gate_dry_run,
     normalized_l1_discrepancy,
     raw_cosine_discrepancy,
 )
-from .reference_sampling import RegularGridReference, build_regular_grid_reference, sample_regular_grid_trilinear
+from .reference_sampling import RegularGridReference, build_regular_grid_reference, build_slice_stack_reference, replace_slice_values, sample_regular_grid_trilinear, sample_slice_stack
 
 
 def _summary(values: np.ndarray) -> dict[str, Any]:
@@ -46,14 +47,68 @@ def _resolve_case_manifest(path: str | Path | None, *, subject: str, case_id: st
     """Validate L100 with the existing strict admission, other profiles read-only."""
     if path is None:
         return {"sparse_manifest_status": "not_supplied", "requested_case": case_id, "manifest_resolved_case": None}
-    if str(case_id).upper().startswith("L100"):
-        return resolve_preflight_sparse_manifest(path, subject=subject, requested_case=case_id, observation_paths=observation_paths)
     from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
     manifest = validate_sparse_profile_manifest(path, subject=subject, strict=False)
+    if str(case_id).upper().startswith("L100"):
+        validated = resolve_preflight_sparse_manifest(path, subject=subject, requested_case=case_id, observation_paths=observation_paths)
+    else:
+        validated = {"sparse_manifest_status": "validated"}
     resolved = str(manifest.get("case_id") or manifest.get("condition") or manifest.get("profile_id"))
     if resolved != case_id and not resolved.startswith(f"{case_id}_") and not case_id.startswith(resolved):
         raise ValueError(f"sparse manifest case {resolved!r} disagrees with requested case {case_id!r}")
-    return {"sparse_manifest_status": "validated", "requested_case": case_id, "manifest_resolved_case": resolved, "path": str(manifest.get("_manifest_path", Path(path).resolve())), "sha256": str(manifest.get("_manifest_sha256", _sha256_file(Path(path))))}
+    stacks = manifest.get("stacks", {})
+    active = []
+    records = {}
+    for stack in OBSERVATION_STACKS:
+        spec = stacks.get(stack, {})
+        present = bool(spec.get("training_stack_present")) if manifest.get("schema_version") == "phase4r_sparse_profile_v2" else bool(spec.get("retained_original_group_ids"))
+        if present:
+            label = "source_observation" if validated.get("input_observation_mode") == "source" else "derived_observation"
+            record = spec.get(label) or spec.get("source_observation")
+            if not isinstance(record, dict) or not isinstance(record.get("path"), str):
+                raise ValueError(f"manifest active stack {stack} lacks {label}")
+            active.append(stack); records[stack] = {"path": str(Path(record["path"]).resolve()), "sha256": record.get("sha256")}
+    return {**validated, "sparse_manifest_status": "validated", "requested_case": case_id, "manifest_resolved_case": resolved, "resolved_case": resolved, "profile_id": manifest.get("profile_id"), "fold_id": manifest.get("fold_id"), "fold_count": manifest.get("fold_count"), "schema_version": manifest.get("schema_version"), "active_stacks": active, "observation_records": records, "path": str(manifest.get("_manifest_path", Path(path).resolve())), "sha256": str(manifest.get("_manifest_sha256", _sha256_file(Path(path))))}
+
+
+def _manifest_active_inputs(manifest_path: str | Path, *, subject: str, case_id: str, prepared_root: str | Path) -> tuple[list[Path], dict[str, Any]]:
+    """Resolve exact manifest-declared observations; never fall back to full data."""
+    from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
+    manifest = validate_sparse_profile_manifest(manifest_path, subject=subject, strict=False)
+    schema = manifest.get("schema_version")
+    if schema not in {"phase4r_sparse_v1", "phase4r_sparse_profile_v2"}:
+        raise ValueError("unsupported sparse manifest schema")
+    resolved_case = str(manifest.get("case_id") or manifest.get("condition") or manifest.get("profile_id"))
+    if resolved_case != case_id and not resolved_case.startswith(f"{case_id}_") and not case_id.startswith(resolved_case):
+        raise ValueError(f"sparse manifest case {resolved_case!r} disagrees with requested case {case_id!r}")
+    mode = "source" if schema == "phase4r_sparse_v1" else "derived"
+    if str(case_id).upper().startswith("L100"):
+        source_paths = {stack: Path(manifest["stacks"][stack]["source_observation"]["path"]).resolve() for stack in OBSERVATION_STACKS}
+        requested = {stack: Path(value).resolve() for stack, value in zip(OBSERVATION_STACKS, (Path(prepared_root) / stack / "observations.npz" for stack in OBSERVATION_STACKS), strict=True) if value.is_file()}
+        mode = "source" if requested and all(requested.get(stack) == source_paths[stack] for stack in requested) else "derived"
+    paths = []
+    records = {}
+    for stack in OBSERVATION_STACKS:
+        spec = manifest.get("stacks", {}).get(stack, {})
+        present = bool(spec.get("training_stack_present")) if schema == "phase4r_sparse_profile_v2" else bool(spec.get("retained_original_group_ids"))
+        if not present:
+            continue
+        label = "source_observation" if mode == "source" else "derived_observation"
+        record = spec.get(label) or spec.get("source_observation")
+        if not isinstance(record, dict):
+            raise ValueError(f"active manifest stack {stack} lacks {label}")
+        path = Path(record["path"]).resolve()
+        if not path.is_file():
+            raise FileNotFoundError(f"manifest active observation is missing: {path}")
+        if record.get("sha256") and _sha256_file(path) != record["sha256"]:
+            raise ValueError(f"manifest observation SHA256 mismatch: {path}")
+        paths.append(path); records[stack] = {"path": str(path), "sha256": record.get("sha256", _sha256_file(path))}
+    if not paths:
+        raise ValueError("sparse manifest has no active stacks")
+    declared_root = Path(manifest.get("prepared_root", "")).resolve()
+    if mode == "derived" and Path(prepared_root).resolve() != declared_root:
+        raise ValueError("--prepared-root disagrees with manifest prepared_root")
+    return paths, {"sparse_manifest_status": "validated", "requested_case": case_id, "input_observation_mode": mode, "active_stacks": [stack for stack in OBSERVATION_STACKS if stack in records], "observation_records": records, "profile_id": manifest.get("profile_id"), "resolved_case": resolved_case, "schema_version": schema, "fold_id": manifest.get("fold_id"), "fold_count": manifest.get("fold_count"), "path": str(manifest.get("_manifest_path", Path(manifest_path).resolve())), "sha256": manifest.get("_manifest_sha256")}
 
 
 def _anchor_identity_hash(arrays: dict[str, np.ndarray], indices: np.ndarray) -> str:
@@ -135,6 +190,7 @@ def run_same_world_reliability_audit(
     srpan_tau_min: float = .05,
     cosine_epsilon: float = 1e-8,
     provenance: dict[str, Any] | None = None,
+    sax_observation_path: str | Path | None = None,
 ) -> dict[str, Any]:
     arrays = _dataset_arrays(joint_dataset, group_axisangle_physical)
     sax_indices = np.flatnonzero(arrays["stack_idx"] == 0)
@@ -143,9 +199,25 @@ def run_same_world_reliability_audit(
     if sax_indices.size == 0:
         raise ValueError("same-world audit requires at least one SAX anchor.")
     try:
-        reference_grid = build_regular_grid_reference(arrays["physical_xyz"][sax_indices], arrays["observed"][sax_indices])
-        timing_grid = build_regular_grid_reference(arrays["physical_xyz"][sax_indices], np.column_stack((arrays["timing"][sax_indices], np.zeros((sax_indices.size, 1)))), axes=reference_grid.axes)
-        sampling_admission = {"status": "admitted", "implementation": "explicit trilinear interpolation", "coordinate_convention": reference_grid.coordinate_convention, "grid_shape": list(reference_grid.shape)}
+        if sax_observation_path is not None:
+            reference_stack = build_slice_stack_reference(str(sax_observation_path), np.asarray(group_axisangle_physical.detach().cpu() if isinstance(group_axisangle_physical, torch.Tensor) else group_axisangle_physical))
+            with np.load(sax_observation_path, allow_pickle=False) as raw:
+                timing9 = np.asarray(raw["timing9_ms"], dtype=np.float64)
+                groups = np.asarray(raw["group_idx"], dtype=np.int64)
+                weights = np.asarray(raw["weight_idx"], dtype=np.int64)
+                images = np.asarray(raw["images"])
+            timing_values = {}
+            for plane in reference_stack.planes:
+                rows = np.flatnonzero((groups == plane.group_idx) & (weights >= 0))
+                ordered = rows[np.argsort(weights[rows], kind="stable")]
+                timing_values[plane.group_idx] = np.broadcast_to(timing9[ordered[0]][None, None, :], (*images.shape[1:], 9)).copy()
+            timing_stack = replace_slice_values(reference_stack, timing_values)
+            sampling_admission = {"status": "admitted", "implementation": "slice-stack bilinear plus bracketed through-plane interpolation", "coordinate_convention": reference_stack.coordinate_convention, "plane_count": len(reference_stack.planes), "orientation_spread_deg": reference_stack.orientation_spread_deg}
+        else:
+            reference_stack = None
+            reference_grid = build_regular_grid_reference(arrays["physical_xyz"][sax_indices], arrays["observed"][sax_indices])
+            timing_grid = build_regular_grid_reference(arrays["physical_xyz"][sax_indices], np.column_stack((arrays["timing"][sax_indices], np.zeros((sax_indices.size, 1)))), axes=reference_grid.axes)
+            sampling_admission = {"status": "admitted", "implementation": "test-only RAS Cartesian trilinear interpolation", "coordinate_convention": reference_grid.coordinate_convention, "grid_shape": list(reference_grid.shape)}
     except ValueError as error:
         result["status"] = "BLOCKED_REFERENCE_GEOMETRY"
         result["reference_sampling_qc"] = {"status": "blocked", "reason": str(error), "implementation": "fail-closed; nearest-neighbor is not substituted"}
@@ -155,29 +227,34 @@ def run_same_world_reliability_audit(
         result["summary"] = _summary_payload(result)
         return result
 
-    sampling_qc = {**sampling_admission, "support_min_ras_mm": [float(axis[0]) for axis in reference_grid.axes], "support_max_ras_mm": [float(axis[-1]) for axis in reference_grid.axes]}
+    sampling_qc = dict(sampling_admission)
     all_valid_target, all_valid_reference = [], []
     for stack, indices in target_indices_by_stack.items():
         if indices.size == 0:
             result["stack_payloads"][stack] = _empty_stack_payload(indices)
             continue
-        sampled, valid, support = sample_regular_grid_trilinear(reference_grid, arrays["physical_xyz"][indices])
-        sampled_timing, timing_valid, _ = sample_regular_grid_trilinear(timing_grid, arrays["physical_xyz"][indices])
+        if reference_stack is not None:
+            sampled, valid, support = sample_slice_stack(reference_stack, arrays["physical_xyz"][indices])
+            sampled_timing, timing_valid, _ = sample_slice_stack(timing_stack, arrays["physical_xyz"][indices])
+        else:
+            sampled, valid, support = sample_regular_grid_trilinear(reference_grid, arrays["physical_xyz"][indices])
+            sampled_timing, timing_valid, _ = sample_regular_grid_trilinear(timing_grid, arrays["physical_xyz"][indices])
         reference_local, nearest_distance = match_lax_to_sax(arrays["physical_xyz"][sax_indices], arrays["physical_xyz"][indices])
         delta = arrays["timing"][indices] - sampled_timing[:, :9]
         result["stack_payloads"][stack] = {"target_indices": indices, "target_fingerprints": arrays["observed"][indices], "reference": sampled, "reference_valid": valid & timing_valid, "timing_reference": sampled_timing[:, :9], "nearest_distance_mm": nearest_distance, "timing_delta": delta, "support": support}
         all_valid_target.append(arrays["observed"][indices][valid])
         all_valid_reference.append(sampled[valid])
-    if not all_valid_target:
-        result["status"] = "PASS_NO_TARGET_STACK"
+    has_target_stack = any(payload["target_indices"].size for payload in result["stack_payloads"].values())
+    active_stack_values = {stack: arrays["observed"][np.flatnonzero(arrays["stack_idx"] == code)] for code, stack in ((0, "sax"), (1, "2ch"), (2, "4ch")) if np.any(arrays["stack_idx"] == code)}
+    try:
+        stats = fit_case_joint_robust_normalization(active_stack_values, low_quantile=normalization_low_quantile, high_quantile=normalization_high_quantile)
+    except ValueError as error:
+        result["normalization_error"] = str(error)
         stats = None
-    else:
-        try:
-            stats = fit_joint_robust_normalization(np.vstack(all_valid_target), np.vstack(all_valid_reference), low_quantile=normalization_low_quantile, high_quantile=normalization_high_quantile)
-        except ValueError as error:
+        if has_target_stack:
             result["status"] = "BLOCKED_NORMALIZATION"
-            result["normalization_error"] = str(error)
-            stats = None
+    if not has_target_stack:
+        result["status"] = "PASS_NO_TARGET_STACK"
     for stack, payload in result["stack_payloads"].items():
         indices, reference, valid = payload["target_indices"], payload["reference"], payload["reference_valid"]
         target = arrays["observed"][indices]
@@ -195,7 +272,7 @@ def run_same_world_reliability_audit(
             pair = {"subject": subject, "case_id": case_id, "target_stack": stack, "target_anchor_index": int(anchor), "target_group_idx": int(arrays["group_idx"][anchor]), "target_row": int(arrays["row_col"][anchor, 0]), "target_col": int(arrays["row_col"][anchor, 1]), "world_x_mm": float(arrays["physical_xyz"][anchor, 0]), "world_y_mm": float(arrays["physical_xyz"][anchor, 1]), "world_z_mm": float(arrays["physical_xyz"][anchor, 2]), "reference_valid": bool(valid[offset]), "reference_support_info": str(payload.get("support", {}).get("invalid_reason", np.array(["inside_reference_fov"] * indices.size, dtype=object))[offset]), "observed_l1_normalized": float(l1[offset]) if np.isfinite(l1[offset]) else None, "observed_cosine_raw": float(raw_cosine[offset]) if np.isfinite(raw_cosine[offset]) else None, "observed_cosine_normalized": float(norm_cosine[offset]) if np.isfinite(norm_cosine[offset]) else None, "timing_only_l1_normalized": float(timing_l1[offset]) if timing_l1 is not None and np.isfinite(timing_l1[offset]) else None, "timing_only_cosine": float(timing_cosine[offset]) if timing_cosine is not None and np.isfinite(timing_cosine[offset]) else None, "timing_abs_mean_ms": float(np.abs(payload["timing_delta"][offset]).mean()) if valid[offset] else None, "timing_l2_ms": float(np.linalg.norm(payload["timing_delta"][offset])) if valid[offset] else None, "nearest_neighbor_distance_mm": float(payload["nearest_distance_mm"][offset]), "nearest_neighbor_cosine": None}
             result["pairs"].append(pair)
     result["pairs"].sort(key=lambda row: (row["target_stack"], row["target_anchor_index"]))
-    result["normalization_statistics"] = stats.as_dict() if stats is not None else {"status": "not_run", "reason": "no target stack anchors"}
+    result["normalization_statistics"] = stats.as_dict() if stats is not None else {"status": "not_run" if result["status"] == "PASS_NO_TARGET_STACK" else "blocked", "reason": "no target stack anchors" if result["status"] == "PASS_NO_TARGET_STACK" else result.get("normalization_error", "normalization unavailable")}
     result["observed_l1_statistics"] = {stack: _summary(payload["observed_l1"]) for stack, payload in result["stack_payloads"].items()}
     result["observed_cosine_statistics"] = {stack: {"raw": _summary(payload["observed_cosine_raw"]), "normalized": _summary(payload["observed_cosine_normalized"])} for stack, payload in result["stack_payloads"].items()}
     result["timing_statistics"] = {stack: timing_statistics(payload["timing_delta"][np.isfinite(payload["timing_delta"]).all(axis=1)]) for stack, payload in result["stack_payloads"].items()}
@@ -215,7 +292,11 @@ def _timing_summary(result: dict[str, Any], key: str) -> dict[str, Any]:
 
 
 def _manifest(subject: str, case_id: str, geometry_source: str, status: str, provenance: dict[str, Any] | None, **extra: Any) -> dict[str, Any]:
-    return {"schema": "ismrm_v2_2/same_world_reliability_audit/v1", "subject": subject, "requested_case": case_id, "resolved_case": case_id, "status": status, "geometry_source": geometry_source, "selected_geometry": "group_axisangle_post_stack_init_physical", "reference_stack": "sax", "target_stacks": ["2ch", "4ch"], "reference_sampling": "same-world-coordinate explicit trilinear; no extrapolation", "fingerprint_npz_schema": "same_world_fingerprints.npz: <stack>_target_fingerprint and <stack>_reference_fingerprint [N,10]", "discrepancy_definitions": {"l1": "mean absolute difference over ten jointly normalized weights", "cosine_raw": "1-cosine over raw ten weights", "cosine_normalized": "1-cosine over jointly normalized ten weights"}, "timestamp_utc": datetime.now(timezone.utc).isoformat(), **extra, **dict(provenance or {})}
+    provenance_map = dict(provenance or {})
+    sparse = provenance_map.get("sparse_manifest") if isinstance(provenance_map.get("sparse_manifest"), dict) else provenance_map
+    resolved = sparse.get("resolved_case") or sparse.get("manifest_resolved_case") or case_id
+    requested = sparse.get("requested_case") or case_id
+    return {"schema": "ismrm_v2_2/same_world_reliability_audit/v1", "subject": subject, "requested_case": requested, "resolved_case": resolved, "status": status, "geometry_source": geometry_source, "selected_geometry": "group_axisangle_post_stack_init_physical", "reference_stack": "sax", "target_stacks": ["2ch", "4ch"], "active_stacks": sparse.get("active_stacks"), "observation_records": sparse.get("observation_records"), "reference_sampling": "same-world-coordinate slice-stack bilinear plus bracketed through-plane interpolation; no extrapolation", "fingerprint_npz_schema": "same_world_fingerprints.npz: <stack>_target_fingerprint and <stack>_reference_fingerprint [N,10]", "discrepancy_definitions": {"l1": "mean absolute difference over ten jointly normalized weights", "cosine_raw": "1-cosine over raw ten weights", "cosine_normalized": "1-cosine over jointly normalized ten weights"}, "timestamp_utc": datetime.now(timezone.utc).isoformat(), **extra, **provenance_map}
 
 
 def _summary_payload(result: dict[str, Any]) -> dict[str, Any]:
@@ -256,9 +337,17 @@ def main() -> None:
     device = torch.device(args.device)
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError(f"Requested CUDA device is unavailable: {device}")
-    inputs = cropped_observation_paths(args.prepared_root, args.subject)
+    if args.sparse_manifest:
+        inputs, manifest_inputs = _manifest_active_inputs(args.sparse_manifest, subject=args.subject, case_id=args.case, prepared_root=args.prepared_root)
+    else:
+        from ismrm_v2.proposed.q002.contracts import cropped_observation_paths
+        inputs = cropped_observation_paths(args.prepared_root, args.subject)
+        manifest_inputs = {"input_observation_mode": "unspecified", "active_stacks": [path.parent.name for path in inputs], "observation_records": {path.parent.name: {"path": str(path), "sha256": _sha256_file(path)} for path in inputs}}
     scalar = QuantPointDataset(inputs, device=device); joint = JointAnchorDataset(inputs, scalar)
-    geometry, geometry_provenance = load_geometry_checkpoint(args.geometry_checkpoint, scalar.group_axisangle_init, scalar.group_resolution_xyz_mm)
+    try:
+        geometry, geometry_provenance = load_geometry_checkpoint(args.geometry_checkpoint, scalar.group_axisangle_init, scalar.group_resolution_xyz_mm)
+    except (FileNotFoundError, ValueError) as error:
+        raise RuntimeError(f"BLOCKED_CASE_GEOMETRY: case-specific checkpoint does not match active dataset: {error}") from error
     decoder = None
     if args.signal_decoder_checkpoint:
         if not args.protocol_yaml:
@@ -271,8 +360,9 @@ def main() -> None:
     parameters = _load_timing_only_parameters(args.timing_only_parameters_npz, int(joint.xyz.shape[0]), anchor_order) if args.timing_only_parameters_npz else None
     if parameters is not None and decoder is None:
         raise ValueError("--timing-only-parameters-npz requires --signal-decoder-checkpoint")
-    sparse_manifest = _resolve_case_manifest(args.sparse_manifest, subject=args.subject, case_id=args.case, observation_paths=dict(zip(OBSERVATION_STACKS, inputs, strict=True)))
-    result = run_same_world_reliability_audit(joint, group_axisangle_physical=geometry, subject=args.subject, case_id=args.case, geometry_source=geometry_provenance["source"], timing_only_decoder=decoder, timing_only_parameters=parameters, normalization_low_quantile=args.normalization_low_quantile, normalization_high_quantile=args.normalization_high_quantile, gate_quantile=args.gate_quantile, gate_power=args.gate_power, gate_epsilon=args.gate_epsilon, srpan_tau_min=args.srpan_tau_min, provenance={**_git_provenance(), "device": str(device), "geometry_checkpoint": geometry_provenance, "prepared_root": str(Path(args.prepared_root).resolve()), "sparse_manifest": sparse_manifest, "joint_anchor_order_sha256": anchor_order, "timing_only_parameters": {"path": parameters["source"], "sha256": parameters["sha256"], "anchor_order_sha256": anchor_order} if parameters else None, "timing_only_decoder_checkpoint": str(args.signal_decoder_checkpoint) if args.signal_decoder_checkpoint else None})
+    sparse_manifest = manifest_inputs
+    sax_path = next((path for path in inputs if path.parent.name == "sax"), None)
+    result = run_same_world_reliability_audit(joint, group_axisangle_physical=geometry, subject=args.subject, case_id=args.case, geometry_source=geometry_provenance["source"], timing_only_decoder=decoder, timing_only_parameters=parameters, normalization_low_quantile=args.normalization_low_quantile, normalization_high_quantile=args.normalization_high_quantile, gate_quantile=args.gate_quantile, gate_power=args.gate_power, gate_epsilon=args.gate_epsilon, srpan_tau_min=args.srpan_tau_min, sax_observation_path=sax_path, provenance={**_git_provenance(), "device": str(device), "geometry_checkpoint": geometry_provenance, "prepared_root": str(Path(args.prepared_root).resolve()), "sparse_manifest": sparse_manifest, "joint_anchor_order_sha256": anchor_order, "timing_only_parameters": {"path": parameters["source"], "sha256": parameters["sha256"], "anchor_order_sha256": anchor_order} if parameters else None, "timing_only_decoder_checkpoint": str(args.signal_decoder_checkpoint) if args.signal_decoder_checkpoint else None})
     print(json.dumps({name: str(path) for name, path in write_same_world_audit_outputs(result, args.output_dir).items()}, indent=2, sort_keys=True))
 
 
