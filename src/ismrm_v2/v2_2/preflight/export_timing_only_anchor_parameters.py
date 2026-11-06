@@ -54,7 +54,11 @@ def _translate_packed_tcnn_encoding_state(
         # tiny-cuda-nn rounds each level's grid resolution upward before
         # deciding whether that level is dense or hashed.
         resolution = math.ceil(base_resolution * level_scale**level)
-        entries = min(max_entries, resolution**3)
+        # tiny-cuda-nn aligns every level's table length to eight entries
+        # before applying the hash-map cap (GridEncoding's offset table uses
+        # these aligned lengths, not the raw resolution cubed).
+        dense_entries = ((resolution**3 + 7) // 8) * 8
+        entries = min(max_entries, dense_entries)
         required = entries * n_features
         if offset + required > flat.numel():
             raise ValueError(

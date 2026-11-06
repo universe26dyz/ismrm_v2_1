@@ -131,7 +131,8 @@ def test_cpu_audit_loader_translates_packed_tinycudann_hashgrid_state():
     expected_entries = []
     for level in range(source.encoding.n_levels):
         resolution = int(np.ceil(source.encoding.base_resolution * source.encoding.b**level))
-        entries = min(2 ** config.log2_hashmap_size, resolution ** 3)
+        dense_entries = ((resolution ** 3 + 7) // 8) * 8
+        entries = min(2 ** config.log2_hashmap_size, dense_entries)
         expected_entries.append(entries)
         packed_parts.append(source_state[f"encoding.embeddings.{level}.weight"][:entries].reshape(-1))
     packed = torch.cat(packed_parts)
