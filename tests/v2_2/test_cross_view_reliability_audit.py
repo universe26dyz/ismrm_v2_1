@@ -117,6 +117,9 @@ def test_timing_only_simulation_holds_parameters_fixed_and_uses_no_grad():
     for before, after in zip(decoder.calls[0][:3], decoder.calls[1][:3]):
         assert torch.equal(before, after)
 
+    scaled = timing_only_cosine_discrepancy(decoder, t1, t2, b1, timing_a, timing_b, amplitude=torch.tensor([2.0, 3.0]))
+    assert np.allclose(scaled, discrepancy)
+
 
 class _JointFixture:
     def __init__(self) -> None:
@@ -165,7 +168,7 @@ def test_timing_only_outputs_have_per_stack_summaries_and_correlations(tmp_path)
         case_id="L100",
         geometry_source="synthetic fixed HB1",
         timing_only_decoder=_FrozenDecoder(),
-        timing_only_parameters={"t1_ms": np.full(5, 1000.0), "t2_ms": np.full(5, 50.0), "b1": np.ones(5)},
+        timing_only_parameters={"t1_ms": np.full(5, 1000.0), "t2_ms": np.full(5, 50.0), "b1": np.ones(5), "amplitude": np.ones(5)},
     )
     output = tmp_path / "timing_only"
     write_audit_outputs(result, output)
@@ -189,17 +192,22 @@ def test_timing_only_parameter_npz_requires_exact_joint_anchor_order(tmp_path):
         t1_ms=np.array([1000.0, 1100.0]),
         t2_ms=np.array([50.0, 55.0]),
         b1=np.array([0.9, 1.0]),
+        amplitude=np.array([1.0, 2.0]),
         anchor_order_sha256=np.array(expected_hash),
     )
 
     parameters = audit._load_timing_only_parameters(parameter_file, 2, expected_hash)
 
     assert parameters["t1_ms"].shape == (2,)
+    np.savez(parameter_file, t1_ms=np.array([1000.0, 1100.0]), t2_ms=np.array([50.0, 55.0]), b1=np.array([0.9, 1.0]), anchor_order_sha256=np.array(expected_hash))
+    with np.testing.assert_raises_regex(ValueError, "amplitude"):
+        audit._load_timing_only_parameters(parameter_file, 2, expected_hash)
     np.savez(
         parameter_file,
         t1_ms=np.array([1000.0, 1100.0]),
         t2_ms=np.array([50.0, 55.0]),
         b1=np.array([0.9, 1.0]),
+        amplitude=np.array([1.0, 2.0]),
         anchor_order_sha256=np.array("b" * 64),
     )
     with np.testing.assert_raises_regex(ValueError, "anchor_order_sha256"):

@@ -67,7 +67,7 @@ def _resolve_case_manifest(path: str | Path | None, *, subject: str, case_id: st
             record = spec.get(label) or spec.get("source_observation")
             if not isinstance(record, dict) or not isinstance(record.get("path"), str):
                 raise ValueError(f"manifest active stack {stack} lacks {label}")
-            active.append(stack); records[stack] = {"path": str(Path(record["path"]).resolve()), "sha256": record.get("sha256")}
+            active.append(stack); records[stack] = {"mode": label.removesuffix("_observation"), "path": str(Path(record["path"]).resolve()), "sha256": record.get("sha256"), "retained_original_group_ids": spec.get("retained_original_group_ids", []), "derived_to_original_group_idx": spec.get("derived_to_original_group_idx")}
     return {**validated, "sparse_manifest_status": "validated", "requested_case": case_id, "manifest_resolved_case": resolved, "resolved_case": resolved, "profile_id": manifest.get("profile_id"), "fold_id": manifest.get("fold_id"), "fold_count": manifest.get("fold_count"), "schema_version": manifest.get("schema_version"), "active_stacks": active, "observation_records": records, "path": str(manifest.get("_manifest_path", Path(path).resolve())), "sha256": str(manifest.get("_manifest_sha256", _sha256_file(Path(path))))}
 
 
@@ -81,7 +81,8 @@ def _manifest_active_inputs(manifest_path: str | Path, *, subject: str, case_id:
     resolved_case = str(manifest.get("case_id") or manifest.get("condition") or manifest.get("profile_id"))
     if resolved_case != case_id and not resolved_case.startswith(f"{case_id}_") and not case_id.startswith(resolved_case):
         raise ValueError(f"sparse manifest case {resolved_case!r} disagrees with requested case {case_id!r}")
-    mode = "source" if schema == "phase4r_sparse_v1" else "derived"
+    condition = str(manifest.get("condition") or manifest.get("case_id") or case_id).upper()
+    mode = "source" if schema == "phase4r_sparse_v1" and condition.startswith("L100") else "derived"
     if str(case_id).upper().startswith("L100"):
         source_paths = {stack: Path(manifest["stacks"][stack]["source_observation"]["path"]).resolve() for stack in OBSERVATION_STACKS}
         requested = {stack: Path(value).resolve() for stack, value in zip(OBSERVATION_STACKS, (Path(prepared_root) / stack / "observations.npz" for stack in OBSERVATION_STACKS), strict=True) if value.is_file()}
@@ -94,7 +95,7 @@ def _manifest_active_inputs(manifest_path: str | Path, *, subject: str, case_id:
         if not present:
             continue
         label = "source_observation" if mode == "source" else "derived_observation"
-        record = spec.get(label) or spec.get("source_observation")
+        record = spec.get(label)
         if not isinstance(record, dict):
             raise ValueError(f"active manifest stack {stack} lacks {label}")
         path = Path(record["path"]).resolve()
@@ -102,7 +103,7 @@ def _manifest_active_inputs(manifest_path: str | Path, *, subject: str, case_id:
             raise FileNotFoundError(f"manifest active observation is missing: {path}")
         if record.get("sha256") and _sha256_file(path) != record["sha256"]:
             raise ValueError(f"manifest observation SHA256 mismatch: {path}")
-        paths.append(path); records[stack] = {"path": str(path), "sha256": record.get("sha256", _sha256_file(path))}
+        paths.append(path); records[stack] = {"mode": mode, "path": str(path), "sha256": record.get("sha256", _sha256_file(path)), "retained_original_group_ids": spec.get("retained_original_group_ids", []), "derived_to_original_group_idx": spec.get("derived_to_original_group_idx")}
     if not paths:
         raise ValueError("sparse manifest has no active stacks")
     declared_root = Path(manifest.get("prepared_root", "")).resolve()
@@ -132,7 +133,10 @@ def _timing_only_pair(
     if decoder is None:
         return None, None, {"status": "not_run", "reason": "no decoder was supplied"}
     if parameters is None:
-        return None, None, {"status": "not_run", "reason": "no anchor-aligned T1/T2/B1 parameters were supplied"}
+        return None, None, {"status": "not_run", "reason": "no anchor-aligned T1/T2/B1/amplitude parameters were supplied"}
+    missing = {"t1_ms", "t2_ms", "b1", "amplitude"}.difference(parameters)
+    if missing:
+        return None, None, {"status": "not_run", "reason": f"parameter source lacks {sorted(missing)}"}
     count = target_indices.size
     if timing_reference.shape != (count, 9):
         raise ValueError("same-world timing reference must be [N,9].")
@@ -141,7 +145,7 @@ def _timing_only_pair(
     parameter_values = []
     device_parameter = next(decoder.parameters(), None)
     device = device_parameter.device if device_parameter is not None else torch.device("cpu")
-    for name in ("t1_ms", "t2_ms", "b1"):
+    for name in ("t1_ms", "t2_ms", "b1", "amplitude"):
         value = np.asarray(parameters[name])
         if value.shape != (arrays["physical_xyz"].shape[0],):
             raise ValueError(f"timing-only {name} must align with all joint anchors.")
@@ -151,6 +155,9 @@ def _timing_only_pair(
     with torch.no_grad():
         observed_target = decoder(*parameter_values, target_timing).detach().cpu().numpy()
         reference_target = decoder(*parameter_values, reference_timing).detach().cpu().numpy()
+    amplitude = parameter_values[3].detach().cpu().numpy()
+    observed_target = observed_target * amplitude[:, None]
+    reference_target = reference_target * amplitude[:, None]
     if normalization is None:
         l1, l1_valid = _timing_l1(observed_target, reference_target, reference_valid)
     else:
@@ -212,7 +219,7 @@ def run_same_world_reliability_audit(
                 ordered = rows[np.argsort(weights[rows], kind="stable")]
                 timing_values[plane.group_idx] = np.broadcast_to(timing9[ordered[0]][None, None, :], (*images.shape[1:], 9)).copy()
             timing_stack = replace_slice_values(reference_stack, timing_values)
-            sampling_admission = {"status": "admitted", "implementation": "slice-stack bilinear plus bracketed through-plane interpolation", "coordinate_convention": reference_stack.coordinate_convention, "plane_count": len(reference_stack.planes), "orientation_spread_deg": reference_stack.orientation_spread_deg}
+            sampling_admission = {"status": "admitted", "implementation": "slice-stack bilinear plus bracketed through-plane interpolation", "coordinate_convention": reference_stack.coordinate_convention, "plane_count": len(reference_stack.planes), "orientation_spread_deg": reference_stack.orientation_spread_deg, "median_inter_plane_angle_deg": reference_stack.median_inter_plane_angle_deg}
         else:
             reference_stack = None
             reference_grid = build_regular_grid_reference(arrays["physical_xyz"][sax_indices], arrays["observed"][sax_indices])

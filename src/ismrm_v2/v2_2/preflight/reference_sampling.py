@@ -27,6 +27,7 @@ class SlicePlane:
 class SliceStackReference:
     planes: tuple[SlicePlane, ...]
     orientation_spread_deg: float
+    median_inter_plane_angle_deg: float
     coordinate_convention: str = "local [column,row,slice] mm -> world RAS mm; frozen post-HB1 pose"
 
 
@@ -95,7 +96,11 @@ def build_slice_stack_reference(
             normal = -normal
         angles.append(np.degrees(np.arccos(np.clip(float(np.dot(normal, reference_normal)), -1.0, 1.0))))
         oriented.append(SlicePlane(plane.group_idx, plane.values, plane.joint_valid, plane.row_spacing_mm, plane.col_spacing_mm, plane.rotation, plane.translation, plane.origin_ras_mm, normal))
-    return SliceStackReference(tuple(oriented), float(max(angles)), "local [column,row,slice] mm -> world RAS mm; frozen post-HB1 pose")
+    pairwise = []
+    for left in range(len(oriented)):
+        for right in range(left + 1, len(oriented)):
+            pairwise.append(np.degrees(np.arccos(np.clip(abs(float(np.dot(oriented[left].normal_ras, oriented[right].normal_ras))), -1.0, 1.0))))
+    return SliceStackReference(tuple(oriented), float(max(angles)), float(np.median(pairwise) if pairwise else 0.0), "local [column,row,slice] mm -> world RAS mm; frozen post-HB1 pose")
 
 
 def _bilinear_plane(plane: SlicePlane, world_point: np.ndarray, *, tolerance_mm: float) -> tuple[np.ndarray, bool, float]:
@@ -104,13 +109,13 @@ def _bilinear_plane(plane: SlicePlane, world_point: np.ndarray, *, tolerance_mm:
     col = local[0] / plane.col_spacing_mm + (width - 1) / 2.0
     row = local[1] / plane.row_spacing_mm + (height - 1) / 2.0
     if row < -tolerance_mm or row > height - 1 + tolerance_mm or col < -tolerance_mm or col > width - 1 + tolerance_mm:
-        return np.full(10, np.nan), False, float(np.dot(world_point - plane.origin_ras_mm, plane.normal_ras))
+        return np.full(plane.values.shape[-1], np.nan), False, float(np.dot(world_point - plane.origin_ras_mm, plane.normal_ras))
     row = float(np.clip(row, 0, height - 1)); col = float(np.clip(col, 0, width - 1))
     r0, c0 = int(np.floor(row)), int(np.floor(col)); r1, c1 = min(r0 + 1, height - 1), min(c0 + 1, width - 1)
     wr, wc = row - r0, col - c0
     corners = ((r0, c0, (1 - wr) * (1 - wc)), (r0, c1, (1 - wr) * wc), (r1, c0, wr * (1 - wc)), (r1, c1, wr * wc))
     if any(not plane.joint_valid[r, c] for r, c, _ in corners):
-        return np.full(10, np.nan), False, float(np.dot(world_point - plane.origin_ras_mm, plane.normal_ras))
+        return np.full(plane.values.shape[-1], np.nan), False, float(np.dot(world_point - plane.origin_ras_mm, plane.normal_ras))
     value = sum(weight * plane.values[r, c] for r, c, weight in corners)
     distance = float(np.dot(world_point - plane.origin_ras_mm, plane.normal_ras))
     return np.asarray(value), bool(np.isfinite(value).all()), distance
@@ -148,7 +153,7 @@ def sample_slice_stack(
         if negative and positive:
             d0, v0 = min(negative, key=lambda item: item[0]); d1, v1 = min(positive, key=lambda item: item[0])
             sampled[index] = (d1 * v0 + d0 * v1) / (d0 + d1); valid[index] = True
-    support = {"signed_plane_distance_mm": distances, "orientation_spread_deg": np.asarray(reference.orientation_spread_deg), "invalid_reason": np.where(valid, "inside_bilinear_and_bracketed_support", "no_valid_plane_or_bracket").astype(object)}
+    support = {"signed_plane_distance_mm": distances, "orientation_spread_deg": np.asarray(reference.orientation_spread_deg), "median_inter_plane_angle_deg": np.asarray(reference.median_inter_plane_angle_deg), "invalid_reason": np.where(valid, "inside_bilinear_and_bracketed_support", "no_valid_plane_or_bracket").astype(object)}
     return sampled, valid, support
 
 
@@ -160,7 +165,7 @@ def replace_slice_values(reference: SliceStackReference, values_by_group: dict[i
         if values.shape[:2] != plane.values.shape[:2] or values.ndim != 3 or not np.isfinite(values).all():
             raise ValueError("auxiliary slice values must be finite [H,W,C] and match each image grid")
         planes.append(SlicePlane(plane.group_idx, values, plane.joint_valid, plane.row_spacing_mm, plane.col_spacing_mm, plane.rotation, plane.translation, plane.origin_ras_mm, plane.normal_ras))
-    return SliceStackReference(tuple(planes), reference.orientation_spread_deg, reference.coordinate_convention)
+    return SliceStackReference(tuple(planes), reference.orientation_spread_deg, reference.median_inter_plane_angle_deg, reference.coordinate_convention)
 
 
 @dataclass(frozen=True)

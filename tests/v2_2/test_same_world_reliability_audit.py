@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import torch
+from nesvor.transform import RigidTransform, ax_transform_points
 
 from ismrm_v2.v2_2.preflight.discrepancy import (
     fit_joint_robust_normalization,
@@ -14,6 +15,7 @@ from ismrm_v2.v2_2.preflight.reference_sampling import (
     sample_slice_stack,
 )
 from ismrm_v2.v2_2.preflight.export_timing_only_anchor_parameters import export_anchor_parameters
+import ismrm_v2.v2_2.preflight.same_world_reliability_audit as same_world
 
 
 def test_trilinear_sampling_recovers_ten_channel_linear_field():
@@ -49,6 +51,14 @@ def test_same_world_geometry_transform_is_cpu_safe():
     assert np.allclose(sampled[0], 1.0)
 
 
+def test_nesvor_transform_inversion_matches_world_ras_sampling_convention():
+    pose = torch.tensor([[0.2, -0.1, 0.3, 4.0, -2.0, 1.5]], dtype=torch.float64)
+    local = torch.tensor([[1.2, -0.7, 2.1], [-0.5, 0.4, -1.0]], dtype=torch.float64)
+    world = ax_transform_points(pose, local, trans_first=True)
+    recovered = ax_transform_points(RigidTransform(pose, trans_first=True).inv().axisangle(trans_first=True), world, trans_first=True)
+    assert torch.allclose(recovered, local, atol=1e-8, rtol=0)
+
+
 def test_oblique_parallel_slice_stack_brackets_planes_and_matches_linear_field(tmp_path):
     height, width, groups = 2, 2, 2
     images = np.zeros((groups * 10, height, width), dtype=np.float32)
@@ -73,6 +83,7 @@ def test_oblique_parallel_slice_stack_brackets_planes_and_matches_linear_field(t
     assert valid.tolist() == [True, False]
     assert np.allclose(sampled[0], np.arange(10) + 1.0)
     assert qc["orientation_spread_deg"] == 0.0
+    assert qc["median_inter_plane_angle_deg"] == 0.0
 
 
 def test_timing_parameter_export_records_frozen_geometry_and_anchor_order(tmp_path):
@@ -81,9 +92,24 @@ def test_timing_parameter_export_records_frozen_geometry_and_anchor_order(tmp_pa
         stack_idx = torch.tensor([0, 1]); group_idx = torch.tensor([0, 1]); row_col = torch.tensor([[0, 0], [1, 1]])
     checkpoint = tmp_path / "model.pt"; checkpoint.write_bytes(b"model")
     geometry = tmp_path / "geometry.pt"; geometry.write_bytes(b"geometry")
-    output = export_anchor_parameters(tmp_path / "timing.npz", t1_ms=np.array([1., 2.]), t2_ms=np.array([3., 4.]), b1=np.array([.9, 1.]), joint_dataset=Dataset(), reconstruction_checkpoint=checkpoint, geometry_checkpoint=geometry, geometry_provenance={"selected_key": "group_axisangle_post_stack_init_physical", "post_hb1_geometry_sha256": "a" * 64})
+    output = export_anchor_parameters(tmp_path / "timing.npz", t1_ms=np.array([1., 2.]), t2_ms=np.array([3., 4.]), b1=np.array([.9, 1.]), amplitude=np.array([2., 3.]), joint_dataset=Dataset(), reconstruction_checkpoint=checkpoint, geometry_checkpoint=geometry, geometry_provenance={"selected_key": "group_axisangle_post_stack_init_physical", "post_hb1_geometry_sha256": "a" * 64})
     with np.load(output, allow_pickle=False) as values:
         assert values["t1_ms"].tolist() == [1., 2.]
+        assert values["amplitude"].tolist() == [2., 3.]
         assert len(values["anchor_order_sha256"].item()) == 64
     sidecar = output.with_suffix(".json")
     assert json.loads(sidecar.read_text())["trained_pose_key_not_used"] == "trained_axisangle_train"
+
+
+def test_legacy_sparse_l50_uses_derived_observation_not_source(monkeypatch, tmp_path):
+    source = tmp_path / "source"; derived = tmp_path / "derived"
+    for base in (source, derived):
+        for stack in ("sax", "2ch", "4ch"):
+            path = base / stack / "observations.npz"; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(b"fixture")
+    manifest = {"schema_version": "phase4r_sparse_v1", "case_id": "L50_fold0", "condition": "L50", "prepared_root": str(derived), "stacks": {stack: {"retained_original_group_ids": [0], "source_observation": {"path": str(source / stack / "observations.npz")}, "derived_observation": {"path": str(derived / stack / "observations.npz")}} for stack in ("sax", "2ch", "4ch")}}
+    manifest_path = tmp_path / "manifest.json"; manifest_path.write_text(json.dumps(manifest))
+    monkeypatch.setattr("ismrm_v2.sampling.sparse_profile_manifest.validate_sparse_profile_manifest", lambda *args, **kwargs: manifest | {"_manifest_path": str(manifest_path), "_manifest_sha256": "a" * 64})
+    paths, provenance = same_world._manifest_active_inputs(manifest_path, subject="S", case_id="L50_fold0", prepared_root=derived)
+    assert all(str(path).startswith(str(derived)) for path in paths)
+    assert provenance["input_observation_mode"] == "derived"
+    assert all(item["mode"] == "derived" for item in provenance["observation_records"].values())

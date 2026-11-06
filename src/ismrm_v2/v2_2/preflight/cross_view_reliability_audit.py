@@ -166,6 +166,7 @@ def timing_only_cosine_discrepancy(
     timing_sax_ms: torch.Tensor,
     timing_lax_ms: torch.Tensor,
     *,
+    amplitude: torch.Tensor | None = None,
     epsilon: float = 1e-8,
 ) -> np.ndarray:
     """Evaluate a frozen decoder twice with identical tissue parameters and changed timing only."""
@@ -174,9 +175,14 @@ def timing_only_cosine_discrepancy(
         raise ValueError("timing inputs must be matching [N,9] tensors.")
     if any(value.shape != timing_sax_ms.shape[:1] for value in (t1_ms, t2_ms, b1)):
         raise ValueError("T1, T2 and B1 must be [N] and align with timing rows.")
+    if amplitude is not None and amplitude.shape != timing_sax_ms.shape[:1]:
+        raise ValueError("amplitude must be [N] and align with timing rows.")
     with torch.no_grad():
         fingerprint_sax = decoder(t1_ms, t2_ms, b1, timing_sax_ms)
         fingerprint_lax = decoder(t1_ms, t2_ms, b1, timing_lax_ms)
+        if amplitude is not None:
+            fingerprint_sax = fingerprint_sax * amplitude[:, None]
+            fingerprint_lax = fingerprint_lax * amplitude[:, None]
     values, _ = cosine_discrepancy(fingerprint_lax.detach().cpu().numpy(), fingerprint_sax.detach().cpu().numpy(), epsilon=epsilon)
     return values
 
@@ -274,22 +280,22 @@ def _timing_only_values(
     if decoder is None:
         return None, {"timing_only_simulator_status": "not_run", "reason": "no decoder was supplied"}
     if parameters is None:
-        return None, {"timing_only_simulator_status": "not_run", "reason": "no anchor-aligned T1/T2/B1 parameters were supplied"}
-    missing = {"t1_ms", "t2_ms", "b1"}.difference(parameters)
+        return None, {"timing_only_simulator_status": "not_run", "reason": "no anchor-aligned T1/T2/B1/amplitude parameters were supplied"}
+    missing = {"t1_ms", "t2_ms", "b1", "amplitude"}.difference(parameters)
     if missing:
         return None, {"timing_only_simulator_status": "not_run", "reason": f"parameter source lacks {sorted(missing)}"}
     count = timing.shape[0]
     decoder_device = next(decoder.parameters(), None)
     device = decoder_device.device if decoder_device is not None else torch.device("cpu")
     tensors = []
-    for name in ("t1_ms", "t2_ms", "b1"):
+    for name in ("t1_ms", "t2_ms", "b1", "amplitude"):
         value = torch.as_tensor(parameters[name], dtype=torch.float32)
         if value.shape != (count,):
             raise ValueError(f"timing-only {name} must be anchor-aligned [N] with N={count}.")
         tensors.append(value[target_indices].to(device))
     timing_sax = torch.as_tensor(timing[reference_indices], dtype=torch.float32, device=device)
     timing_lax = torch.as_tensor(timing[target_indices], dtype=torch.float32, device=device)
-    return timing_only_cosine_discrepancy(decoder, *tensors, timing_sax, timing_lax, epsilon=epsilon), {
+    return timing_only_cosine_discrepancy(decoder, *tensors[:3], timing_sax, timing_lax, amplitude=tensors[3], epsilon=epsilon), {
         "timing_only_simulator_status": "run",
         "source": str(parameters.get("source", "explicit anchor-aligned parameters")),
     }
@@ -815,11 +821,11 @@ def _load_timing_only_parameters(path: str | Path, expected_anchors: int, expect
     if not source.is_file():
         raise FileNotFoundError(f"timing-only parameter NPZ does not exist: {source}")
     with np.load(source, allow_pickle=False) as payload:
-        required = {"t1_ms", "t2_ms", "b1", "anchor_order_sha256"}
+        required = {"t1_ms", "t2_ms", "b1", "amplitude", "anchor_order_sha256"}
         missing = required.difference(payload.files)
         if missing:
             raise ValueError(f"timing-only parameter NPZ lacks: {sorted(missing)}")
-        parameters = {name: np.asarray(payload[name]) for name in ("t1_ms", "t2_ms", "b1")}
+        parameters = {name: np.asarray(payload[name]) for name in ("t1_ms", "t2_ms", "b1", "amplitude")}
         identity = np.asarray(payload["anchor_order_sha256"]).item()
     if any(value.shape != (expected_anchors,) for value in parameters.values()):
         raise ValueError(f"timing-only parameters must align with all {expected_anchors} joint anchors in joint-dataset order.")
@@ -906,7 +912,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--device", default="cpu", help="Torch device; local validation uses cpu, server may use cuda:0.")
     parser.add_argument("--signal-decoder-checkpoint", help="Optional compatible frozen signal-decoder checkpoint for timing-only simulation.")
     parser.add_argument("--protocol-yaml", help="Protocol YAML required with --signal-decoder-checkpoint.")
-    parser.add_argument("--timing-only-parameters-npz", help="Optional NPZ with anchor-aligned t1_ms/t2_ms/b1 [N] and required anchor_order_sha256; N is the full current JointAnchorDataset order.")
+    parser.add_argument("--timing-only-parameters-npz", help="Optional NPZ with anchor-aligned t1_ms/t2_ms/b1/amplitude [N] and required anchor_order_sha256; N is the full current JointAnchorDataset order.")
     return parser
 
 

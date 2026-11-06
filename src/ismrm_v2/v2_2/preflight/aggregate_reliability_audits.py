@@ -48,8 +48,9 @@ def aggregate_reliability_audits(audit_dirs: list[str | Path], output_dir: str |
     output.mkdir(parents=True, exist_ok=True)
     manifests = [_read_json(directory / "manifest.json") for directory in directories]
     pairs = [pair | {"audit_dir": str(directory)} for directory in directories for pair in _read_pairs(directory)]
-    case_rows, stack_rows, timing_rows, discrepancy_rows = [], [], [], []
+    case_rows, stack_rows, timing_rows, discrepancy_rows, gate_distributions = [], [], [], [], []
     for directory, manifest in zip(directories, manifests):
+        summary_payload = _read_json(directory / "summary.json")
         rows = [row for row in pairs if row["audit_dir"] == str(directory)]
         subject, case = manifest.get("subject"), manifest.get("resolved_case", manifest.get("requested_case"))
         for stack in ("2ch", "4ch"):
@@ -60,14 +61,18 @@ def aggregate_reliability_audits(audit_dirs: list[str | Path], output_dir: str |
                 selected = [(float(row[left_name]), float(row[right_name])) for row in subset if row.get(left_name) not in ("", "None", None) and row.get(right_name) not in ("", "None", None)]
                 return (np.asarray([item[0] for item in selected], dtype=float), np.asarray([item[1] for item in selected], dtype=float))
             metrics = {name: _metric_stats(vector(name)) for name in ("observed_l1_normalized", "observed_cosine_raw", "observed_cosine_normalized", "timing_only_l1_normalized", "timing_only_cosine")}
-            stack_rows.append({"subject": subject, "case_id": case, "target_stack": stack, "pair_count": len(subset), "reference_valid_count": sum(row.get("reference_valid") == "True" for row in subset), **{f"{name}_{key}": value for name, payload in metrics.items() for key, value in payload.items()}})
+            gates_l1 = summary_payload.get("l1_gate_dry_run", {}).get(stack, {})
+            gates_cos = summary_payload.get("cosine_gate_dry_run", {}).get(stack, {})
+            for metric, gate in (("observed_l1_normalized", gates_l1), ("observed_cosine_raw", gates_cos)):
+                gate_distributions.append({"subject": subject, "case_id": case, "target_stack": stack, "metric": metric, "gate_quantile": gate.get("gate_quantile"), "tau_q90": gate.get("tau_q90"), "tau_srpan_literal": gate.get("tau_srpan_literal"), "progress": gate.get("progress", {})})
+            stack_rows.append({"subject": subject, "case_id": case, "target_stack": stack, "pair_count": len(subset), "reference_valid_count": sum(row.get("reference_valid") == "True" for row in subset), "reference_valid_fraction": (sum(row.get("reference_valid") == "True" for row in subset) / len(subset) if subset else None), "l1_gate_q90": gates_l1.get("tau_q90"), "l1_gate_tau_srpan_literal": gates_l1.get("tau_srpan_literal"), "cosine_gate_q90": gates_cos.get("tau_q90"), "cosine_gate_tau_srpan_literal": gates_cos.get("tau_srpan_literal"), **{f"{name}_{key}": value for name, payload in metrics.items() for key, value in payload.items()}})
             l1_timing, timing = aligned("observed_l1_normalized", "timing_abs_mean_ms"); l1_timing_l2, timing_l2 = aligned("observed_l1_normalized", "timing_l2_ms")
             cosine_timing, cosine_timing_abs = aligned("observed_cosine_normalized", "timing_abs_mean_ms"); cosine_timing_l2, timing_l2_cosine = aligned("observed_cosine_normalized", "timing_l2_ms")
             l1_to_timing_only, timing_only_l1 = aligned("observed_l1_normalized", "timing_only_l1_normalized"); cosine_to_timing_only, timing_only_cosine = aligned("observed_cosine_normalized", "timing_only_cosine")
             timing_rows.append({"subject": subject, "case_id": case, "target_stack": stack, "corr_l1_vs_timing_abs_mean": _corr(l1_timing, timing), "corr_l1_vs_timing_l2": _corr(l1_timing_l2, timing_l2), "corr_cosine_vs_timing_abs_mean": _corr(cosine_timing, cosine_timing_abs), "corr_cosine_vs_timing_l2": _corr(cosine_timing_l2, timing_l2_cosine), "corr_l1_vs_timing_only": _corr(l1_to_timing_only, timing_only_l1), "corr_cosine_vs_timing_only": _corr(cosine_to_timing_only, timing_only_cosine)})
             for metric in ("observed_l1_normalized", "observed_cosine_normalized"):
                 discrepancy_rows.append({"subject": subject, "case_id": case, "target_stack": stack, "metric": metric, **_metric_stats(vector(metric))})
-        case_rows.append({"subject": subject, "case_id": case, "status": manifest.get("status"), "pair_count": sum(row["subject"] == subject and row["case_id"] == case for row in rows), "reference_sampling_status": manifest.get("reference_sampling", "unknown")})
+        case_rows.append({"subject": subject, "case_id": case, "status": manifest.get("status"), "pair_count": sum(row["subject"] == subject and row["case_id"] == case for row in rows), "reference_sampling_status": manifest.get("reference_sampling", "unknown"), "reference_valid_fraction": summary_payload.get("reference_valid_fraction")})
     between_case = {}
     for metric in ("observed_l1_normalized", "observed_cosine_normalized"):
         medians = []
@@ -77,10 +82,13 @@ def aggregate_reliability_audits(audit_dirs: list[str | Path], output_dir: str |
                 medians.append(float(np.median(values)))
         medians_array = np.asarray(medians, dtype=float)
         between_case[metric] = {"case_count": int(medians_array.size), "case_median_cv": float(medians_array.std() / abs(medians_array.mean())) if medians_array.size > 1 and medians_array.mean() != 0 else None, "case_median_robust_spread": float(np.quantile(medians_array, .75) - np.quantile(medians_array, .25)) if medians_array.size else None}
-    dyl_pairs = [pair for pair in pairs if pair["subject"] == "DYL_2"]
+    def stress(rows):
+        return {metric: _metric_stats(np.asarray([float(pair[metric]) for pair in rows if pair.get(metric) not in ("", "None", None)], dtype=float)) for metric in ("observed_l1_normalized", "observed_cosine_normalized", "timing_only_l1_normalized", "timing_only_cosine")}
+    dyl_l100 = [pair for pair in pairs if pair["subject"] == "DYL_2" and "L100" in str(pair["case_id"]).upper()]
+    dyl_asymmetric = [pair for pair in pairs if pair["subject"] == "DYL_2" and "L100" not in str(pair["case_id"]).upper()]
     non_dyl_pairs = [pair for pair in pairs if pair["subject"] != "DYL_2"]
-    heartbeat_stress = {"DYL_2": {metric: _metric_stats(np.asarray([float(pair[metric]) for pair in dyl_pairs if pair.get(metric) not in ("", "None", None)], dtype=float)) for metric in ("observed_l1_normalized", "observed_cosine_normalized", "timing_only_l1_normalized", "timing_only_cosine")}, "non_DYL_2": {metric: _metric_stats(np.asarray([float(pair[metric]) for pair in non_dyl_pairs if pair.get(metric) not in ("", "None", None)], dtype=float)) for metric in ("observed_l1_normalized", "observed_cosine_normalized", "timing_only_l1_normalized", "timing_only_cosine")}}
-    summary = {"schema": "ismrm_v2_2/reliability_audit_aggregate/v1", "audit_count": len(directories), "subjects": sorted({manifest.get("subject") for manifest in manifests}), "cases": case_rows, "metrics": {metric: _metric_stats(np.asarray([float(row[metric]) for row in pairs if row.get(metric) not in ("", "None", None)], dtype=float)) for metric in ("observed_l1_normalized", "observed_cosine_normalized")}, "between_case_dependence": between_case, "heartbeat_stress": heartbeat_stress, "decision_states": ["L1_SUPPORTED", "COSINE_SUPPORTED", "INCONCLUSIVE_OR_TIMING_CONFOUNDED"], "decision": "INCONCLUSIVE_OR_TIMING_CONFOUNDED", "winner_selected": False, "interpretation": "Evidence only; no discrepancy is connected to training."}
+    heartbeat_stress = {"DYL_2_L100": stress(dyl_l100), "DYL_2_asymmetric_sparse": stress(dyl_asymmetric), "non_DYL_2": stress(non_dyl_pairs)}
+    summary = {"schema": "ismrm_v2_2/reliability_audit_aggregate/v1", "audit_count": len(directories), "subjects": sorted({manifest.get("subject") for manifest in manifests}), "cases": case_rows, "metrics": {metric: _metric_stats(np.asarray([float(row[metric]) for row in pairs if row.get(metric) not in ("", "None", None)], dtype=float)) for metric in ("observed_l1_normalized", "observed_cosine_normalized")}, "between_case_dependence": between_case, "heartbeat_stress": heartbeat_stress, "gate_distributions": gate_distributions, "decision_states": ["L1_SUPPORTED", "COSINE_SUPPORTED", "INCONCLUSIVE_OR_TIMING_CONFOUNDED"], "decision": "INCONCLUSIVE_OR_TIMING_CONFOUNDED", "winner_selected": False, "interpretation": "Evidence only; no discrepancy is connected to training."}
     paths = {name: output / name for name in ("aggregate_summary.json", "case_table.csv", "stack_metric_table.csv", "timing_confounding_table.csv", "discrepancy_comparison.csv", "decision_support.json")}
     paths["aggregate_summary.json"].write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     paths["decision_support.json"].write_text(json.dumps({"recommendation_states": summary["decision_states"], "recommendation": summary["decision"], "winner_selected": False, "evidence": summary["metrics"]}, indent=2, sort_keys=True) + "\n", encoding="utf-8")

@@ -21,13 +21,14 @@ def export_anchor_parameters(
     t1_ms: np.ndarray,
     t2_ms: np.ndarray,
     b1: np.ndarray,
+    amplitude: np.ndarray,
     joint_dataset: Any,
     reconstruction_checkpoint: str | Path,
     geometry_checkpoint: str | Path,
     geometry_provenance: dict[str, Any],
 ) -> Path:
     """Write an immutable NPZ plus JSON sidecar with the exact anchor contract."""
-    values = {name: np.asarray(value, dtype=np.float32) for name, value in (("t1_ms", t1_ms), ("t2_ms", t2_ms), ("b1", b1))}
+    values = {name: np.asarray(value, dtype=np.float32) for name, value in (("t1_ms", t1_ms), ("t2_ms", t2_ms), ("b1", b1), ("amplitude", amplitude))}
     count = int(torch.as_tensor(joint_dataset.xyz).shape[0])
     if any(value.shape != (count,) or not np.isfinite(value).all() for value in values.values()):
         raise ValueError(f"timing-only parameters must be finite anchor-aligned [N={count}]")
@@ -38,7 +39,7 @@ def export_anchor_parameters(
     output.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(output, **values, anchor_order_sha256=np.asarray(anchor_hash))
     provenance = {
-        "schema": "ismrm_v2_2/timing_only_anchor_parameters/v1",
+        "schema": "ismrm_v2_2/timing_only_anchor_parameters/v2",
         "path": str(output), "sha256": _sha256_file(output),
         "reconstruction_checkpoint": str(Path(reconstruction_checkpoint).resolve()), "reconstruction_checkpoint_sha256": _sha256_file(Path(reconstruction_checkpoint)),
         "geometry_checkpoint": str(Path(geometry_checkpoint).resolve()), "geometry_checkpoint_sha256": _sha256_file(Path(geometry_checkpoint)),
@@ -73,7 +74,11 @@ def export_from_frozen_checkpoint(
     model.eval()
     with torch.no_grad():
         fields = model.inr(space.physical_ras_to_train(points))
-    return export_anchor_parameters(output_path, t1_ms=fields["t1_ms"].detach().cpu().numpy(), t2_ms=fields["t2_ms"].detach().cpu().numpy(), b1=fields["b1"].detach().cpu().numpy(), joint_dataset=joint_dataset, reconstruction_checkpoint=reconstruction_checkpoint, geometry_checkpoint=geometry_checkpoint, geometry_provenance=geometry_provenance | {"checkpoint_load": "frozen reconstruction checkpoint loaded", "trained_pose_not_selected": True, "checkpoint_metadata_keys": sorted(checkpoint)})
+    intensity_scale = torch.as_tensor(model.intensity_scale)
+    if intensity_scale.numel() != 1 or not torch.isfinite(intensity_scale).all() or intensity_scale.item() <= 0:
+        raise ValueError("frozen model intensity_scale must be one finite positive scalar for amplitude export")
+    amplitude = fields["amplitude"] * intensity_scale
+    return export_anchor_parameters(output_path, t1_ms=fields["t1_ms"].detach().cpu().numpy(), t2_ms=fields["t2_ms"].detach().cpu().numpy(), b1=fields["b1"].detach().cpu().numpy(), amplitude=amplitude.detach().cpu().numpy(), joint_dataset=joint_dataset, reconstruction_checkpoint=reconstruction_checkpoint, geometry_checkpoint=geometry_checkpoint, geometry_provenance=geometry_provenance | {"checkpoint_load": "frozen reconstruction checkpoint loaded", "trained_pose_not_selected": True, "checkpoint_metadata_keys": sorted(checkpoint)})
 
 
 def build_parser() -> argparse.ArgumentParser:
