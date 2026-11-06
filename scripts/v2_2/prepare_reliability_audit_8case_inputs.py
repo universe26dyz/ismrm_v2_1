@@ -67,12 +67,20 @@ def resolve_manifest(root: Path, subject: str, item: dict[str, Any]) -> tuple[Pa
             payload = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
+        if payload.get("profile_id") != profile_id:
+            continue
         payload_fold = payload.get("fold_id", payload.get("phase"))
+        # A single-fold profile is represented canonically with case_id equal
+        # to profile_id and fold_id/phase set to null.  The case-plan selector
+        # uses fold_id=0 uniformly, so treat that query as the sole fold.
+        if payload_fold is None and payload.get("fold_count") == 1 and fold_id == 0:
+            matches.append((path.resolve(), str(payload.get("case_id") or payload.get("condition"))))
+            continue
         try:
             payload_fold = int(payload_fold)
         except (TypeError, ValueError):
             continue
-        if payload.get("profile_id") == profile_id and payload_fold == fold_id:
+        if payload_fold == fold_id:
             matches.append((path.resolve(), str(payload.get("case_id") or payload.get("condition"))))
     if len(matches) != 1:
         raise ValueError(f"case selector {subject}/{profile_id}/fold{fold_id} matched {len(matches)} manifests")

@@ -260,3 +260,13 @@ def test_observation_role_resolution_rejects_true_same_priority_ambiguity(tmp_pa
     second = tmp_path / "two" / "S" / "prepared" / "S" / "sax" / "observations.npz"; second.parent.mkdir(parents=True); second.write_bytes(b"same")
     with pytest.raises(RuntimeError, match="same-priority source"):
         stage.locate_source_observation([tmp_path / "one", tmp_path / "two"], subject="S", stack="sax", expected_sha256=stage.digest(first))
+
+
+def test_profile_selector_zero_resolves_single_fold_manifest(tmp_path):
+    spec = importlib.util.spec_from_file_location("stage_single_fold", "scripts/v2_2/prepare_reliability_audit_8case_inputs.py")
+    stage = importlib.util.module_from_spec(spec); spec.loader.exec_module(stage)
+    manifest = tmp_path / "HHZ" / "SAX100_2CH0_4CH0" / "sparse_manifest.json"; manifest.parent.mkdir(parents=True)
+    manifest.write_text(json.dumps({"profile_id": "SAX100_2CH0_4CH0", "case_id": "SAX100_2CH0_4CH0", "fold_id": None, "phase": None, "fold_count": 1}))
+    selected, case_id = stage.resolve_manifest(tmp_path, "HHZ", {"profile_id": "SAX100_2CH0_4CH0", "fold_id": 0})
+    assert selected == manifest.resolve()
+    assert case_id == "SAX100_2CH0_4CH0"
