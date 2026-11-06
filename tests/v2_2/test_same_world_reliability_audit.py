@@ -1,6 +1,8 @@
 import numpy as np
 import json
 import torch
+import importlib.util
+from pathlib import Path
 from nesvor.transform import RigidTransform, ax_transform_points
 
 from ismrm_v2.v2_2.preflight.discrepancy import (
@@ -113,3 +115,46 @@ def test_legacy_sparse_l50_uses_derived_observation_not_source(monkeypatch, tmp_
     assert all(str(path).startswith(str(derived)) for path in paths)
     assert provenance["input_observation_mode"] == "derived"
     assert all(item["mode"] == "derived" for item in provenance["observation_records"].values())
+
+
+def test_timing_only_pair_calls_decoder_without_amplitude_argument():
+    class Decoder(torch.nn.Module):
+        def forward(self, t1_ms, t2_ms, b1, timing9_ms):
+            assert t1_ms.shape == t2_ms.shape == b1.shape
+            return torch.nn.functional.normalize(torch.cat((timing9_ms[:, :1], torch.ones((timing9_ms.shape[0], 9))), dim=1), dim=1)
+
+    arrays = {"physical_xyz": np.zeros((2, 3)), "timing": np.zeros((2, 9))}
+    parameters = {"t1_ms": np.array([1000., 1100.]), "t2_ms": np.array([50., 55.]), "b1": np.ones(2), "amplitude": np.array([2., 3.])}
+    l1, cosine, status = same_world._timing_only_pair(Decoder(), parameters, arrays, np.array([0, 1]), np.ones((2, 9)), np.array([True, True]))
+    assert status["status"] == "run"
+    assert np.isfinite(l1).all() and np.isfinite(cosine).all()
+
+
+def test_staging_finds_nested_model_and_rebases_historical_manifest(monkeypatch, tmp_path):
+    spec = importlib.util.spec_from_file_location("stage_inputs", "scripts/v2_2/prepare_reliability_audit_8case_inputs.py")
+    stage = importlib.util.module_from_spec(spec); spec.loader.exec_module(stage)
+    subject, case = "CYJ", "L50_fold0"
+    observation_root = tmp_path / "frozen_baseline"; source_root = observation_root / subject / "prepared"
+    source_paths = {}
+    for stack in ("sax", "2ch", "4ch"):
+        path = source_root / stack / "observations.npz"; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(f"source-{stack}".encode()); source_paths[stack] = path
+    derived_root = tmp_path / "sparse_inputs" / subject / case
+    raw = {"schema_version": "phase4r_sparse_v1", "status": "ELIGIBLE", "subject": subject, "source_prepared_root": "/old/frozen", "prepared_root": "/old/derived", "git_sha": "a" * 40, "condition": "L50", "stride": 2, "phase": 0, "stacks": {}}
+    for stack in ("sax", "2ch", "4ch"):
+        derived = derived_root / stack / "observations.npz"; derived.parent.mkdir(parents=True, exist_ok=True); derived.write_bytes(f"derived-{stack}".encode())
+        raw["stacks"][stack] = {"retained_original_group_ids": [0], "heldout_original_group_ids": [1], "source_observation": {"path": "/old/frozen/%s/observations.npz" % stack, "sha256": stage.digest(source_paths[stack])}, "derived_observation": {"path": "/old/derived/%s/observations.npz" % stack, "sha256": stage.digest(derived)}}
+    manifest_root = tmp_path / "manifests" / subject / case; manifest_root.mkdir(parents=True)
+    manifest = manifest_root / "sparse_manifest.json"; manifest.write_text(json.dumps(raw)); original_sha = stage.digest(manifest)
+    model = tmp_path / "models" / subject / "reconstruction" / "proposed" / subject / case / "model.pt"; model.parent.mkdir(parents=True); model.write_bytes(b"frozen-model")
+    monkeypatch.setattr(stage, "validate_sparse_profile_manifest", lambda path, **kwargs: json.loads(Path(path).read_text()) if Path(path).is_file() else {})
+    item = {"subject": subject, "case_id": case, "input_dir": "runs/v2_2/00_preflight_inputs/{subject}/{case_id}"}
+    stage.stage_case(item, root=tmp_path, manifest_root=tmp_path / "manifests", geometry_root=tmp_path, reconstruction_root=tmp_path / "models", observation_roots=[observation_root, tmp_path / "sparse_inputs"])
+    runtime = json.loads((tmp_path / "runs/v2_2/00_preflight_inputs" / subject / case / "case_runtime.json").read_text())
+    assert runtime["geometry_checkpoint"] == runtime["reconstruction_checkpoint"]
+    assert runtime["geometry_checkpoint"].endswith("/model.pt")
+    assert stage.digest(manifest) == original_sha
+    working = Path(runtime["sparse_manifest"])
+    payload = json.loads(working.read_text())
+    assert payload["source_prepared_root"] == str(source_root)
+    assert payload["prepared_root"] == str(working.parent)
+    assert all(Path(payload["stacks"][stack]["derived_observation"]["path"]).is_file() for stack in ("sax", "2ch", "4ch"))

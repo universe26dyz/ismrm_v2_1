@@ -152,10 +152,11 @@ def _timing_only_pair(
         parameter_values.append(torch.as_tensor(value[target_indices], dtype=torch.float32, device=device))
     target_timing = torch.as_tensor(arrays["timing"][target_indices], dtype=torch.float32, device=device)
     reference_timing = torch.as_tensor(timing_reference, dtype=torch.float32, device=device)
+    t1, t2, b1, amplitude_tensor = parameter_values
     with torch.no_grad():
-        observed_target = decoder(*parameter_values, target_timing).detach().cpu().numpy()
-        reference_target = decoder(*parameter_values, reference_timing).detach().cpu().numpy()
-    amplitude = parameter_values[3].detach().cpu().numpy()
+        observed_target = decoder(t1, t2, b1, target_timing).detach().cpu().numpy()
+        reference_target = decoder(t1, t2, b1, reference_timing).detach().cpu().numpy()
+    amplitude = amplitude_tensor.detach().cpu().numpy()
     observed_target = observed_target * amplitude[:, None]
     reference_target = reference_target * amplitude[:, None]
     if normalization is None:
