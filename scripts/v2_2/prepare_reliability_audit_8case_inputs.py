@@ -93,29 +93,56 @@ def locate_model_checkpoint(root: Path, subject: str, case_id: str) -> Path:
     raise FileNotFoundError(f"cannot locate frozen Proposed model.pt for {subject}/{case_id} below {root}")
 
 
-def locate_matching_observation(roots: list[Path], *, subject: str, case_id: str, stack: str, expected_sha256: str, digest_cache: dict[Path, str] | None = None) -> Path:
-    """Find a current project-local observation whose bytes match historical provenance."""
-    candidates: list[Path] = []
-    for root in roots:
-        candidates.extend((root / subject / case_id / stack / "observations.npz", root / subject / stack / "observations.npz"))
-        candidates.extend(sorted(root.glob(f"**/{subject}/**/{stack}/observations.npz")))
-        candidates.extend(sorted(root.glob(f"**/{case_id}/**/{stack}/observations.npz")))
+def _unique_candidates(candidates: list[tuple[int, str, Path]], *, expected_sha256: str, stack: str, role: str, digest_cache: dict[Path, str] | None = None) -> tuple[Path, dict[str, Any]]:
+    """Select one role-aware candidate; lower-priority duplicates are provenance only."""
     seen: set[Path] = set()
-    matches: list[Path] = []
-    for candidate in candidates:
+    matches: list[tuple[int, str, Path]] = []
+    for priority, rule, candidate in candidates:
         candidate = candidate.resolve()
         if candidate in seen or not candidate.is_file() or candidate.is_symlink():
             continue
         seen.add(candidate)
         if digest(candidate, digest_cache) == expected_sha256:
-            matches.append(candidate)
-    if len(matches) > 1:
-        inode_keys = {(candidate.stat().st_dev, candidate.stat().st_ino) for candidate in matches}
-        if len(inode_keys) > 1:
-            raise RuntimeError(f"ambiguous project-local {stack} observations match recorded SHA256: {matches}")
-    if matches:
-        return matches[0]
-    raise FileNotFoundError(f"no current project-local {stack} observation matches recorded SHA256 {expected_sha256}")
+            matches.append((priority, rule, candidate))
+    if not matches:
+        raise FileNotFoundError(f"no project-local {role} {stack} observation matches recorded SHA256 {expected_sha256}")
+    best_priority = min(item[0] for item in matches)
+    best = [item for item in matches if item[0] == best_priority]
+    if len(best) != 1:
+        raise RuntimeError(f"ambiguous same-priority {role} {stack} observations match recorded SHA256: {[str(item[2]) for item in best]}")
+    selected = best[0]
+    duplicates = [str(item[2]) for item in matches if item[2] != selected[2]]
+    return selected[2], {"role": role, "selected_path": str(selected[2]), "selected_sha256": expected_sha256, "resolution_rule": selected[1], "duplicate_same_sha_candidates": duplicates}
+
+
+def locate_source_observation(roots: list[Path], *, subject: str, stack: str, expected_sha256: str, digest_cache: dict[Path, str] | None = None) -> tuple[Path, dict[str, Any]]:
+    """Resolve source observations from canonical prepared subject layouts only."""
+    candidates: list[tuple[int, str, Path]] = []
+    for root in roots:
+        candidates.extend([
+            (0, "canonical_subject_prepared_subject_stack", root / subject / "prepared" / subject / stack / "observations.npz"),
+            (0, "canonical_subject_prepared_stack", root / subject / "prepared" / stack / "observations.npz"),
+            (1, "canonical_recursive_prepared_subject_stack", root / "**" / subject / "prepared" / subject / stack / "observations.npz"),
+            (1, "canonical_recursive_prepared_stack", root / "**" / subject / "prepared" / stack / "observations.npz"),
+        ])
+        candidates.extend((1, "canonical_recursive_prepared_subject_stack", path) for path in root.glob(f"**/{subject}/prepared/{subject}/{stack}/observations.npz"))
+        candidates.extend((1, "canonical_recursive_prepared_stack", path) for path in root.glob(f"**/{subject}/prepared/{stack}/observations.npz"))
+        candidates.extend((2, "lower_priority_sparse_copy", path) for path in root.glob(f"**/{subject}/sparse_inputs/**/{stack}/observations.npz"))
+    return _unique_candidates(candidates, expected_sha256=expected_sha256, stack=stack, role="source", digest_cache=digest_cache)
+
+
+def locate_derived_observation(roots: list[Path], *, subject: str, case_id: str, stack: str, expected_sha256: str, digest_cache: dict[Path, str] | None = None) -> tuple[Path, dict[str, Any]]:
+    """Resolve derived observations from the exact resolved sparse case only."""
+    candidates: list[tuple[int, str, Path]] = []
+    for root in roots:
+        candidates.extend([
+            (0, "canonical_subject_sparse_inputs_resolved_case_stack", root / subject / "sparse_inputs" / subject / case_id / stack / "observations.npz"),
+            (0, "canonical_sparse_inputs_resolved_case_stack", root / "sparse_inputs" / subject / case_id / stack / "observations.npz"),
+            (0, "canonical_resolved_case_stack", root / subject / case_id / stack / "observations.npz"),
+        ])
+        candidates.extend((1, "recursive_resolved_case_stack", path) for path in root.glob(f"**/{subject}/sparse_inputs/{subject}/{case_id}/{stack}/observations.npz"))
+        candidates.extend((1, "recursive_resolved_case_stack", path) for path in root.glob(f"**/{subject}/{case_id}/{stack}/observations.npz"))
+    return _unique_candidates(candidates, expected_sha256=expected_sha256, stack=stack, role="derived", digest_cache=digest_cache)
 
 
 def stage_case(item: dict[str, Any], *, root: Path, manifest_root: Path, geometry_root: Path, reconstruction_root: Path, observation_roots: list[Path], digest_cache: dict[Path, str] | None = None) -> dict[str, Any]:
@@ -137,20 +164,22 @@ def stage_case(item: dict[str, Any], *, root: Path, manifest_root: Path, geometr
     prepared = destination / "prepared"
     prepared.mkdir()
     source_paths: dict[str, Path] = {}
+    source_resolution: dict[str, dict[str, Any]] = {}
     derived_paths: dict[str, Path] = {}
+    derived_resolution: dict[str, dict[str, Any]] = {}
     active_records = []
     for stack in STACKS:
         spec = raw["stacks"][stack]
         source_record = spec.get("source_observation")
         if not isinstance(source_record, dict) or not isinstance(source_record.get("sha256"), str):
             raise ValueError(f"{source_manifest}: {stack} lacks source SHA256 provenance")
-        source_paths[stack] = locate_matching_observation(observation_roots, subject=subject, case_id=case_id, stack=stack, expected_sha256=source_record["sha256"], digest_cache=digest_cache)
+        source_paths[stack], source_resolution[stack] = locate_source_observation(observation_roots, subject=subject, stack=stack, expected_sha256=source_record["sha256"], digest_cache=digest_cache)
         present = bool(spec.get("retained_original_group_ids", [])) if schema == LEGACY_SCHEMA_VERSION else bool(spec.get("training_stack_present"))
         if present and not use_source:
             record = spec.get("derived_observation")
             if not isinstance(record, dict) or not isinstance(record.get("sha256"), str):
                 raise ValueError(f"{source_manifest}: {stack} lacks derived SHA256 provenance")
-            derived_paths[stack] = locate_matching_observation(observation_roots, subject=subject, case_id=case_id, stack=stack, expected_sha256=record["sha256"], digest_cache=digest_cache)
+            derived_paths[stack], derived_resolution[stack] = locate_derived_observation(observation_roots, subject=subject, case_id=case_id, stack=stack, expected_sha256=record["sha256"], digest_cache=digest_cache)
     source_roots = {path.parent.parent for path in source_paths.values()}
     if len(source_roots) != 1 or any(path != next(iter(source_roots)) / stack / "observations.npz" for stack, path in source_paths.items()):
         raise ValueError("current source observations do not share the canonical subject prepared root")
@@ -161,13 +190,15 @@ def stage_case(item: dict[str, Any], *, root: Path, manifest_root: Path, geometr
     for stack in STACKS:
         spec = raw["stacks"][stack]
         spec["source_observation"] = {**spec["source_observation"], "path": str(source_paths[stack]), "sha256": digest(source_paths[stack], digest_cache)}
+        spec["source_observation_resolution"] = source_resolution[stack]
         if stack in derived_paths:
             target = prepared / stack / "observations.npz"
             hardlink(derived_paths[stack], target)
             spec["derived_observation"] = {**spec["derived_observation"], "path": str(target), "sha256": digest(target, digest_cache)}
-            active_records.append({"stack": stack, "mode": "derived", "source": str(derived_paths[stack]), "path": str(target), "sha256": digest(target, digest_cache), "retained_original_group_ids": spec.get("retained_original_group_ids", []), "derived_to_original_group_idx": spec.get("derived_to_original_group_idx")})
+            spec["derived_observation_resolution"] = {**derived_resolution[stack], "selected_path": str(target), "selected_sha256": digest(target, digest_cache)}
+            active_records.append({"stack": stack, "mode": "derived", "role": "derived", "source": str(derived_paths[stack]), "path": str(target), "sha256": digest(target, digest_cache), "resolution": spec["derived_observation_resolution"], "retained_original_group_ids": spec.get("retained_original_group_ids", []), "derived_to_original_group_idx": spec.get("derived_to_original_group_idx")})
         elif use_source:
-            active_records.append({"stack": stack, "mode": "source", "path": str(source_paths[stack]), "sha256": digest(source_paths[stack])})
+            active_records.append({"stack": stack, "mode": "source", "role": "source", "path": str(source_paths[stack]), "sha256": digest(source_paths[stack], digest_cache), "resolution": source_resolution[stack]})
     working_manifest = destination / "sparse_manifest.json" if use_source else prepared / "sparse_manifest.json"
     working_manifest.write_text(json.dumps(raw, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     validate_sparse_profile_manifest(working_manifest, subject=subject)

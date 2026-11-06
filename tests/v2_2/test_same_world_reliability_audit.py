@@ -234,3 +234,29 @@ def test_staging_finds_nested_model_and_rebases_historical_manifest(monkeypatch,
     assert payload["source_prepared_root"] == str(source_root)
     assert payload["prepared_root"] == str(working.parent)
     assert all(Path(payload["stacks"][stack]["derived_observation"]["path"]).is_file() for stack in ("sax", "2ch", "4ch"))
+
+
+def test_observation_role_resolution_prefers_canonical_source_and_exact_derived_case(tmp_path):
+    spec = importlib.util.spec_from_file_location("stage_roles", "scripts/v2_2/prepare_reliability_audit_8case_inputs.py")
+    stage = importlib.util.module_from_spec(spec); spec.loader.exec_module(stage)
+    root = tmp_path / "frozen_baseline"; subject = "DYL_2"; stack = "sax"; payload = b"identical-sax"
+    canonical = root / subject / "prepared" / subject / stack / "observations.npz"; canonical.parent.mkdir(parents=True); canonical.write_bytes(payload)
+    for case in ("L25_fold0", "L50_fold0"):
+        duplicate = root / subject / "sparse_inputs" / subject / case / stack / "observations.npz"; duplicate.parent.mkdir(parents=True); duplicate.write_bytes(payload)
+    selected, provenance = stage.locate_source_observation([root], subject=subject, stack=stack, expected_sha256=stage.digest(canonical))
+    assert selected == canonical.resolve()
+    assert provenance["role"] == "source"
+    assert len(provenance["duplicate_same_sha_candidates"]) == 2
+    l50 = root / subject / "sparse_inputs" / subject / "L50_fold0" / stack / "observations.npz"
+    selected, provenance = stage.locate_derived_observation([root], subject=subject, case_id="L50_fold0", stack=stack, expected_sha256=stage.digest(l50))
+    assert selected == l50.resolve()
+    assert provenance["role"] == "derived"
+
+
+def test_observation_role_resolution_rejects_true_same_priority_ambiguity(tmp_path):
+    spec = importlib.util.spec_from_file_location("stage_roles_ambiguous", "scripts/v2_2/prepare_reliability_audit_8case_inputs.py")
+    stage = importlib.util.module_from_spec(spec); spec.loader.exec_module(stage)
+    first = tmp_path / "one" / "S" / "prepared" / "S" / "sax" / "observations.npz"; first.parent.mkdir(parents=True); first.write_bytes(b"same")
+    second = tmp_path / "two" / "S" / "prepared" / "S" / "sax" / "observations.npz"; second.parent.mkdir(parents=True); second.write_bytes(b"same")
+    with pytest.raises(RuntimeError, match="same-priority source"):
+        stage.locate_source_observation([tmp_path / "one", tmp_path / "two"], subject="S", stack="sax", expected_sha256=stage.digest(first))
