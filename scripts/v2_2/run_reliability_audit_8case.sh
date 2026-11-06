@@ -3,8 +3,10 @@ set -euo pipefail
 
 : "${ROOT:?Set ROOT to the project-local checkout}"
 : "${CASE_PLAN:?Set CASE_PLAN to a project-local JSON plan}"
+: "${RESOLVED_CASE_PLAN:=${ROOT}/runs/v2_2/00_preflight_inputs/resolved_case_plan.json}"
 : "${RUN_ROOT:=${ROOT}/runs/v2_2/02_same_world_audit/$(date -u +%Y%m%dT%H%M%SZ)}"
 [[ "${CASE_PLAN}" == "${ROOT}"/* && -f "${CASE_PLAN}" ]] || { echo "CASE_PLAN must be an existing project-local file" >&2; exit 2; }
+[[ "${RESOLVED_CASE_PLAN}" == "${ROOT}"/* && -f "${RESOLVED_CASE_PLAN}" ]] || { echo "RESOLVED_CASE_PLAN must be an existing staging artifact" >&2; exit 2; }
 [[ "${RUN_ROOT}" == "${ROOT}/runs/v2_2"/* && ! -e "${RUN_ROOT}" ]] || { echo "RUN_ROOT must be a new project-local directory" >&2; exit 2; }
 [[ "$(git -C "${ROOT}" branch --show-current)" == "ismrm_v2_2" ]] || { echo "wrong branch" >&2; exit 2; }
 
@@ -17,33 +19,30 @@ verify_sha "${B6_PATH}" 15981fbe93d2c70e14755ea756a02856c9383481e7d92d239619268a
 verify_sha "${PROTOCOL_PATH}" 3865b6bde1154750d4ed687456823fafad7b0cad5a61f763decb27dd1a4ed1c7
 export SIGNAL_DECODER_CHECKPOINT="${DECODER_PATH}" PROTOCOL_YAML="${PROTOCOL_PATH}"
 
-mapfile -t CASE_ROWS < <(python - "${CASE_PLAN}" "${ROOT}" <<'PY'
+mapfile -t CASE_ROWS < <(python - "${RESOLVED_CASE_PLAN}" "${ROOT}" <<'PY'
 import json, sys
 from pathlib import Path
 plan = json.load(open(sys.argv[1], encoding="utf-8"))
-if plan.get("schema") != "ismrm_v2_2/reliability_audit_case_plan/v1": raise SystemExit("unsupported case-plan schema")
+if plan.get("schema") != "ismrm_v2_2/reliability_audit_resolved_case_plan/v1": raise SystemExit("runner requires resolved_case_plan.json")
 cases = plan.get("cases")
 if not isinstance(cases, list) or len(cases) != 8: raise SystemExit("case plan must contain exactly eight cases")
 seen = set()
 for item in cases:
-    for key in ("label", "subject", "input_dir"):
+    for key in ("label", "subject", "resolved_case_id", "input_dir", "case_runtime"):
         if not isinstance(item.get(key), str): raise SystemExit(f"case missing {key}")
-    if not isinstance(item.get("case_id"), str) and not (isinstance(item.get("profile_id"), str) and isinstance(item.get("fold_id", 0), int)):
-        raise SystemExit("case requires case_id or profile_id/fold_id")
-    planned_case = item.get("case_id") or f"{item['profile_id']}_fold{item.get('fold_id', 0)}"
-    item["case_id"] = planned_case
+    planned_case = item["resolved_case_id"]
     key = (item["subject"], planned_case)
     if key in seen: raise SystemExit(f"duplicate case: {key}")
     seen.add(key)
     root = Path(sys.argv[2])
-    input_dir = (root / item["input_dir"].format(**item)).resolve()
+    input_dir = Path(item["input_dir"]).resolve()
     if not input_dir.is_relative_to(root.resolve()): raise SystemExit(f"case input_dir escapes project root: {input_dir}")
     runtime = input_dir / "case_runtime.json"
     if not runtime.is_file(): raise SystemExit(f"formal case input lacks case_runtime.json: {input_dir}")
     metadata = json.load(runtime.open(encoding="utf-8"))
     if metadata.get("geometry_checkpoint") != metadata.get("reconstruction_checkpoint") or not str(metadata.get("geometry_checkpoint", "")).endswith("/model.pt"):
         raise SystemExit(f"formal case runtime must use one staged model.pt for both checkpoint roles: {runtime}")
-    fields = (metadata["sparse_manifest"], metadata["prepared_root"], metadata["geometry_checkpoint"], metadata.get("timing_only_parameters", ""), metadata["reconstruction_checkpoint"])
+    fields = (metadata["sparse_manifest"], metadata["prepared_root"], metadata["geometry_checkpoint"], metadata.get("timing_only_parameters", ""), metadata["reconstruction_checkpoint"], ",".join(metadata.get("active_stacks", [])))
     print("\t".join((item["label"], item["subject"], planned_case, str(input_dir), *fields)))
 PY
 )
@@ -52,13 +51,15 @@ PY
 mkdir -p "${RUN_ROOT}"
 OUTPUT_DIRS=()
 for row in "${CASE_ROWS[@]}"; do
-  IFS=$'\t' read -r label subject case_id input_dir sparse_manifest prepared_root geometry_checkpoint timing_npz reconstruction_checkpoint <<< "${row}"
+  IFS=$'\t' read -r label subject case_id input_dir sparse_manifest prepared_root geometry_checkpoint timing_npz reconstruction_checkpoint active_stacks <<< "${row}"
   [[ -d "${input_dir}" && -f "${sparse_manifest}" && -d "${prepared_root}" && -f "${geometry_checkpoint}" ]] || { echo "missing case input for ${label}: ${input_dir}" >&2; exit 2; }
   output_dir="${RUN_ROOT}/${subject}/${case_id}"
   export SUBJECT="${subject}" CASE="${case_id}" PREPARED_ROOT="${prepared_root}" GEOMETRY_CHECKPOINT="${geometry_checkpoint}" OUTPUT_DIR="${output_dir}" SPARSE_MANIFEST="${sparse_manifest}"
   timing_dir="${RUN_ROOT}/timing_parameters/${subject}/${case_id}"
   timing_output="${timing_dir}/timing_only_parameters.npz"
-  if [[ "${EXPORT_TIMING_ONLY:-1}" == "1" ]]; then
+  if [[ "${active_stacks}" == "sax" ]]; then
+    unset TIMING_ONLY_PARAMETERS_NPZ || true
+  elif [[ "${EXPORT_TIMING_ONLY:-1}" == "1" ]]; then
     [[ -f "${reconstruction_checkpoint}" ]] || { echo "timing export reconstruction checkpoint missing for ${label}" >&2; exit 2; }
     mkdir -p "${timing_dir}"
     PYTHONPATH="${ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}" python -m ismrm_v2.v2_2.preflight.export_timing_only_anchor_parameters --subject "${subject}" --case "${case_id}" --prepared-root "${prepared_root}" --sparse-manifest "${sparse_manifest}" --geometry-checkpoint "${geometry_checkpoint}" --b6-model "${B6_PATH}" --protocol-yaml "${PROTOCOL_PATH}" --signal-decoder-checkpoint "${DECODER_PATH}" --reconstruction-checkpoint "${reconstruction_checkpoint}" --output "${timing_output}" --device "${DEVICE:-cpu}"
@@ -68,7 +69,7 @@ for row in "${CASE_ROWS[@]}"; do
   else
     unset TIMING_ONLY_PARAMETERS_NPZ || true
   fi
-  "${ROOT}/scripts/v2_2/run_reliability_audit_case.sh"
+  DEVICE="${DEVICE:-cpu}" "${ROOT}/scripts/v2_2/run_reliability_audit_case.sh"
   status=$(python - "${output_dir}/manifest.json" <<'PY'
 import json, sys
 print(json.load(open(sys.argv[1], encoding="utf-8")).get("status"))
@@ -90,4 +91,4 @@ done
 aggregate_dir="${ROOT}/runs/v2_2/03_same_world_aggregate/$(basename "${RUN_ROOT}")"
 args=()
 for directory in "${OUTPUT_DIRS[@]}"; do args+=(--audit-dir "${directory}"); done
-PYTHONPATH="${ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}" python -m ismrm_v2.v2_2.preflight.aggregate_reliability_audits "${args[@]}" --case-plan "${CASE_PLAN}" --output-dir "${aggregate_dir}"
+PYTHONPATH="${ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}" python -m ismrm_v2.v2_2.preflight.aggregate_reliability_audits "${args[@]}" --case-plan "${RESOLVED_CASE_PLAN}" --output-dir "${aggregate_dir}"

@@ -118,6 +118,7 @@ def export_anchor_parameters(
     geometry_checkpoint: str | Path,
     geometry_provenance: dict[str, Any],
     decoder_provenance: dict[str, Any] | None = None,
+    extra_provenance: dict[str, Any] | None = None,
 ) -> Path:
     """Write an immutable NPZ plus JSON sidecar with the exact anchor contract."""
     values = {name: np.asarray(value, dtype=np.float32) for name, value in (("t1_ms", t1_ms), ("t2_ms", t2_ms), ("b1", b1), ("amplitude", amplitude))}
@@ -131,7 +132,7 @@ def export_anchor_parameters(
     output.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(output, **values, anchor_order_sha256=np.asarray(anchor_hash))
     provenance = {
-        "schema": "ismrm_v2_2/timing_only_anchor_parameters/v2",
+        "schema": "ismrm_v2_2/timing_only_anchor_parameters/v3",
         "path": str(output), "sha256": _sha256_file(output),
         "reconstruction_checkpoint": str(Path(reconstruction_checkpoint).resolve()), "reconstruction_checkpoint_sha256": _sha256_file(Path(reconstruction_checkpoint)),
         "geometry_checkpoint": str(Path(geometry_checkpoint).resolve()), "geometry_checkpoint_sha256": _sha256_file(Path(geometry_checkpoint)),
@@ -142,6 +143,15 @@ def export_anchor_parameters(
     }
     if decoder_provenance:
         provenance.update(decoder_provenance)
+    if extra_provenance:
+        provenance.update(extra_provenance)
+    # Recompute the NPZ digest after all values have been written, and keep the
+    # fixed identity fields authoritative even when callers provide extras.
+    provenance["path"] = str(output)
+    provenance["sha256"] = _sha256_file(output)
+    provenance["anchor_order_sha256"] = anchor_hash
+    provenance["anchor_count"] = count
+    provenance["parameter_array_sha256"] = {name: hashlib.sha256(value.tobytes()).hexdigest() for name, value in values.items()}
     output.with_suffix(".json").write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return output
 
@@ -186,7 +196,14 @@ def export_from_frozen_checkpoint(
         raise ValueError("frozen model intensity_scale must be one finite positive scalar for amplitude export")
     amplitude = fields["amplitude"] * intensity_scale
     decoder_provenance = {"runtime_decoder_path": str(runtime_decoder) if runtime_decoder else None, "runtime_decoder_sha256": runtime_decoder_sha256, "scientific_decoder_content_changed": False}
-    return export_anchor_parameters(output_path, t1_ms=fields["t1_ms"].detach().cpu().numpy(), t2_ms=fields["t2_ms"].detach().cpu().numpy(), b1=fields["b1"].detach().cpu().numpy(), amplitude=amplitude.detach().cpu().numpy(), joint_dataset=joint_dataset, reconstruction_checkpoint=reconstruction_checkpoint, geometry_checkpoint=geometry_checkpoint, geometry_provenance=geometry_provenance | checkpoint_provenance | {"checkpoint_load": "audit-only quantitative checkpoint loaded", "trained_pose_key_not_used": "trained_axisangle_train"} | dict(provenance or {}), decoder_provenance=decoder_provenance)
+    extra_provenance = {
+        "checkpoint_training_space_sha256": checkpoint_provenance.get("checkpoint_training_space_sha256"),
+        "selected_geometry_key": geometry_provenance.get("selected_key"),
+        "trained_pose_key_not_used": "trained_axisangle_train",
+        "checkpoint_load": "audit-only quantitative checkpoint loaded",
+        **dict(provenance or {}),
+    }
+    return export_anchor_parameters(output_path, t1_ms=fields["t1_ms"].detach().cpu().numpy(), t2_ms=fields["t2_ms"].detach().cpu().numpy(), b1=fields["b1"].detach().cpu().numpy(), amplitude=amplitude.detach().cpu().numpy(), joint_dataset=joint_dataset, reconstruction_checkpoint=reconstruction_checkpoint, geometry_checkpoint=geometry_checkpoint, geometry_provenance=geometry_provenance | checkpoint_provenance, decoder_provenance=decoder_provenance, extra_provenance=extra_provenance)
 
 
 def build_parser() -> argparse.ArgumentParser:

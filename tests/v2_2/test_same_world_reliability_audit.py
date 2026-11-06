@@ -20,6 +20,7 @@ from ismrm_v2.v2_2.preflight.reference_sampling import (
 from ismrm_v2.v2_2.preflight.export_timing_only_anchor_parameters import export_anchor_parameters
 import ismrm_v2.v2_2.preflight.export_timing_only_anchor_parameters as timing_export
 import ismrm_v2.v2_2.preflight.same_world_reliability_audit as same_world
+import ismrm_v2.v2_2.preflight.cross_view_reliability_audit as cross_view
 
 
 def test_trilinear_sampling_recovers_ten_channel_linear_field():
@@ -112,7 +113,23 @@ def test_timing_parameter_export_records_frozen_geometry_and_anchor_order(tmp_pa
     assert provenance["scientific_decoder_content_changed"] is False
 
 
-def test_timing_export_relocates_decoder_before_model_construction(monkeypatch, tmp_path):
+def test_timing_export_sidecar_round_trips_through_audit_loader(tmp_path):
+    class Dataset:
+        xyz = torch.zeros((2, 3)); stack_idx = torch.tensor([0, 1]); group_idx = torch.tensor([0, 1]); row_col = torch.tensor([[0, 0], [1, 1]])
+    checkpoint = tmp_path / "model.pt"; checkpoint.write_bytes(b"model")
+    geometry = tmp_path / "geometry.pt"; geometry.write_bytes(b"geometry")
+    expected_extra = {"subject": "S", "requested_case": "case", "resolved_case": "case_fold0", "active_observation_records": {"sax": {"path": "/project/sax.npz", "sha256": "a" * 64}}, "sparse_working_manifest_sha256": "b" * 64, "checkpoint_training_space_sha256": "c" * 64, "protocol_yaml": "/project/protocol.yaml", "protocol_sha256": "d" * 64, "approved_runtime_decoder_sha256": timing_export.APPROVED_DECODER_SHA256, "git_sha": "e" * 40}
+    output = export_anchor_parameters(tmp_path / "timing.npz", t1_ms=np.array([1., 2.]), t2_ms=np.array([3., 4.]), b1=np.array([.9, 1.]), amplitude=np.array([2., 3.]), joint_dataset=Dataset(), reconstruction_checkpoint=checkpoint, geometry_checkpoint=geometry, geometry_provenance={"selected_key": "group_axisangle_post_stack_init_physical", "post_hb1_geometry_sha256": "f" * 64}, extra_provenance=expected_extra)
+    anchor_hash = timing_export._joint_anchor_order_sha256(Dataset())
+    loaded = cross_view._load_timing_only_parameters(output, 2, anchor_hash, expected_provenance={**expected_extra, "anchor_order_sha256": anchor_hash, "anchor_count": 2, "reconstruction_checkpoint_sha256": timing_export._sha256_file(checkpoint), "geometry_checkpoint_sha256": timing_export._sha256_file(geometry), "post_hb1_geometry_sha256": "f" * 64})
+    assert loaded["provenance"]["schema"].endswith("/v3")
+    sidecar = output.with_suffix(".json")
+    payload = json.loads(sidecar.read_text()); payload["subject"] = "stale"; sidecar.write_text(json.dumps(payload))
+    with pytest.raises(ValueError, match="subject"):
+        cross_view._load_timing_only_parameters(output, 2, anchor_hash, expected_provenance={**expected_extra, "anchor_order_sha256": anchor_hash, "anchor_count": 2, "reconstruction_checkpoint_sha256": timing_export._sha256_file(checkpoint), "geometry_checkpoint_sha256": timing_export._sha256_file(geometry), "post_hb1_geometry_sha256": "f" * 64})
+
+
+def test_timing_export_loads_quantitative_inr_without_constructing_decoder(monkeypatch, tmp_path):
     captured = {}
     class Model(torch.nn.Module):
         intensity_scale = torch.ones(())
@@ -142,6 +159,15 @@ def test_eight_case_runner_passes_runtime_decoder_to_exporter():
     assert '--signal-decoder-checkpoint "${DECODER_PATH}"' in script
 
 
+def test_formal_runner_consumes_resolved_plan_and_skips_sax_only_timing_export():
+    script = Path("scripts/v2_2/run_reliability_audit_8case.sh").read_text()
+    assert "ismrm_v2_2/reliability_audit_resolved_case_plan/v1" in script
+    assert 'planned_case = item["resolved_case_id"]' in script
+    assert 'f"{item[\'profile_id\']}_fold' not in script
+    assert 'if [[ "${active_stacks}" == "sax" ]]' in script
+    assert '--device "${DEVICE:-cpu}"' in Path("scripts/v2_2/run_reliability_audit_case.sh").read_text()
+
+
 def test_legacy_sparse_l50_uses_derived_observation_not_source(monkeypatch, tmp_path):
     source = tmp_path / "source"; derived = tmp_path / "derived"
     for base in (source, derived):
@@ -167,6 +193,17 @@ def test_timing_only_pair_calls_decoder_without_amplitude_argument():
     l1, cosine, status = same_world._timing_only_pair(Decoder(), parameters, arrays, np.array([0, 1]), np.ones((2, 9)), np.array([True, True]))
     assert status["status"] == "run"
     assert np.isfinite(l1).all() and np.isfinite(cosine).all()
+
+
+def test_timing_only_reference_mixes_nonlinear_plane_signals():
+    class NonlinearDecoder(torch.nn.Module):
+        def forward(self, t1_ms, t2_ms, b1, timing9_ms):
+            return torch.cat((timing9_ms[:, :1].square(), torch.ones((timing9_ms.shape[0], 9))), dim=1)
+    arrays = {"physical_xyz": np.zeros((1, 3)), "timing": np.full((1, 9), 1.5)}
+    parameters = {"t1_ms": np.array([1000.]), "t2_ms": np.array([50.]), "b1": np.ones(1), "amplitude": np.ones(1)}
+    l1, _, status = same_world._timing_only_pair(NonlinearDecoder(), parameters, arrays, np.array([0]), np.full((1, 9), 1.5), np.array([True]), reference_timing_by_group={0: np.ones(9), 1: np.full(9, 2.)}, support_group_idx=np.array([[0, 1]]), support_weights=np.array([[.5, .5]]))
+    assert status["reference_timing_simulation"] == "mixture_of_plane_signals"
+    assert np.isclose(l1[0], .025)
 
 
 def test_staging_finds_nested_model_and_rebases_historical_manifest(monkeypatch, tmp_path):

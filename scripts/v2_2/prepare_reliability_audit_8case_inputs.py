@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import shutil
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -117,7 +118,7 @@ def locate_matching_observation(roots: list[Path], *, subject: str, case_id: str
     raise FileNotFoundError(f"no current project-local {stack} observation matches recorded SHA256 {expected_sha256}")
 
 
-def stage_case(item: dict[str, Any], *, root: Path, manifest_root: Path, geometry_root: Path, reconstruction_root: Path, observation_roots: list[Path], digest_cache: dict[Path, str] | None = None) -> None:
+def stage_case(item: dict[str, Any], *, root: Path, manifest_root: Path, geometry_root: Path, reconstruction_root: Path, observation_roots: list[Path], digest_cache: dict[Path, str] | None = None) -> dict[str, Any]:
     subject = item["subject"]
     source_manifest, case_id = resolve_manifest(manifest_root, subject, item)
     destination = (root / item["input_dir"].format(**(item | {"case_id": case_id}))).resolve()
@@ -178,13 +179,14 @@ def stage_case(item: dict[str, Any], *, root: Path, manifest_root: Path, geometr
     model_target = destination / "model.pt"
     shutil.copy2(model, model_target)
     model_sha = digest(model_target, digest_cache)
-    runtime = {"schema": "ismrm_v2_2/reliability_audit_case_runtime/v2", "subject": subject, "case_id": case_id, "source_manifest": str(source_manifest), "source_manifest_sha256": source_sha, "sparse_manifest": str(working_manifest), "sparse_manifest_sha256": digest(working_manifest), "prepared_root": str(prepared_root), "model_checkpoint": str(model_target), "model_checkpoint_sha256": model_sha, "geometry_checkpoint": str(model_target), "geometry_checkpoint_sha256": model_sha, "reconstruction_checkpoint": str(model_target), "reconstruction_checkpoint_sha256": model_sha, "input_observation_mode": "source" if use_source else "derived", "active_observations": active_records}
+    runtime = {"schema": "ismrm_v2_2/reliability_audit_case_runtime/v2", "subject": subject, "case_id": case_id, "source_manifest": str(source_manifest), "source_manifest_sha256": source_sha, "sparse_manifest": str(working_manifest), "sparse_manifest_sha256": digest(working_manifest), "prepared_root": str(prepared_root), "model_checkpoint": str(model_target), "model_checkpoint_sha256": model_sha, "geometry_checkpoint": str(model_target), "geometry_checkpoint_sha256": model_sha, "reconstruction_checkpoint": str(model_target), "reconstruction_checkpoint_sha256": model_sha, "input_observation_mode": "source" if use_source else "derived", "active_stacks": [record["stack"] for record in active_records], "active_observations": active_records}
     (destination / "case_runtime.json").write_text(json.dumps(runtime, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return {"label": item.get("label"), "subject": subject, "requested_case": item.get("case_id"), "requested_selector": {key: item[key] for key in ("case_id", "profile_id", "fold_id") if key in item}, "profile_id": item.get("profile_id"), "fold_id": item.get("fold_id"), "resolved_case_id": case_id, "input_dir": str(destination), "case_runtime": str(destination / "case_runtime.json"), "source_manifest": str(source_manifest), "working_manifest": str(working_manifest)}
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", required=True); parser.add_argument("--case-plan", required=True); parser.add_argument("--manifest-root", required=True); parser.add_argument("--geometry-root", required=True); parser.add_argument("--reconstruction-root", required=True); parser.add_argument("--observation-root", action="append", default=[])
+    parser.add_argument("--root", required=True); parser.add_argument("--case-plan", required=True); parser.add_argument("--manifest-root", required=True); parser.add_argument("--geometry-root", required=True); parser.add_argument("--reconstruction-root", required=True); parser.add_argument("--observation-root", action="append", default=[]); parser.add_argument("--staging-id", help="Optional immutable run-scoped staging ID.")
     args = parser.parse_args()
     root = Path(args.root).resolve()
     observation_root_values = args.observation_root or [str(root / "runs" / "frozen_baseline"), str(root / "runs" / "sparse_inputs"), args.manifest_root]
@@ -195,9 +197,17 @@ def main() -> None:
     plan = json.loads(Path(args.case_plan).read_text(encoding="utf-8"))
     if plan.get("schema") != "ismrm_v2_2/reliability_audit_case_plan/v1" or len(plan.get("cases", [])) != 8:
         raise ValueError("case plan must contain exactly eight cases")
+    staging_id = args.staging_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     digest_cache: dict[Path, str] = {}
+    resolved_entries = []
     for item in plan["cases"]:
-        stage_case(item, root=root, manifest_root=Path(args.manifest_root).resolve(), geometry_root=Path(args.geometry_root).resolve(), reconstruction_root=Path(args.reconstruction_root).resolve(), observation_roots=[Path(value).resolve() for value in observation_root_values], digest_cache=digest_cache)
+        staged_item = dict(item)
+        staged_item["input_dir"] = str(Path("runs/v2_2/00_preflight_inputs") / staging_id / "{subject}" / "{case_id}")
+        resolved_entries.append(stage_case(staged_item, root=root, manifest_root=Path(args.manifest_root).resolve(), geometry_root=Path(args.geometry_root).resolve(), reconstruction_root=Path(args.reconstruction_root).resolve(), observation_roots=[Path(value).resolve() for value in observation_root_values], digest_cache=digest_cache))
+    resolved_plan_path = root / "runs" / "v2_2" / "00_preflight_inputs" / staging_id / "resolved_case_plan.json"
+    resolved_plan_path.parent.mkdir(parents=True, exist_ok=True)
+    resolved_plan_path.write_text(json.dumps({"schema": "ismrm_v2_2/reliability_audit_resolved_case_plan/v1", "source_case_plan": str(Path(args.case_plan).resolve()), "cases": resolved_entries}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(resolved_plan_path)
 
 
 if __name__ == "__main__":

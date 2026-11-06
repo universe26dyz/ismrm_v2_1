@@ -36,6 +36,8 @@ from .discrepancy import (
 )
 from .reference_sampling import RegularGridReference, build_regular_grid_reference, build_slice_stack_reference, replace_slice_values, sample_regular_grid_trilinear, sample_slice_stack
 
+APPROVED_DECODER_SHA256 = "338f2c0b8db90851f733ed31caa2c99914605fed3f7215ec2f69f19eba59583b"
+
 
 def _summary(values: np.ndarray) -> dict[str, Any]:
     finite = np.asarray(values, dtype=np.float64)
@@ -416,6 +418,9 @@ def main() -> None:
     if args.signal_decoder_checkpoint:
         if not args.protocol_yaml:
             raise ValueError("--signal-decoder-checkpoint requires --protocol-yaml")
+        decoder_sha256 = _sha256_file(Path(args.signal_decoder_checkpoint).resolve())
+        if decoder_sha256 != APPROVED_DECODER_SHA256:
+            raise RuntimeError(f"BLOCKED_ASSET_SHA: formal audit requires approved decoder SHA256 {APPROVED_DECODER_SHA256}, got {decoder_sha256}")
         try:
             timing_domain = validate_decoder_timing_domain(args.signal_decoder_checkpoint, scalar.timing.detach().cpu().numpy())
         except (FileNotFoundError, ValueError) as error:

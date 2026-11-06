@@ -90,11 +90,16 @@ def aggregate_reliability_audits(audit_dirs: list[str | Path], output_dir: str |
     heartbeat_stress = {"DYL_2_L100": stress(dyl_l100), "DYL_2_asymmetric_sparse": stress(dyl_asymmetric), "non_DYL_2": stress(non_dyl_pairs)}
     if case_plan is not None:
         plan = _read_json(Path(case_plan))
-        expected = {(item["subject"], item.get("case_id") or f"{item['profile_id']}_fold{item.get('fold_id', 0)}", item.get("profile_id")) for item in plan.get("cases", [])}
-        if plan.get("schema") != "ismrm_v2_2/reliability_audit_case_plan/v1" or len(expected) != 8 or len(directories) != 8 or len({item[0] for item in expected}) != 5:
+        if plan.get("schema") == "ismrm_v2_2/reliability_audit_resolved_case_plan/v1":
+            expected = {(item["subject"], item["resolved_case_id"], item.get("profile_id")) for item in plan.get("cases", [])}
+        elif plan.get("schema") == "ismrm_v2_2/reliability_audit_case_plan/v1" and all(isinstance(item.get("case_id"), str) for item in plan.get("cases", [])):
+            expected = {(item["subject"], item["case_id"], item.get("profile_id")) for item in plan.get("cases", [])}
+        else:
+            expected = set()
+        if len(expected) != 8 or len(directories) != 8 or len({item[0] for item in expected}) != 5:
             raise ValueError("formal aggregate requires exactly eight unique planned cases")
         for subject, planned_case, profile in expected:
-            matches = [row for row in case_rows if row["subject"] == subject and (row.get("requested_case") == planned_case or row.get("resolved_case") == planned_case or profile is not None and row.get("profile_id") == profile)]
+            matches = [row for row in case_rows if row["subject"] == subject and (row.get("resolved_case") == planned_case or row.get("case_id") == planned_case)]
             if len(matches) != 1:
                 raise ValueError(f"formal aggregate case-plan mismatch for {subject}/{planned_case}")
             row = matches[0]
