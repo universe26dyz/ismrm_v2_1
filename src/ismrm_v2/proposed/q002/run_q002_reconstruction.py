@@ -17,7 +17,7 @@ from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
 from ismrm_v2.proposed.inference.export_quantitative import export_quantitative_outputs, export_quantitative_outputs_psf128
 from ismrm_v2.proposed.inference.reprojection import export_native_plane_reprojections
 
-from ismrm_v2.proposed.q002.contracts import Q002_EXPERIMENT_ID, Q002S640_EXPERIMENT_ID, Q002S640_K256_EXPERIMENT_ID, Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID, Q004S640_K1_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, build_q002_route_config, cropped_observation_paths, profiled_observation_paths
+from ismrm_v2.proposed.q002.contracts import B0_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID, Q002_EXPERIMENT_ID, Q002S640_EXPERIMENT_ID, Q002S640_K256_EXPERIMENT_ID, Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID, Q004S640_K1_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, build_q002_route_config, cropped_observation_paths, profiled_observation_paths
 from ismrm_v2.proposed.q002.joint_dataset import JointAnchorDataset
 from ismrm_v2.proposed.q002.training import train_q002_reconstruction
 from ismrm_v2.proposed.q002.training_curves import generate_convergence_artifacts, generate_q004_convergence_artifacts
@@ -167,6 +167,12 @@ def run(args: argparse.Namespace) -> Path:
         fingerprint_cosine=fingerprint_cosine,
         continuation=route["route"].get("continuation"),
         training_psf_samples=training_psf_samples,
+        cross_view_reliability=route["route"].get("cross_view_reliability"),
+        stack_balance=route["route"].get("stack_balance"),
+        reliability_provenance={
+            "observation_sha256": {str(path): _sha256(path) for path in inputs},
+            "sparse_manifest": ({"path": sparse_profile.get("_manifest_path"), "sha256": sparse_profile.get("_manifest_sha256")} if sparse_profile is not None else None),
+        },
     )
     export = resolved["export"]; export_config = {"bbox": resolved.get("bbox", {}), **export}
     raw_paths = export_quantitative_outputs(result["model"], result["training_space"], output, float(export["output_resolution_mm"]), int(export["output_batch_size"]), dataset=scalar, export_config=export_config)
@@ -201,7 +207,9 @@ def run(args: argparse.Namespace) -> Path:
         export_quantitative_outputs_psf128(result["model"], result["training_space"], output, dataset=scalar, export_config=export_config, batch_size=int(export["output_batch_size"]), experiment_id=args.experiment_id, subject_id=args.subject_id, source_checkpoint=output / "model.pt", reconstruction_code_git_commit=git_sha)
     protocol_path = Path(args.protocol)
     protocol_provenance = {"protocol_path": str(protocol_path), "protocol_sha256": _sha256(protocol_path)} if protocol_path.is_file() else {}
-    common = {"experiment_id": args.experiment_id, "subject_id": args.subject_id, "route": route["route"], "reconstruction_git_sha": git_sha, "git_dirty": bool(__import__("subprocess").check_output(["git", "status", "--porcelain"], text=True).strip()), "B6_model_path": str(Path(args.b6_model)), "b6_model_sha256": _sha256(Path(args.b6_model)), "decoder_relocation":{"b6_resolved_config_path":source_decoder_path,"runtime_decoder_path":str(Path(args.signal_simulator)),"approved_decoder_sha256":_sha256(Path(args.signal_simulator)),"scientific_config_changed":False}, "approved_decoder_path": str(Path(args.signal_simulator)), "approved_decoder_sha256": _sha256(Path(args.signal_simulator)), "dependency_sha256": {"B6_model": _sha256(Path(args.b6_model)), "frozen_decoder": _sha256(Path(args.signal_simulator)), **({"protocol": _sha256(protocol_path)} if protocol_path.is_file() else {})}, **protocol_provenance, "prepared_inputs_sha256": {str(path): _sha256(path) for path in inputs}, "joint_dataset_qc": joint.qc, "controls": result["controls"], "intensity_normalization": result["intensity_normalization"], "stack_weights": result["stack_weights"], "fixed_monitor": {"seed": result["fixed_monitor"]["seed"], "anchor_identity_sha256": result["fixed_monitor"]["anchor_identity_sha256"]}, "q002_checkpoint_sha256": _sha256(output / "model.pt"), "psf128_contract": {"resolution_mm": 1.0, "factor": 1.0, "samples": 128, "seed": 20260911}}
+    common = {"experiment_id": args.experiment_id, "subject_id": args.subject_id, "route": route["route"], "reconstruction_git_sha": git_sha, "git_dirty": bool(__import__("subprocess").check_output(["git", "status", "--porcelain"], text=True).strip()), "B6_model_path": str(Path(args.b6_model)), "b6_model_sha256": _sha256(Path(args.b6_model)), "decoder_relocation":{"b6_resolved_config_path":source_decoder_path,"runtime_decoder_path":str(Path(args.signal_simulator)),"approved_decoder_sha256":_sha256(Path(args.signal_simulator)),"scientific_config_changed":False}, "approved_decoder_path": str(Path(args.signal_simulator)), "approved_decoder_sha256":_sha256(Path(args.signal_simulator)), "dependency_sha256": {"B6_model": _sha256(Path(args.b6_model)), "frozen_decoder": _sha256(Path(args.signal_simulator)), **({"protocol": _sha256(protocol_path)} if protocol_path.is_file() else {})}, **protocol_provenance, "prepared_inputs_sha256": {str(path): _sha256(path) for path in inputs}, "joint_dataset_qc": joint.qc, "controls": result["controls"], "intensity_normalization": result["intensity_normalization"], "stack_weights": result["stack_weights"], "fixed_monitor": {"seed": result["fixed_monitor"]["seed"], "anchor_identity_sha256": result["fixed_monitor"]["anchor_identity_sha256"]}, "q002_checkpoint_sha256": _sha256(output / "model.pt"), "psf128_contract": {"resolution_mm": 1.0, "factor": 1.0, "samples": 128, "seed": 20260911}}
+    if result.get("reliability_cache") is not None:
+        common["cross_view_reliability"] = result["reliability_cache"].manifest()
     if sparse_profile is not None:
         common.update(sparse_profile_provenance(sparse_profile, inputs))
     if args.experiment_id == Q003S640_EXPERIMENT_ID:
@@ -248,7 +256,7 @@ These are mechanistic interpretations, not population-level claims.
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cropped-prepared-root", required=True); parser.add_argument("--subject-id", default="CYJ"); parser.add_argument("--sparse-manifest"); parser.add_argument("--expected-sparse-generator-git-sha"); parser.add_argument("--expected-sparse-manifest-sha256"); parser.add_argument("--b6-model", required=True); parser.add_argument("--expected-b6-model-sha256"); parser.add_argument("--signal-simulator", required=True); parser.add_argument("--expected-decoder-sha256"); parser.add_argument("--protocol", default="mlp/configs/protocol_scmr_v5_10_100.yaml"); parser.add_argument("--expected-protocol-sha256"); parser.add_argument("--output", required=True); parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--experiment-id", choices=(Q002_EXPERIMENT_ID, Q002S640_EXPERIMENT_ID, Q002S640_K256_EXPERIMENT_ID, Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID, Q004S640_K1_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID), default=Q002_EXPERIMENT_ID)
+    parser.add_argument("--experiment-id", choices=(Q002_EXPERIMENT_ID, Q002S640_EXPERIMENT_ID, Q002S640_K256_EXPERIMENT_ID, Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID, Q004S640_K1_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, B0_R0_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID), default=Q002_EXPERIMENT_ID)
     parser.add_argument("--anchor-batch-size", type=int, default=64)
     parser.add_argument("--endpoint-policy", choices=("legacy", "central_only"), default="legacy")
     return parser

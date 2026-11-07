@@ -25,6 +25,10 @@ from ismrm_v2.proposed.reconstruction.orchestration import (
 from ismrm_v2.proposed.training.experiment_infrastructure import normalize_step1_config
 from ismrm_v2.proposed.training.experiment_infrastructure import CachedBalancedSampler
 from ismrm_v2.proposed.rigid_psf.hb1_stack_adapter import initialize_group_poses_from_hb1
+from ismrm_v2.v2_2.stage_b_reliability import (
+    ReliabilityCache, ReliabilityConfig, build_reliability_cache, gate_floor, reliability_weighted_joint_mse,
+    stage_b_progress,
+)
 
 
 def q002_training_controls(training: Mapping[str, Any], *, anchor_batch_size: int = 64, training_psf_samples: int = 8) -> dict[str, int]:
@@ -189,11 +193,15 @@ def regularization_batch_from_b6_scalar_support(sampler: CachedBalancedSampler, 
     return {"batch": batch, "candidate_count": int(batch["xyz"].shape[0]), "effective_point_count": int(n_points), "sampling_source": "B6 scalar cropped support"}
 
 
-def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: Mapping[str, Any], protocol_yaml: str | Path, output_dir: str | Path, *, prepared_inputs: list[str | Path], anchor_batch_size: int = 64, fingerprint_cosine: Mapping[str, Any] | None = None, continuation: Mapping[str, Any] | None = None, training_psf_samples: int = 8) -> dict[str, Any]:
+def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: Mapping[str, Any], protocol_yaml: str | Path, output_dir: str | Path, *, prepared_inputs: list[str | Path], anchor_batch_size: int = 64, fingerprint_cosine: Mapping[str, Any] | None = None, continuation: Mapping[str, Any] | None = None, training_psf_samples: int = 8, cross_view_reliability: Mapping[str, Any] | None = None, stack_balance: Mapping[str, Any] | None = None, reliability_provenance: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Train fresh same-anchor state; Q003 changes only the shared data objective."""
 
     resolved = normalize_step1_config(_with_protocol_path(config, protocol_yaml))
     training, loss_cfg = _require(resolved, "training"), _require(resolved, "loss")
+    stack_balance_cfg = stack_balance if stack_balance is not None else resolved.get("stack_balance", {"enabled": True})
+    stack_balance_enabled = bool(dict(stack_balance_cfg).get("enabled", True))
+    reliability_cfg = cross_view_reliability if cross_view_reliability is not None else resolved.get("cross_view_reliability")
+    reliability_config = ReliabilityConfig.from_mapping(reliability_cfg)
     controls = q002_training_controls(training, anchor_batch_size=anchor_batch_size, training_psf_samples=training_psf_samples)
     training_psf_samples = int(controls["training_psf_samples"] if "training_psf_samples" in controls else controls["psf_samples"])
     cosine_cfg = dict(fingerprint_cosine or {"enabled": False, "weight": 0.0, "epsilon": 1.0e-8})
@@ -204,6 +212,8 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         raise ValueError("Fingerprint cosine is only enabled for the 640-anchor Q003 route.")
     if cosine_enabled and (cosine_weight != 1.0 or cosine_epsilon != 1.0e-8):
         raise ValueError("Q003 requires fingerprint cosine weight=1.0 and epsilon=1e-8.")
+    if reliability_config.enabled and cosine_enabled:
+        raise ValueError("Stage-B reliability routes must keep the Q003 prediction-vs-observation cosine objective disabled.")
     continuation_enabled = continuation is not None
     continuation_plan = q003_10k_training_plan(training) if continuation_enabled else None
     if continuation_enabled and (not cosine_enabled or controls["anchor_batch_size"] != 640 or dict(continuation or {}).get("stage_b_extension_iterations") != 4000):
@@ -225,10 +235,32 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         raise FileExistsError(f"Q002 output_dir must be absent or empty: {output}")
     output.mkdir(parents=True, exist_ok=True)
     sampler = JointAnchorSampler(joint_dataset, seed=controls["seed"], anchor_batch_size=controls["anchor_batch_size"], training_psf_samples=training_psf_samples)
+    reliability_cache: ReliabilityCache | None = None
+    if reliability_config.enabled:
+        if stack_initialization is None:
+            raise ValueError("Stage-B reliability requires fixed post-HB1 stack initialization geometry.")
+        sax_observation_path = next((Path(path) for path in prepared_inputs if Path(path).parent.name == "sax"), None)
+        reliability_cache = build_reliability_cache(
+            joint_dataset,
+            group_axisangle_post_stack_init_physical=stack_initialization.post_stack_init_axisangle_physical,
+            sax_observation_path=sax_observation_path,
+            config=reliability_config,
+            provenance={"prepared_inputs": [str(Path(path)) for path in prepared_inputs], **dict(reliability_provenance or {})},
+            cache_directory=output / "reliability",
+        )
+    elif not stack_balance_enabled:
+        # B0_R0 is an independent stack-balance ablation; retain the same
+        # objective implementation while removing only the balance prefactor.
+        reliability_cache = None
     regularization_sampler = CachedBalancedSampler(scalar_dataset)
     monitor = joint_dataset.fixed_monitor(seed=controls["seed"], samples_per_stack=int(training.get("monitor_samples_per_weight_per_stack", 1)))
     (output / "fixed_monitor.json").write_text(json.dumps({"seed": monitor["seed"], "samples_per_stack": monitor["samples_per_stack"], "anchor_identity_sha256": monitor["anchor_identity_sha256"]}, indent=2) + "\n")
+    resolved["stack_balance"] = {"enabled": stack_balance_enabled}
+    resolved["cross_view_reliability"] = reliability_config.as_dict()
     resolved_record = dict(resolved); resolved_record["q002_sampling"] = controls; resolved_record["q002_joint_stack_weights"] = {int(k): float(v) for k, v in joint_dataset.stack_weights.items()}; resolved_record["q002_intensity_normalization"] = normalization
+    if reliability_cache is not None:
+        resolved["cross_view_reliability_cache"] = reliability_cache.manifest()
+        resolved_record["cross_view_reliability_cache"] = reliability_cache.manifest()
     if cosine_enabled:
         resolved_record["q003_fingerprint_cosine"] = {"enabled": True, "weight": cosine_weight, "epsilon": cosine_epsilon}
     if continuation_plan is not None:
@@ -242,6 +274,8 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         fields[2:2] = ["fingerprint_cosine_loss", "weighted_fingerprint_cosine_loss", "total_data_loss", "pred_norm_clamp_count", "obs_norm_clamp_count", "any_norm_clamp_count"]
     if continuation_plan is not None:
         fields = q003_10k_training_log_fields()
+    if reliability_config.enabled:
+        fields += ["reliability_enabled", "reliability_discrepancy", "reliability_valid_fraction", "reliability_tau", "reliability_w_min", "reliability_gate_mean", "reliability_gate_min", "reliability_gate_p10", "reliability_gate_p50", "reliability_gate_p90", "reliability_multiplier_mean", "reliability_multiplier_mean_by_stack", "reliability_fraction_gate_lt_0_25", "reliability_fraction_gate_lt_0_5", "reliability_invalid_reference_fraction"]
     log_handle = (output / "training_log.csv").open("w", newline="", encoding="utf-8"); monitor_handle = (output / "monitor_log.csv").open("w", newline="", encoding="utf-8")
     monitor_fields = ["iteration", "stage", "monitor_mse", "per_weight_mse", "per_stack_mse", "fixed_monitor_anchor_identity_sha256"]
     if cosine_enabled:
@@ -254,8 +288,18 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
             global_iteration += 1
             batch = sampler.sample(); batch["xyz"] = space.local_to_train(batch["xyz"].to(device)); batch["group_idx"] = batch["group_idx"].to(device); batch["stack_idx"] = batch["stack_idx"].to(device); batch["timing"] = batch["timing"].to(device); batch["observed"] = batch["observed"].to(device)
             prediction = model.forward_fingerprint(batch, training_psf_samples, psf_chunk_size=controls["psf_forward_chunk_size"])
-            data_terms = joint_fingerprint_objective(prediction, batch["observed"] / model.intensity_scale, batch["stack_idx"], joint_dataset.stack_weights, cosine_weight=cosine_weight, cosine_epsilon=cosine_epsilon)
-            data = data_terms["total_data_loss"]
+            observed = batch["observed"] / model.intensity_scale
+            if reliability_config.enabled or not stack_balance_enabled:
+                base_weights = joint_dataset.stack_weights if stack_balance_enabled else {int(stack): 1.0 for stack in batch["stack_idx"].unique().tolist()}
+                base_terms = joint_fingerprint_objective(prediction, observed, batch["stack_idx"], base_weights, cosine_weight=0.0, cosine_epsilon=cosine_epsilon)
+                gate = None
+                if reliability_cache is not None and stage == "B":
+                    gate = reliability_cache.gate_for_indices(batch["anchor_idx"], progress=stage_b_progress(iteration, iterations), config=reliability_config)
+                data, reliability_terms = reliability_weighted_joint_mse(prediction, observed, batch["stack_idx"], joint_dataset.stack_weights, gate, enabled=reliability_config.enabled, stage=stage, stack_balance_enabled=stack_balance_enabled)
+                data_terms = dict(base_terms); data_terms["total_data_loss"] = data; data_terms["reliability_terms"] = reliability_terms
+            else:
+                data_terms = joint_fingerprint_objective(prediction, observed, batch["stack_idx"], joint_dataset.stack_weights, cosine_weight=cosine_weight, cosine_epsilon=cosine_epsilon)
+                data = data_terms["total_data_loss"]
             regularization_cfg = _require(resolved, "spatial_regularization")
             regularization_batch = regularization_batch_from_b6_scalar_support(regularization_sampler, n_points=int(regularization_cfg["n_points"]))
             scalar_regularization = regularization_batch["batch"]
@@ -271,6 +315,19 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
                 row.update({"fingerprint_cosine_loss": float(data_terms["fingerprint_cosine_loss"].detach()), "weighted_fingerprint_cosine_loss": float(data_terms["weighted_fingerprint_cosine_loss"].detach()), "total_data_loss": float(data_terms["total_data_loss"].detach()), "pred_norm_clamp_count": data_terms["pred_norm_clamp_count"], "obs_norm_clamp_count": data_terms["obs_norm_clamp_count"], "any_norm_clamp_count": data_terms["any_norm_clamp_count"]})
             if controls["anchor_batch_size"] == 640:
                 row.update({"anchor_batch_size": batch["anchor_batch_size"], "weights_per_anchor": batch["weights_per_anchor"], "signal_residual_count": batch["signal_residual_count"], "training_psf_samples": batch["training_psf_samples"], "data_psf_inr_location_count": batch["data_psf_inr_location_count"], "psf_forward_chunk_size": controls["psf_forward_chunk_size"], "regularization_application_count": 1})
+            if reliability_config.enabled:
+                reliability_terms = data_terms["reliability_terms"]
+                gate = reliability_terms["reliability_gate"]
+                multiplier = reliability_terms["reliability_multiplier"]
+                if gate is None:
+                    valid_fraction = float(reliability_cache.reference_valid[batch["anchor_idx"].detach().cpu().numpy()].mean()) if reliability_cache is not None else 0.0
+                    reliability_row = {"reliability_enabled": True, "reliability_discrepancy": "raw_cosine", "reliability_valid_fraction": valid_fraction, "reliability_tau": json.dumps(reliability_cache.tau_by_stack if reliability_cache is not None else {}, sort_keys=True), "reliability_w_min": "", "reliability_gate_mean": 1.0, "reliability_gate_min": 1.0, "reliability_gate_p10": 1.0, "reliability_gate_p50": 1.0, "reliability_gate_p90": 1.0, "reliability_multiplier_mean": 1.0, "reliability_multiplier_mean_by_stack": json.dumps({}, sort_keys=True), "reliability_fraction_gate_lt_0_25": 0.0, "reliability_fraction_gate_lt_0_5": 0.0, "reliability_invalid_reference_fraction": 1.0 - valid_fraction}
+                else:
+                    gate_cpu, multiplier_cpu = gate.detach().cpu(), multiplier.detach().cpu()
+                    per_stack = {str(int(stack)): float(multiplier_cpu[batch["stack_idx"].detach().cpu() == stack].mean()) for stack in batch["stack_idx"].detach().cpu().unique().tolist()}
+                    valid_fraction = float(reliability_cache.reference_valid[batch["anchor_idx"].detach().cpu().numpy()].mean()) if reliability_cache is not None else 0.0
+                    reliability_row = {"reliability_enabled": True, "reliability_discrepancy": "raw_cosine", "reliability_valid_fraction": valid_fraction, "reliability_tau": json.dumps(reliability_cache.tau_by_stack if reliability_cache is not None else {}, sort_keys=True), "reliability_w_min": gate_floor(stage_b_progress(iteration, iterations), reliability_config), "reliability_gate_mean": float(gate_cpu.mean()), "reliability_gate_min": float(gate_cpu.min()), "reliability_gate_p10": float(torch.quantile(gate_cpu, .10)), "reliability_gate_p50": float(torch.quantile(gate_cpu, .50)), "reliability_gate_p90": float(torch.quantile(gate_cpu, .90)), "reliability_multiplier_mean": float(multiplier_cpu.mean()), "reliability_multiplier_mean_by_stack": json.dumps(per_stack, sort_keys=True), "reliability_fraction_gate_lt_0_25": float((gate_cpu < .25).float().mean()), "reliability_fraction_gate_lt_0_5": float((gate_cpu < .5).float().mean()), "reliability_invalid_reference_fraction": 1.0 - valid_fraction}
+                row.update(reliability_row)
             writer.writerow(row)
             if int(training.get("monitor_every", 0)) and global_iteration % int(training["monitor_every"]) == 0:
                 monitor_batch = {key: value.to(device) for key, value in monitor.items() if key in {"xyz", "observed", "group_idx", "stack_idx", "timing"}}
@@ -320,4 +377,4 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
     if stack_initialization is not None:
         (output / "stack_initialization_poses.json").write_text(json.dumps({"coordinate_convention": "physical RAS mm; trans_first=true", "stacks": list(stack_initialization.stack_pose_records)}, indent=2) + "\n")
     (output / "timing_profile.csv").write_text("section,milliseconds\noptimization_total,{:.6f}\n".format((time.perf_counter() - started) * 1000.0))
-    return {"model": model, "training_space": space, "protocol": protocol, "decoder_metadata": decoder_metadata, "intensity_normalization": normalization, "controls": controls, "stack_weights": joint_dataset.stack_weights, "output_dir": output, "stack_initialization": stack_initialization, "fixed_monitor": monitor, "resolved_config": resolved, "primary_checkpoint": primary_checkpoint, "global_iteration": global_iteration, "continuation_plan": continuation_plan}
+    return {"model": model, "training_space": space, "protocol": protocol, "decoder_metadata": decoder_metadata, "intensity_normalization": normalization, "controls": controls, "stack_weights": joint_dataset.stack_weights, "output_dir": output, "stack_initialization": stack_initialization, "fixed_monitor": monitor, "resolved_config": resolved, "primary_checkpoint": primary_checkpoint, "global_iteration": global_iteration, "continuation_plan": continuation_plan, "reliability_cache": reliability_cache}
