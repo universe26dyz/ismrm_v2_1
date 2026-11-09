@@ -6,8 +6,9 @@ import numpy as np
 import pytest
 import torch
 
+from ismrm_v2.proposed.q002.run_q002_reconstruction import FORMAL_SPARSE_EXPERIMENT_IDS, validate_formal_sparse_reconstruction_dependencies
 from ismrm_v2.proposed.q002.contracts import B0_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID, build_q002_route_config
-from ismrm_v2.proposed.q002.training import joint_vector_mse
+from ismrm_v2.proposed.q002.training import joint_vector_mse, reliability_sample_coverage
 from ismrm_v2.v2_2.stage_b_reliability import (
     ReliabilityCache,
     ReliabilityConfig,
@@ -126,3 +127,24 @@ def test_route_switches_are_independent():
     assert routes[B1_R0_EXPERIMENT_ID]["stack_balance"]["enabled"] is True
     assert routes[B0_R1_EXPERIMENT_ID]["cross_view_reliability"]["enabled"] is True
     assert routes[B1_R1_EXPERIMENT_ID]["cross_view_reliability"]["enabled"] is True
+
+
+def test_all_formal_routes_use_sparse_admission_and_missing_pins_fail_closed():
+    expected_formal = {"Q002S640_B6_roi_same_anchor_mse", "Q004S640_K1_B6_roi_same_anchor_mse", "Q005S640_K4_B6_roi_same_anchor_mse", B0_R0_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID}
+    assert expected_formal.issubset(set(FORMAL_SPARSE_EXPERIMENT_IDS))
+    from argparse import Namespace
+    for experiment_id in (B0_R0_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID):
+        args = Namespace(experiment_id=experiment_id, sparse_manifest=None)
+        with pytest.raises(ValueError, match="exact sparse manifest"):
+            validate_formal_sparse_reconstruction_dependencies(args)
+
+
+def test_target_only_reliability_coverage_ignores_sax_and_handles_no_target():
+    coverage = reliability_sample_coverage(torch.tensor([0, 0, 1, 1]), torch.tensor([True, True, True, False]))
+    assert coverage["reliability_valid_fraction"] == pytest.approx(.75)
+    assert coverage["reliability_invalid_reference_fraction"] == pytest.approx(.25)
+    assert coverage["reliability_target_valid_fraction"] == pytest.approx(.5)
+    assert coverage["reliability_target_invalid_reference_fraction"] == pytest.approx(.5)
+    no_target = reliability_sample_coverage(torch.tensor([0, 0]), torch.tensor([True, True]))
+    assert no_target["reliability_target_valid_fraction"] is None
+    assert no_target["reliability_target_invalid_reference_fraction"] is None

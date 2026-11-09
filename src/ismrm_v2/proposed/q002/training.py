@@ -193,6 +193,29 @@ def regularization_batch_from_b6_scalar_support(sampler: CachedBalancedSampler, 
     return {"batch": batch, "candidate_count": int(batch["xyz"].shape[0]), "effective_point_count": int(n_points), "sampling_source": "B6 scalar cropped support"}
 
 
+def reliability_sample_coverage(stack_idx: torch.Tensor, reference_valid: torch.Tensor) -> dict[str, float | None]:
+    """Summarize overall and non-SAX reference coverage without changing training."""
+
+    stacks = torch.as_tensor(stack_idx, dtype=torch.long).detach().cpu()
+    valid = torch.as_tensor(reference_valid, dtype=torch.bool).detach().cpu()
+    if stacks.ndim != 1 or valid.shape != stacks.shape:
+        raise ValueError("stack_idx and reference_valid must be matching one-dimensional tensors")
+    overall = float(valid.float().mean()) if valid.numel() else 0.0
+    target = stacks != 0
+    if not bool(target.any()):
+        target_fraction = None
+        target_invalid = None
+    else:
+        target_fraction = float(valid[target].float().mean())
+        target_invalid = 1.0 - target_fraction
+    return {
+        "reliability_valid_fraction": overall,
+        "reliability_invalid_reference_fraction": 1.0 - overall,
+        "reliability_target_valid_fraction": target_fraction,
+        "reliability_target_invalid_reference_fraction": target_invalid,
+    }
+
+
 def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: Mapping[str, Any], protocol_yaml: str | Path, output_dir: str | Path, *, prepared_inputs: list[str | Path], anchor_batch_size: int = 64, fingerprint_cosine: Mapping[str, Any] | None = None, continuation: Mapping[str, Any] | None = None, training_psf_samples: int = 8, cross_view_reliability: Mapping[str, Any] | None = None, stack_balance: Mapping[str, Any] | None = None, reliability_provenance: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Train fresh same-anchor state; Q003 changes only the shared data objective."""
 
@@ -275,7 +298,7 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
     if continuation_plan is not None:
         fields = q003_10k_training_log_fields()
     if reliability_config.enabled:
-        fields += ["reliability_enabled", "reliability_discrepancy", "reliability_valid_fraction", "reliability_tau", "reliability_w_min", "reliability_gate_mean", "reliability_gate_min", "reliability_gate_p10", "reliability_gate_p50", "reliability_gate_p90", "reliability_multiplier_mean", "reliability_multiplier_mean_by_stack", "reliability_fraction_gate_lt_0_25", "reliability_fraction_gate_lt_0_5", "reliability_invalid_reference_fraction"]
+        fields += ["reliability_enabled", "reliability_discrepancy", "reliability_valid_fraction", "reliability_invalid_reference_fraction", "reliability_target_valid_fraction", "reliability_target_invalid_reference_fraction", "reliability_tau", "reliability_w_min", "reliability_gate_mean", "reliability_gate_min", "reliability_gate_p10", "reliability_gate_p50", "reliability_gate_p90", "reliability_multiplier_mean", "reliability_multiplier_mean_by_stack", "reliability_fraction_gate_lt_0_25", "reliability_fraction_gate_lt_0_5"]
     log_handle = (output / "training_log.csv").open("w", newline="", encoding="utf-8"); monitor_handle = (output / "monitor_log.csv").open("w", newline="", encoding="utf-8")
     monitor_fields = ["iteration", "stage", "monitor_mse", "per_weight_mse", "per_stack_mse", "fixed_monitor_anchor_identity_sha256"]
     if cosine_enabled:
@@ -319,14 +342,15 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
                 reliability_terms = data_terms["reliability_terms"]
                 gate = reliability_terms["reliability_gate"]
                 multiplier = reliability_terms["reliability_multiplier"]
+                sampled_indices = batch["anchor_idx"].detach().cpu().numpy()
+                sampled_reference_valid = torch.as_tensor(reliability_cache.reference_valid[sampled_indices] if reliability_cache is not None else np.zeros(batch["anchor_idx"].shape[0], dtype=bool))
+                coverage = reliability_sample_coverage(batch["stack_idx"], sampled_reference_valid)
                 if gate is None:
-                    valid_fraction = float(reliability_cache.reference_valid[batch["anchor_idx"].detach().cpu().numpy()].mean()) if reliability_cache is not None else 0.0
-                    reliability_row = {"reliability_enabled": True, "reliability_discrepancy": "raw_cosine", "reliability_valid_fraction": valid_fraction, "reliability_tau": json.dumps(reliability_cache.tau_by_stack if reliability_cache is not None else {}, sort_keys=True), "reliability_w_min": "", "reliability_gate_mean": 1.0, "reliability_gate_min": 1.0, "reliability_gate_p10": 1.0, "reliability_gate_p50": 1.0, "reliability_gate_p90": 1.0, "reliability_multiplier_mean": 1.0, "reliability_multiplier_mean_by_stack": json.dumps({}, sort_keys=True), "reliability_fraction_gate_lt_0_25": 0.0, "reliability_fraction_gate_lt_0_5": 0.0, "reliability_invalid_reference_fraction": 1.0 - valid_fraction}
+                    reliability_row = {"reliability_enabled": True, "reliability_discrepancy": "raw_cosine", **coverage, "reliability_tau": json.dumps(reliability_cache.tau_by_stack if reliability_cache is not None else {}, sort_keys=True), "reliability_w_min": "", "reliability_gate_mean": 1.0, "reliability_gate_min": 1.0, "reliability_gate_p10": 1.0, "reliability_gate_p50": 1.0, "reliability_gate_p90": 1.0, "reliability_multiplier_mean": 1.0, "reliability_multiplier_mean_by_stack": json.dumps({}, sort_keys=True), "reliability_fraction_gate_lt_0_25": 0.0, "reliability_fraction_gate_lt_0_5": 0.0}
                 else:
                     gate_cpu, multiplier_cpu = gate.detach().cpu(), multiplier.detach().cpu()
                     per_stack = {str(int(stack)): float(multiplier_cpu[batch["stack_idx"].detach().cpu() == stack].mean()) for stack in batch["stack_idx"].detach().cpu().unique().tolist()}
-                    valid_fraction = float(reliability_cache.reference_valid[batch["anchor_idx"].detach().cpu().numpy()].mean()) if reliability_cache is not None else 0.0
-                    reliability_row = {"reliability_enabled": True, "reliability_discrepancy": "raw_cosine", "reliability_valid_fraction": valid_fraction, "reliability_tau": json.dumps(reliability_cache.tau_by_stack if reliability_cache is not None else {}, sort_keys=True), "reliability_w_min": gate_floor(stage_b_progress(iteration, iterations), reliability_config), "reliability_gate_mean": float(gate_cpu.mean()), "reliability_gate_min": float(gate_cpu.min()), "reliability_gate_p10": float(torch.quantile(gate_cpu, .10)), "reliability_gate_p50": float(torch.quantile(gate_cpu, .50)), "reliability_gate_p90": float(torch.quantile(gate_cpu, .90)), "reliability_multiplier_mean": float(multiplier_cpu.mean()), "reliability_multiplier_mean_by_stack": json.dumps(per_stack, sort_keys=True), "reliability_fraction_gate_lt_0_25": float((gate_cpu < .25).float().mean()), "reliability_fraction_gate_lt_0_5": float((gate_cpu < .5).float().mean()), "reliability_invalid_reference_fraction": 1.0 - valid_fraction}
+                    reliability_row = {"reliability_enabled": True, "reliability_discrepancy": "raw_cosine", **coverage, "reliability_tau": json.dumps(reliability_cache.tau_by_stack if reliability_cache is not None else {}, sort_keys=True), "reliability_w_min": gate_floor(stage_b_progress(iteration, iterations), reliability_config), "reliability_gate_mean": float(gate_cpu.mean()), "reliability_gate_min": float(gate_cpu.min()), "reliability_gate_p10": float(torch.quantile(gate_cpu, .10)), "reliability_gate_p50": float(torch.quantile(gate_cpu, .50)), "reliability_gate_p90": float(torch.quantile(gate_cpu, .90)), "reliability_multiplier_mean": float(multiplier_cpu.mean()), "reliability_multiplier_mean_by_stack": json.dumps(per_stack, sort_keys=True), "reliability_fraction_gate_lt_0_25": float((gate_cpu < .25).float().mean()), "reliability_fraction_gate_lt_0_5": float((gate_cpu < .5).float().mean())}
                 row.update(reliability_row)
             writer.writerow(row)
             if int(training.get("monitor_every", 0)) and global_iteration % int(training["monitor_every"]) == 0:
