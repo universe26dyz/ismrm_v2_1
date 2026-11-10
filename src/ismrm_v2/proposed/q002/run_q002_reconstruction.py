@@ -17,7 +17,7 @@ from ismrm_v2.proposed.quantitative_point_dataset import QuantPointDataset
 from ismrm_v2.proposed.inference.export_quantitative import export_quantitative_outputs, export_quantitative_outputs_psf128
 from ismrm_v2.proposed.inference.reprojection import export_native_plane_reprojections
 
-from ismrm_v2.proposed.q002.contracts import B0_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID, Q002_EXPERIMENT_ID, Q002S640_EXPERIMENT_ID, Q002S640_K256_EXPERIMENT_ID, Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID, Q004S640_K1_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, build_q002_route_config, cropped_observation_paths, profiled_observation_paths
+from ismrm_v2.proposed.q002.contracts import B0_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID, B1_R1_NL1_EXPERIMENT_ID, Q002_EXPERIMENT_ID, Q002S640_EXPERIMENT_ID, Q002S640_K256_EXPERIMENT_ID, Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID, Q004S640_K1_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, build_q002_route_config, cropped_observation_paths, profiled_observation_paths
 from ismrm_v2.proposed.q002.joint_dataset import JointAnchorDataset
 from ismrm_v2.proposed.q002.training import train_q002_reconstruction
 from ismrm_v2.proposed.q002.training_curves import generate_convergence_artifacts, generate_q004_convergence_artifacts
@@ -58,6 +58,7 @@ FORMAL_SPARSE_EXPERIMENT_IDS = (
     B1_R0_EXPERIMENT_ID,
     B0_R1_EXPERIMENT_ID,
     B1_R1_EXPERIMENT_ID,
+    B1_R1_NL1_EXPERIMENT_ID,
 )
 
 
@@ -264,7 +265,7 @@ These are mechanistic interpretations, not population-level claims.
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cropped-prepared-root", required=True); parser.add_argument("--subject-id", default="CYJ"); parser.add_argument("--sparse-manifest"); parser.add_argument("--expected-sparse-generator-git-sha"); parser.add_argument("--expected-sparse-manifest-sha256"); parser.add_argument("--b6-model", required=True); parser.add_argument("--expected-b6-model-sha256"); parser.add_argument("--signal-simulator", required=True); parser.add_argument("--expected-decoder-sha256"); parser.add_argument("--protocol", default="mlp/configs/protocol_scmr_v5_10_100.yaml"); parser.add_argument("--expected-protocol-sha256"); parser.add_argument("--output", required=True); parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--experiment-id", choices=(Q002_EXPERIMENT_ID, Q002S640_EXPERIMENT_ID, Q002S640_K256_EXPERIMENT_ID, Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID, Q004S640_K1_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, B0_R0_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID), default=Q002_EXPERIMENT_ID)
+    parser.add_argument("--experiment-id", choices=(Q002_EXPERIMENT_ID, Q002S640_EXPERIMENT_ID, Q002S640_K256_EXPERIMENT_ID, Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID, Q004S640_K1_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, B0_R0_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID, B1_R1_NL1_EXPERIMENT_ID), default=Q002_EXPERIMENT_ID)
     parser.add_argument("--anchor-batch-size", type=int, default=64)
     parser.add_argument("--endpoint-policy", choices=("legacy", "central_only"), default="legacy")
     return parser

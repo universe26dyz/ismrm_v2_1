@@ -7,8 +7,10 @@ import pytest
 import torch
 
 from ismrm_v2.proposed.q002.run_q002_reconstruction import FORMAL_SPARSE_EXPERIMENT_IDS, validate_formal_sparse_reconstruction_dependencies
-from ismrm_v2.proposed.q002.contracts import B0_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID, build_q002_route_config
+from ismrm_v2.proposed.q002.contracts import B0_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID, B1_R1_NL1_EXPERIMENT_ID, build_q002_route_config
 from ismrm_v2.proposed.q002.training import joint_vector_mse, reliability_sample_coverage
+from ismrm_v2.v2_2 import stage_b_reliability as reliability_module
+from ismrm_v2.v2_2.preflight.discrepancy import fit_case_joint_robust_normalization, normalized_l1_discrepancy
 from ismrm_v2.v2_2.stage_b_reliability import (
     ReliabilityCache,
     ReliabilityConfig,
@@ -127,6 +129,80 @@ def test_route_switches_are_independent():
     assert routes[B1_R0_EXPERIMENT_ID]["stack_balance"]["enabled"] is True
     assert routes[B0_R1_EXPERIMENT_ID]["cross_view_reliability"]["enabled"] is True
     assert routes[B1_R1_EXPERIMENT_ID]["cross_view_reliability"]["enabled"] is True
+
+
+def test_normalized_l1_cache_matches_existing_helper_and_persists(monkeypatch, tmp_path):
+    observed = (np.arange(120, dtype=np.float64).reshape(12, 10) + 1.0) / 10.0
+    stack_idx = np.repeat(np.arange(3), 4)
+    arrays = {
+        "physical_xyz": np.zeros((12, 3), dtype=np.float64),
+        "observed": observed,
+        "group_idx": np.zeros(12, dtype=np.int64),
+        "stack_idx": stack_idx,
+        "timing": np.zeros((12, 9), dtype=np.float64),
+        "row_col": np.column_stack((np.arange(12), np.zeros(12, dtype=np.int64))),
+    }
+    sampled = {
+        1: observed[4:8] * 0.97,
+        2: observed[8:12] * 1.03,
+    }
+    monkeypatch.setattr(reliability_module, "_dataset_arrays", lambda *_args: arrays)
+    monkeypatch.setattr(reliability_module, "_joint_anchor_order_sha256", lambda _dataset: "a" * 64)
+    monkeypatch.setattr(reliability_module, "build_slice_stack_reference", lambda *_args: object())
+    sampled_iter = iter((sampled[1], sampled[2]))
+
+    def fake_sample(_reference, _query):
+        values = next(sampled_iter)
+        return values, np.ones(values.shape[0], dtype=bool), {"in_plane_valid": np.ones(values.shape[0], dtype=bool)}
+
+    monkeypatch.setattr(reliability_module, "sample_slice_stack", fake_sample)
+    config = ReliabilityConfig.from_mapping({"enabled": True, "discrepancy": "normalized_l1"})
+    sax_path = tmp_path / "sax.npz"
+    sax_path.touch()
+    cache = build_reliability_cache(
+        object(),
+        group_axisangle_post_stack_init_physical=torch.zeros((1, 6)),
+        sax_observation_path=sax_path,
+        config=config,
+        cache_directory=tmp_path / "cache",
+    )
+    normalization = fit_case_joint_robust_normalization({"sax": observed[:4], "2ch": observed[4:8], "4ch": observed[8:12]})
+    expected_2ch, expected_2ch_valid = normalized_l1_discrepancy(observed[4:8], sampled[1], normalization)
+    expected_4ch, expected_4ch_valid = normalized_l1_discrepancy(observed[8:12], sampled[2], normalization)
+    np.testing.assert_allclose(cache.discrepancy[4:8], expected_2ch)
+    np.testing.assert_allclose(cache.discrepancy[8:12], expected_4ch)
+    assert np.array_equal(cache.reference_valid[4:8], expected_2ch_valid)
+    assert np.array_equal(cache.reference_valid[8:12], expected_4ch_valid)
+    assert np.isnan(cache.discrepancy[:4]).all()
+    assert cache.normalization == normalization.as_dict()
+    manifest = json.loads((tmp_path / "cache" / "reliability_manifest.json").read_text())
+    assert manifest["normalization"] == normalization.as_dict()
+    assert manifest["qc"]["normalization"] == normalization.as_dict()
+
+
+def test_reliability_config_rejects_unapproved_discrepancy():
+    with pytest.raises(ValueError, match="raw_cosine or normalized_l1"):
+        ReliabilityConfig.from_mapping({"discrepancy": "hgnll"})
+
+
+def test_normalized_l1_route_and_existing_raw_route_are_distinct():
+    base = {"training": {"stage_a_iterations": 2000, "stage_b_iterations": 4000, "batch_size": 640, "psf_samples": 8, "seed": 20260911}, "decoder": {}}
+    nl1 = build_q002_route_config(base, cropped_prepared_root="cropped", experiment_id=B1_R1_NL1_EXPERIMENT_ID, anchor_batch_size=640)["route"]
+    raw = build_q002_route_config(base, cropped_prepared_root="cropped", experiment_id=B1_R1_EXPERIMENT_ID, anchor_batch_size=640)["route"]
+    assert nl1["stack_balance"] == {"enabled": True}
+    assert nl1["cross_view_reliability"]["enabled"] is True
+    assert nl1["cross_view_reliability"]["discrepancy"] == "normalized_l1"
+    assert nl1["sampling"]["anchor_batch_size"] == 640
+    assert raw["cross_view_reliability"]["discrepancy"] == "raw_cosine"
+
+
+def test_normalized_l1_formal_sparse_admission_matches_raw_route():
+    assert B1_R1_NL1_EXPERIMENT_ID in FORMAL_SPARSE_EXPERIMENT_IDS
+    assert B1_R1_EXPERIMENT_ID in FORMAL_SPARSE_EXPERIMENT_IDS
+    from argparse import Namespace
+    for experiment_id in (B1_R1_EXPERIMENT_ID, B1_R1_NL1_EXPERIMENT_ID):
+        with pytest.raises(ValueError, match="exact sparse manifest"):
+            validate_formal_sparse_reconstruction_dependencies(Namespace(experiment_id=experiment_id, sparse_manifest=None))
 
 
 def test_all_formal_routes_use_sparse_admission_and_missing_pins_fail_closed():

@@ -18,7 +18,11 @@ import numpy as np
 import torch
 
 from ismrm_v2.v2_2.preflight.cross_view_reliability_audit import _dataset_arrays, _joint_anchor_order_sha256
-from ismrm_v2.v2_2.preflight.discrepancy import raw_cosine_discrepancy
+from ismrm_v2.v2_2.preflight.discrepancy import (
+    fit_case_joint_robust_normalization,
+    normalized_l1_discrepancy,
+    raw_cosine_discrepancy,
+)
 from ismrm_v2.v2_2.preflight.reference_sampling import build_slice_stack_reference, sample_slice_stack
 
 
@@ -74,8 +78,8 @@ class ReliabilityConfig:
         return result
 
     def validate(self) -> None:
-        if self.discrepancy != "raw_cosine":
-            raise ValueError("v2.2 reliability discrepancy is frozen to raw_cosine")
+        if self.discrepancy not in {"raw_cosine", "normalized_l1"}:
+            raise ValueError("v2.2 reliability discrepancy must be raw_cosine or normalized_l1")
         if self.reference_stack != "sax":
             raise ValueError("v2.2 reliability reference_stack is frozen to sax")
         if self.stage != "B_only":
@@ -233,6 +237,7 @@ class ReliabilityCache:
     tau_by_stack: dict[int, float]
     provenance: dict[str, Any] = field(default_factory=dict)
     qc: dict[str, Any] = field(default_factory=dict)
+    normalization: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         self.discrepancy = np.asarray(self.discrepancy, dtype=np.float64)
@@ -265,6 +270,7 @@ class ReliabilityCache:
             "tau_by_stack": {str(key): float(value) for key, value in self.tau_by_stack.items()},
             "provenance": self.provenance,
             "qc": self.qc,
+            "normalization": self.normalization,
         }
 
     def write(self, directory: str | Path) -> dict[str, str]:
@@ -289,7 +295,7 @@ class ReliabilityCache:
         if manifest.get("cache_npz_sha256") and _sha256_file(array_path) != manifest["cache_npz_sha256"]:
             raise ValueError("reliability cache NPZ SHA256 mismatch")
         with np.load(array_path, allow_pickle=False) as data:
-            return cls(str(manifest["anchor_order_sha256"]), data["discrepancy"], data["reference_valid"], data["stack_idx"], {int(key): float(value) for key, value in manifest.get("tau_by_stack", {}).items()}, dict(manifest.get("provenance", {})), dict(manifest.get("qc", {})))
+            return cls(str(manifest["anchor_order_sha256"]), data["discrepancy"], data["reference_valid"], data["stack_idx"], {int(key): float(value) for key, value in manifest.get("tau_by_stack", {}).items()}, dict(manifest.get("provenance", {})), dict(manifest.get("qc", {})), manifest.get("normalization"))
 
 
 def _sha256_file(path: Path) -> str:
@@ -324,15 +330,29 @@ def build_reliability_cache(
     reference_valid = np.zeros(stacks.shape, dtype=bool)
     tau_by_stack: dict[int, float] = {}
     qc: dict[str, Any] = {"anchor_count": int(stacks.size), "reference_stack": cfg.reference_stack, "target_stacks": {}}
+    normalization_payload: dict[str, Any] | None = None
     target_stacks = [int(stack) for stack in np.unique(stacks) if int(stack) != 0] if cfg.enabled else []
     if target_stacks:
         if sax_observation_path is None or not Path(sax_observation_path).is_file():
             raise ValueError("reliability-enabled target stacks require an admitted SAX observation path")
         reference = build_slice_stack_reference(str(sax_observation_path), np.asarray(torch.as_tensor(group_axisangle_post_stack_init_physical).detach().cpu()))
+        if cfg.discrepancy == "normalized_l1":
+            stack_names = {0: "sax", 1: "2ch", 2: "4ch"}
+            observed_by_stack = {
+                stack_names[int(stack)]: arrays["observed"][stacks == int(stack)]
+                for stack in np.unique(stacks)
+                if int(stack) in stack_names and np.count_nonzero(stacks == int(stack))
+            }
+            normalization = fit_case_joint_robust_normalization(observed_by_stack)
+            normalization_payload = normalization.as_dict()
+            qc["normalization"] = normalization_payload
         for stack in target_stacks:
             indices = np.flatnonzero(stacks == stack)
             sampled, valid, support = sample_slice_stack(reference, arrays["physical_xyz"][indices])
-            raw, raw_valid = raw_cosine_discrepancy(arrays["observed"][indices], sampled, epsilon=1.0e-8)
+            if cfg.discrepancy == "raw_cosine":
+                raw, raw_valid = raw_cosine_discrepancy(arrays["observed"][indices], sampled, epsilon=1.0e-8)
+            else:
+                raw, raw_valid = normalized_l1_discrepancy(arrays["observed"][indices], sampled, normalization)
             valid = np.asarray(valid, dtype=bool) & np.asarray(raw_valid, dtype=bool)
             discrepancy[indices] = raw
             reference_valid[indices] = valid
@@ -347,7 +367,7 @@ def build_reliability_cache(
     if sax_observation_path is not None and Path(sax_observation_path).is_file():
         source_hashes["sax_observation"] = _sha256_file(Path(sax_observation_path))
     payload.update({"anchor_order_sha256": _joint_anchor_order_sha256(joint_dataset), "geometry_key": "group_axisangle_post_stack_init_physical", "post_hb1_geometry_sha256": _geometry_sha256(group_axisangle_post_stack_init_physical), "observation_sha256": source_hashes, "scientific_parameters": cfg.as_dict()})
-    cache = ReliabilityCache(_joint_anchor_order_sha256(joint_dataset), discrepancy, reference_valid, stacks, tau_by_stack, payload, qc)
+    cache = ReliabilityCache(_joint_anchor_order_sha256(joint_dataset), discrepancy, reference_valid, stacks, tau_by_stack, payload, qc, normalization_payload)
     if cache_directory is not None:
         cache.write(cache_directory)
     return cache

@@ -21,10 +21,12 @@ B0_R0_EXPERIMENT_ID = "B0_R0"
 B1_R0_EXPERIMENT_ID = "B1_R0"
 B0_R1_EXPERIMENT_ID = "B0_R1"
 B1_R1_EXPERIMENT_ID = "B1_R1"
+B1_R1_NL1_EXPERIMENT_ID = "B1_R1_NL1"
 B0_R0 = B0_R0_EXPERIMENT_ID
 B1_R0 = B1_R0_EXPERIMENT_ID
 B0_R1 = B0_R1_EXPERIMENT_ID
 B1_R1 = B1_R1_EXPERIMENT_ID
+B1_R1_NL1 = B1_R1_NL1_EXPERIMENT_ID
 STACKS = ("sax", "2ch", "4ch")
 
 
@@ -85,7 +87,7 @@ def build_q002_route_config(
     root = Path(cropped_prepared_root)
     if "full_fov" in str(root).lower():
         raise ValueError("Q002 training root must be B6 cropped, not full-FOV.")
-    expected_batch_size = {Q002_EXPERIMENT_ID: 64, Q002S640_EXPERIMENT_ID: 640, Q002S640_K256_EXPERIMENT_ID: 640, Q003S640_EXPERIMENT_ID: 640, Q003S640_10K_EXPERIMENT_ID: 640, Q004S640_K1_EXPERIMENT_ID: 640, Q005S640_K4_EXPERIMENT_ID: 640, B0_R0_EXPERIMENT_ID: 640, B1_R0_EXPERIMENT_ID: 640, B0_R1_EXPERIMENT_ID: 640, B1_R1_EXPERIMENT_ID: 640}.get(experiment_id)
+    expected_batch_size = {Q002_EXPERIMENT_ID: 64, Q002S640_EXPERIMENT_ID: 640, Q002S640_K256_EXPERIMENT_ID: 640, Q003S640_EXPERIMENT_ID: 640, Q003S640_10K_EXPERIMENT_ID: 640, Q004S640_K1_EXPERIMENT_ID: 640, Q005S640_K4_EXPERIMENT_ID: 640, B0_R0_EXPERIMENT_ID: 640, B1_R0_EXPERIMENT_ID: 640, B0_R1_EXPERIMENT_ID: 640, B1_R1_EXPERIMENT_ID: 640, B1_R1_NL1_EXPERIMENT_ID: 640}.get(experiment_id)
     if expected_batch_size is None or int(anchor_batch_size) != expected_batch_size:
         raise ValueError("Q002 route experiment_id must use its fixed anchor_batch_size.")
     sampling: dict[str, Any]
@@ -157,6 +159,27 @@ def build_q002_route_config(
     }
     if experiment_id in (B0_R0_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID):
         route["route"].update({"parent_experiment": Q002S640_EXPERIMENT_ID, "scientific_change": "independent_stack_balance_and_stage_b_cross_view_reliability_switches"})
+        route["resolved_config"]["stack_balance"] = copy.deepcopy(route["route"]["stack_balance"])
+        route["resolved_config"]["cross_view_reliability"] = copy.deepcopy(route["route"]["cross_view_reliability"])
+    if experiment_id == B1_R1_NL1_EXPERIMENT_ID:
+        route["route"].update({
+            "parent_experiment": Q002S640_EXPERIMENT_ID,
+            "scientific_change": "normalized_l1_cross_view_reliability_only",
+            "stack_balance": {"enabled": True},
+            "cross_view_reliability": {
+                "enabled": True,
+                "discrepancy": "normalized_l1",
+                "reference_stack": "sax",
+                "stage": "B_only",
+                "gate_quantile": 0.90,
+                "gate_power": 3.0,
+                "gate_epsilon": 1.0e-6,
+                "tau_min": 0.05,
+                "w_min_start": 0.15,
+                "w_min_end": 0.0,
+                "invalid_reference_policy": "neutral",
+            },
+        })
         route["resolved_config"]["stack_balance"] = copy.deepcopy(route["route"]["stack_balance"])
         route["resolved_config"]["cross_view_reliability"] = copy.deepcopy(route["route"]["cross_view_reliability"])
     if experiment_id in (Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID):
