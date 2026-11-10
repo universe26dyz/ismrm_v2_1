@@ -188,9 +188,10 @@ def build_q002_route_config(
         route["resolved_config"]["stack_balance"] = copy.deepcopy(route["route"]["stack_balance"])
         route["resolved_config"]["cross_view_reliability"] = copy.deepcopy(route["route"]["cross_view_reliability"])
     if experiment_id in (B1_R0_HGNLL_EXPERIMENT_ID, B1_R1_HGNLL_EXPERIMENT_ID):
+        hgnll_parent = B1_R1_EXPERIMENT_ID if experiment_id == B1_R1_HGNLL_EXPERIMENT_ID else B1_R0_EXPERIMENT_ID
         route["route"].update({
-            "parent_experiment": Q002S640_EXPERIMENT_ID,
-            "scientific_change": "joint_fingerprint_hgnll_variance_head_only",
+            "parent_experiment": hgnll_parent,
+            "scientific_change": "replace joint fingerprint MSE with HGNLL + variance clamp",
             "loss": "HGNLL",
             "heteroscedastic": {
                 "enabled": True,

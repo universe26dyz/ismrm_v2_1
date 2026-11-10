@@ -199,7 +199,10 @@ def hgnll_objective(
 
     The residual is reduced across the ten weights first, then stack balance
     and (when supplied) the Stage-B reliability multiplier act on that one
-    complete-anchor scalar.
+    complete-anchor scalar.  ``joint_signal_mse`` is the historical
+    stack-balanced, reliability-independent MSE used for B1 comparison;
+    ``raw_signal_mse`` is the completely unweighted diagnostic.  The two
+    logged HGNLL terms are the final weighted decomposition of ``hgnll``.
     """
 
     cfg = config if isinstance(config, HGNLLConfig) else HGNLLConfig.from_mapping(config or {"enabled": True}, required=True)
@@ -212,14 +215,23 @@ def hgnll_objective(
     raw = log_variance.detach()
     lv = log_variance.clamp(cfg.log_variance_min, cfg.log_variance_max)
     residual = prediction - observed
-    per_anchor = cfg.loss_prefactor * (torch.exp(-lv) * residual.pow(2) + lv).mean(dim=1)
-    weights = _stack_weights(stacks, stack_weights, dtype=prediction.dtype) if stack_balance_enabled else torch.ones_like(per_anchor)
-    multiplier = torch.ones_like(per_anchor)
+    per_weight_residual = cfg.loss_prefactor * torch.exp(-lv) * residual.pow(2)
+    per_weight_logvar = cfg.loss_prefactor * lv
+    per_anchor_residual = per_weight_residual.mean(dim=1)
+    per_anchor_logvar = per_weight_logvar.mean(dim=1)
+    weights = _stack_weights(stacks, stack_weights, dtype=prediction.dtype) if stack_balance_enabled else torch.ones_like(per_anchor_residual)
+    multiplier = torch.ones_like(per_anchor_residual)
     if reliability_multiplier is not None:
         multiplier = torch.as_tensor(reliability_multiplier, dtype=prediction.dtype, device=prediction.device).detach()
-        if multiplier.shape != per_anchor.shape:
+        if multiplier.shape != per_anchor_residual.shape:
             raise ValueError("HGNLL reliability_multiplier must be [B]")
-    total = (weights * multiplier * per_anchor).mean()
+    # Keep the baseline MSE field independent of HGNLL/reliability while
+    # retaining the historical stack-balanced semantics for B1 routes.
+    raw_signal_mse = residual.pow(2).mean()
+    joint_signal_mse = (weights * residual.pow(2).mean(dim=1)).mean()
+    weighted_residual = (weights * multiplier * per_anchor_residual).mean()
+    weighted_logvar = (weights * multiplier * per_anchor_logvar).mean()
+    total = weighted_residual + weighted_logvar
     raw_cpu = raw.reshape(-1).cpu()
     clamped_cpu = lv.detach().reshape(-1).cpu()
     sigma_cpu = torch.exp(0.5 * clamped_cpu)
@@ -227,10 +239,11 @@ def hgnll_objective(
     high_mask = raw > cfg.log_variance_max
     diagnostics: dict[str, Any] = {
         "hgnll": total,
-        "joint_signal_mse": residual.pow(2).mean(dim=1).mean(),
+        "joint_signal_mse": joint_signal_mse,
+        "raw_signal_mse": raw_signal_mse,
         "data_loss": total,
-        "hgnll_residual_term": (cfg.loss_prefactor * torch.exp(-lv) * residual.pow(2)).mean(),
-        "hgnll_log_variance_term": (cfg.loss_prefactor * lv).mean(),
+        "hgnll_residual_term": weighted_residual,
+        "hgnll_log_variance_term": weighted_logvar,
         "raw_logvar_min": float(raw_cpu.min()),
         "raw_logvar_max": float(raw_cpu.max()),
         "raw_logvar_mean": float(raw_cpu.mean()),

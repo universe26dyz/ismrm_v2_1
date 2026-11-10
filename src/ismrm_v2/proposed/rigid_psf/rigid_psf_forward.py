@@ -137,10 +137,12 @@ class TradQuantitativeForward(nn.Module):
         profile: Callable[[str], ContextManager[None]] | None = None,
         *,
         psf_chunk_size: int | None = None,
+        world_samples: torch.Tensor | None = None,
     ) -> torch.Tensor:
         """Predict all ten weights from one shared PSF neighbourhood per anchor."""
 
-        world_samples = self._sample_fingerprint_world(local_xyz_mm, group_idx, n_psf_samples, profile)
+        if world_samples is None:
+            world_samples = self._sample_fingerprint_world(local_xyz_mm, group_idx, n_psf_samples, profile)
         return self._forward_fingerprint_from_world_samples(
             world_samples, group_idx, timing9_ms, n_psf_samples, profile,
             psf_chunk_size=psf_chunk_size,
@@ -156,6 +158,7 @@ class TradQuantitativeForward(nn.Module):
         profile: Callable[[str], ContextManager[None]] | None = None,
         *,
         psf_chunk_size: int | None = None,
+        world_samples: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Return mean fingerprint and HGNLL variance from one PSF draw.
 
@@ -163,7 +166,8 @@ class TradQuantitativeForward(nn.Module):
         there is intentionally no second neighbourhood draw.
         """
 
-        world_samples = self._sample_fingerprint_world(local_xyz_mm, group_idx, n_psf_samples, profile)
+        if world_samples is None:
+            world_samples = self._sample_fingerprint_world(local_xyz_mm, group_idx, n_psf_samples, profile)
         return self._forward_fingerprint_from_world_samples(
             world_samples, group_idx, timing9_ms, n_psf_samples, profile,
             psf_chunk_size=psf_chunk_size, variance_head=variance_head,

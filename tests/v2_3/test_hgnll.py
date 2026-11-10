@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
+from types import SimpleNamespace
 
 import pytest
 import torch
+from torch import nn
 
 from ismrm_v2.proposed.q002.contracts import (
     B1_R0_EXPERIMENT_ID,
@@ -14,6 +17,10 @@ from ismrm_v2.proposed.q002.contracts import (
 )
 from ismrm_v2.proposed.q002.run_q002_reconstruction import FORMAL_SPARSE_EXPERIMENT_IDS
 from ismrm_v2.proposed.q002.training import joint_vector_mse
+from ismrm_v2.proposed.q002.training import build_q002_optimizer
+from ismrm_v2.proposed.reconstruction.orchestration import load_checkpoint, save_checkpoint
+from ismrm_v2.proposed.rigid_psf.rigid_psf_forward import GroupRigidPSF, TradQuantitativeForward
+from ismrm_v2.v2_2.stage_b_reliability import ReliabilityConfig, compute_reliability_gate, normalize_reliability_gate
 from ismrm_v2.v2_3.hgnll import (
     HGNLLConfig,
     HGNLL_LOG_VARIANCE_MAX,
@@ -79,7 +86,7 @@ def test_hgnll_matches_complete_anchor_formula_and_stack_balance():
     per_anchor = 0.5 * (math.exp(3.0) + (-3.0))
     expected = (per_anchor * 1.0 + per_anchor * 2.0) / 2.0
     assert loss.item() == pytest.approx(expected)
-    assert diagnostics["joint_signal_mse"].item() == pytest.approx(1.0)
+    assert diagnostics["joint_signal_mse"].item() == pytest.approx(1.5)
     loss.backward()
     assert prediction.grad is not None
 
@@ -122,3 +129,140 @@ def test_hgnll_routes_are_formally_sparse_admitted_with_batch_640():
         route = build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=route_id, anchor_batch_size=640)["route"]
         assert route["sampling"]["anchor_batch_size"] == 640
         assert route["sampling"]["shared_training_psf_samples"] == 8
+
+
+class _FakeINR(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.encoding = nn.Linear(2, 2)
+        self.network = nn.Linear(2, 2)
+        self.config = SimpleNamespace(latent_features=2)
+
+
+class _FakeRigid(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.axisangle = nn.Parameter(torch.zeros(1, 6))
+
+
+class _FakeModel(nn.Module):
+    def __init__(self, with_head: bool):
+        super().__init__()
+        self.inr = _FakeINR()
+        self.rigid_psf = _FakeRigid()
+        self.variance_head = None
+        self.joint_variance_head = JointFingerprintVarianceHead(2, HGNLLConfig.from_mapping({"enabled": True})) if with_head else None
+
+
+def _learning_rates():
+    return {"encoding": 1e-3, "network": 1e-3, "weight_decay": 0.0, "rigid": 1e-3, "variance": 2e-3}
+
+
+def test_hgnll_optimizer_has_one_variance_group_and_updates_it():
+    cfg = HGNLLConfig.from_mapping({"enabled": True})
+    model = _FakeModel(True)
+    optimizer = build_q002_optimizer(model, _learning_rates(), False, hgnll_config=cfg)
+    variance_groups = [group for group in optimizer.param_groups if group["name"] == "variance"]
+    assert len(variance_groups) == 1
+    assert variance_groups[0]["lr"] == pytest.approx(2e-3)
+    before = [parameter.detach().clone() for parameter in model.joint_variance_head.parameters()]
+    loss = model.joint_variance_head(torch.ones(4, 2)).pow(2).mean()
+    loss.backward()
+    optimizer.step()
+    assert any(not torch.equal(old, new) for old, new in zip(before, model.joint_variance_head.parameters()))
+    off = build_q002_optimizer(_FakeModel(False), _learning_rates(), False, hgnll_config=HGNLLConfig())
+    assert all(group["name"] != "variance" for group in off.param_groups)
+
+
+class _DummyQuantitative(nn.Module):
+    def forward_with_latent(self, xyz, *, include_latent=True):
+        latent = torch.cat((xyz, xyz[:, :1]), dim=1)
+        return {"t1_ms": torch.full((xyz.shape[0],), 1000.0, device=xyz.device), "t2_ms": torch.full((xyz.shape[0],), 50.0, device=xyz.device), "b1": torch.ones(xyz.shape[0], device=xyz.device), "amplitude": torch.ones(xyz.shape[0], device=xyz.device), "latent": latent}
+
+    def forward(self, xyz):
+        return self.forward_with_latent(xyz)
+
+
+class _DummySimulator(nn.Module):
+    def forward(self, t1, t2, b1, timing, protocol, normalize=True):
+        return torch.stack(tuple((t1 + t2 + b1 + timing[:, index % 9]) * 0.001 for index in range(10)), dim=1)
+
+
+def test_same_precomputed_psf_world_samples_preserve_mean_prediction():
+    rigid = GroupRigidPSF(torch.zeros(1, 6), torch.ones(1, 3))
+    forward = TradQuantitativeForward(_DummyQuantitative(), _DummySimulator(), rigid, object())
+    head = JointFingerprintVarianceHead(4, HGNLLConfig.from_mapping({"enabled": True}))
+    xyz = torch.zeros(3, 3); groups = torch.zeros(3, dtype=torch.long); timing = torch.ones(3, 9)
+    world = torch.arange(72, dtype=torch.float32).reshape(3, 8, 3) / 10.0
+    mean = forward.forward_fingerprint(xyz, groups, timing, 8, world_samples=world)
+    hgnll_mean, logvar = forward.forward_fingerprint_with_log_variance(xyz, groups, timing, 8, head, world_samples=world)
+    assert torch.allclose(mean, hgnll_mean, rtol=0.0, atol=1e-7)
+    assert logvar.shape == (3, 10)
+
+
+def test_hgnll_stage_a_is_active_without_reliability_and_stage_b_uses_raw_cosine_gate():
+    cfg = HGNLLConfig.from_mapping({"enabled": True})
+    prediction = torch.ones(4, 10); observed = torch.zeros_like(prediction); logvar = torch.full_like(prediction, -3.0); stacks = torch.tensor([0, 0, 1, 1])
+    stage_a, a_diag = hgnll_objective(prediction, observed, logvar, stacks, {0: 1.0, 1: 1.0}, config=cfg)
+    rel_cfg = ReliabilityConfig.from_mapping({"enabled": True})
+    gate = compute_reliability_gate(torch.tensor([0.0, 0.0, 0.1, 0.2]), torch.ones(4, dtype=torch.bool), stacks, {1: .1}, 1.0, rel_cfg)
+    multiplier = normalize_reliability_gate(gate, stacks)
+    stage_b, b_diag = hgnll_objective(prediction, observed, logvar, stacks, {0: 1.0, 1: 1.0}, reliability_multiplier=multiplier, config=cfg)
+    assert stage_a.item() != 0.0 and stage_b.item() != 0.0
+    assert torch.equal(a_diag["hgnll_reliability_multiplier"], torch.ones(4))
+    assert torch.allclose(b_diag["hgnll_reliability_multiplier"], multiplier)
+
+
+@dataclass
+class _Protocol:
+    tr_ms: float = 5.0
+    vps: int = 10
+    fa_deg: tuple = (1.0,)
+    ti_ms: tuple = (1.0,)
+    t2prep_ms: tuple = (1.0,)
+    n_ramp_up: int = 1
+
+
+class _FakeSpace:
+    group_axisangle_dicom_physical = torch.zeros(1, 6)
+    group_axisangle_init_physical = torch.zeros(1, 6)
+    group_axisangle_init_train = torch.zeros(1, 6)
+
+    def state_dict(self):
+        return {}
+
+
+class _FakeDataset:
+    group_resolution_xyz_mm = torch.ones(1, 3)
+
+
+def test_hgnll_checkpoint_round_trip_preserves_head_and_provenance(tmp_path):
+    cfg = HGNLLConfig.from_mapping({"enabled": True})
+    model = _FakeModel(True)
+    config = {"heteroscedastic": cfg.as_dict(), "training": {"learning_rates": _learning_rates()}}
+    path = tmp_path / "hgnll.pt"
+    save_checkpoint(path, model, config, _Protocol(), _FakeDataset(), _FakeSpace(), 20260911, {}, {})
+    checkpoint = torch.load(path, map_location="cpu", weights_only=False)
+    rebuilt = _FakeModel(True)
+    load_checkpoint(path, rebuilt, torch.device("cpu"))
+    for left, right in zip(model.joint_variance_head.parameters(), rebuilt.joint_variance_head.parameters()):
+        assert torch.equal(left, right)
+    assert checkpoint["hgnll_config"] == cfg.as_dict()
+
+
+def test_hgnll_decomposition_is_exact_after_stack_and_reliability_weighting():
+    cfg = HGNLLConfig.from_mapping({"enabled": True})
+    prediction = torch.tensor([[1.0] * 10, [2.0] * 10, [0.5] * 10, [1.5] * 10])
+    observed = torch.zeros_like(prediction); logvar = torch.tensor([[-3.0] * 10, [-2.5] * 10, [-3.5] * 10, [-2.8] * 10]); stacks = torch.tensor([0, 0, 1, 1])
+    total, diagnostics = hgnll_objective(prediction, observed, logvar, stacks, {0: 1.0, 1: 2.0}, reliability_multiplier=torch.tensor([.5, 1.5, .7, 1.3]), config=cfg)
+    assert torch.allclose(diagnostics["hgnll_residual_term"] + diagnostics["hgnll_log_variance_term"], total, rtol=1e-6, atol=1e-7)
+
+
+def test_old_routes_have_no_hgnll_provenance_and_nl1_stays_unchanged():
+    for route_id in (B1_R0_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID, "B1_R1_NL1"):
+        route = build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=route_id, anchor_batch_size=640)["route"]
+        assert "heteroscedastic" not in route
+    h0 = build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=B1_R0_HGNLL_EXPERIMENT_ID, anchor_batch_size=640)["route"]
+    h1 = build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=B1_R1_HGNLL_EXPERIMENT_ID, anchor_batch_size=640)["route"]
+    assert h0["parent_experiment"] == B1_R0_EXPERIMENT_ID
+    assert h1["parent_experiment"] == B1_R1_EXPERIMENT_ID

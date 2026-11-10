@@ -184,6 +184,29 @@ def joint_fingerprint_objective(prediction: torch.Tensor, observed: torch.Tensor
     }
 
 
+def build_q002_optimizer(model: Any, learning_rates: Mapping[str, Any], joint: bool, *, hgnll_config: HGNLLConfig | Mapping[str, Any] | None = None) -> Any:
+    """Build the Q002 optimizer and isolate the optional HGNLL parameter group."""
+
+    cfg = hgnll_config if isinstance(hgnll_config, HGNLLConfig) else HGNLLConfig.from_mapping(hgnll_config)
+    optimizer = _optimizer(model, learning_rates, joint)
+    joint_head = getattr(model, "joint_variance_head", None)
+    if not cfg.enabled:
+        if joint_head is not None:
+            raise ValueError("HGNLL-off routes must not carry a joint variance head")
+        return optimizer
+    if joint_head is None:
+        raise ValueError("HGNLL-enabled routes require a joint variance head")
+    if model.variance_head is not None:
+        raise ValueError("HGNLL routes require the historical scalar variance branch to remain disabled")
+    variance_lr = float(learning_rates.get(cfg.variance_learning_rate_key, 0.0))
+    if variance_lr <= 0.0:
+        raise ValueError("HGNLL requires a positive training.learning_rates.variance")
+    if any(group.get("name") == "variance" for group in optimizer.param_groups):
+        raise ValueError("HGNLL optimizer already contains a variance group")
+    optimizer.add_param_group({"name": "variance", "params": list(joint_head.parameters()), "lr": variance_lr})
+    return optimizer
+
+
 def regularization_batch_from_b6_scalar_support(sampler: CachedBalancedSampler, *, n_points: int) -> dict[str, Any]:
     """Reuse the B6 scalar sampler so Q002 regularization keeps its 640→256 semantics."""
     if n_points != 256:
@@ -257,7 +280,6 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
     model, space, protocol, decoder_metadata = build_mlp_training_model(scalar_dataset, resolved, protocol_yaml, device, initial_group_axisangle_physical=initial_pose)
     if hgnll_enabled and model.variance_head is not None:
         raise ValueError("HGNLL routes require the historical scalar variance branch to remain disabled")
-    hgnll_head = model.joint_variance_head if hgnll_enabled else None
     model.intensity_scale.copy_(torch.as_tensor(normalization["scale"], device=device))
     output = Path(output_dir)
     if output.exists() and any(output.iterdir()):
@@ -308,7 +330,7 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
     if reliability_config.enabled:
         fields += ["reliability_enabled", "reliability_discrepancy", "reliability_valid_fraction", "reliability_invalid_reference_fraction", "reliability_target_valid_fraction", "reliability_target_invalid_reference_fraction", "reliability_tau", "reliability_w_min", "reliability_gate_mean", "reliability_gate_min", "reliability_gate_p10", "reliability_gate_p50", "reliability_gate_p90", "reliability_multiplier_mean", "reliability_multiplier_mean_by_stack", "reliability_fraction_gate_lt_0_25", "reliability_fraction_gate_lt_0_5"]
     if hgnll_enabled:
-        fields += ["hgnll", "data_loss", "hgnll_residual_term", "hgnll_log_variance_term", "raw_logvar_min", "raw_logvar_max", "raw_logvar_mean", "clamped_logvar_min", "clamped_logvar_max", "clamped_logvar_mean", "clamp_low_fraction", "clamp_high_fraction", "sigma_mean", "sigma_p10", "sigma_p50", "sigma_p90", "lr_variance"]
+        fields += ["raw_signal_mse", "hgnll", "data_loss", "hgnll_residual_term", "hgnll_log_variance_term", "raw_logvar_min", "raw_logvar_max", "raw_logvar_mean", "clamped_logvar_min", "clamped_logvar_max", "clamped_logvar_mean", "clamp_low_fraction", "clamp_high_fraction", "sigma_mean", "sigma_p10", "sigma_p50", "sigma_p90", "lr_variance"]
     log_handle = (output / "training_log.csv").open("w", newline="", encoding="utf-8"); monitor_handle = (output / "monitor_log.csv").open("w", newline="", encoding="utf-8")
     monitor_fields = ["iteration", "stage", "monitor_mse", "per_weight_mse", "per_stack_mse", "fixed_monitor_anchor_identity_sha256"]
     if cosine_enabled:
@@ -357,7 +379,7 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
             lrs = {group["name"]: group["lr"] for group in optimizer.param_groups}
             row = {"stage": stage, "iteration": global_iteration, "joint_signal_mse": float(data_terms["joint_signal_mse"].detach()), "reg_t1": float(regularization["t1"].detach()), "reg_t2": float(regularization["t2"].detach()), "reg_b1": float(regularization["b1"].detach()), "amplitude_reg_t1": float(regularization["amplitude_t1"].detach()), "amplitude_reg_t2": float(regularization["amplitude_t2"].detach()), "transformation": float(model.rigid_psf.transformation_loss(space.spatial_scaling).detach()), "total": float(total.detach()), "intensity_scale": float(model.intensity_scale.detach()), "lr_encoding": lrs["encoding"], "lr_network": lrs["network"], "lr_rigid": lrs.get("rigid", ""), "regularization_candidate_count": regularization_batch["candidate_count"], "regularization_effective_point_count": regularization_batch["effective_point_count"], "regularization_sampling_source": regularization_batch["sampling_source"]}
             if hgnll_enabled:
-                row.update({"hgnll": float(data_terms["hgnll"].detach()), "data_loss": float(data_terms["data_loss"].detach()), "hgnll_residual_term": float(data_terms["hgnll_residual_term"].detach()), "hgnll_log_variance_term": float(data_terms["hgnll_log_variance_term"].detach()), "raw_logvar_min": data_terms["raw_logvar_min"], "raw_logvar_max": data_terms["raw_logvar_max"], "raw_logvar_mean": data_terms["raw_logvar_mean"], "clamped_logvar_min": data_terms["clamped_logvar_min"], "clamped_logvar_max": data_terms["clamped_logvar_max"], "clamped_logvar_mean": data_terms["clamped_logvar_mean"], "clamp_low_fraction": data_terms["clamp_low_fraction"], "clamp_high_fraction": data_terms["clamp_high_fraction"], "sigma_mean": data_terms["sigma_mean"], "sigma_p10": data_terms["sigma_p10"], "sigma_p50": data_terms["sigma_p50"], "sigma_p90": data_terms["sigma_p90"], "lr_variance": lrs["variance"]})
+                row.update({"raw_signal_mse": float(data_terms["raw_signal_mse"].detach()), "hgnll": float(data_terms["hgnll"].detach()), "data_loss": float(data_terms["data_loss"].detach()), "hgnll_residual_term": float(data_terms["hgnll_residual_term"].detach()), "hgnll_log_variance_term": float(data_terms["hgnll_log_variance_term"].detach()), "raw_logvar_min": data_terms["raw_logvar_min"], "raw_logvar_max": data_terms["raw_logvar_max"], "raw_logvar_mean": data_terms["raw_logvar_mean"], "clamped_logvar_min": data_terms["clamped_logvar_min"], "clamped_logvar_max": data_terms["clamped_logvar_max"], "clamped_logvar_mean": data_terms["clamped_logvar_mean"], "clamp_low_fraction": data_terms["clamp_low_fraction"], "clamp_high_fraction": data_terms["clamp_high_fraction"], "sigma_mean": data_terms["sigma_mean"], "sigma_p10": data_terms["sigma_p10"], "sigma_p50": data_terms["sigma_p50"], "sigma_p90": data_terms["sigma_p90"], "lr_variance": lrs["variance"]})
             if cosine_enabled:
                 row.update({"fingerprint_cosine_loss": float(data_terms["fingerprint_cosine_loss"].detach()), "weighted_fingerprint_cosine_loss": float(data_terms["weighted_fingerprint_cosine_loss"].detach()), "total_data_loss": float(data_terms["total_data_loss"].detach()), "pred_norm_clamp_count": data_terms["pred_norm_clamp_count"], "obs_norm_clamp_count": data_terms["obs_norm_clamp_count"], "any_norm_clamp_count": data_terms["any_norm_clamp_count"]})
             if controls["anchor_batch_size"] == 640:
@@ -412,12 +434,7 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
             (checkpoint_root / "model_iter_6000_manifest.json").write_text(json.dumps(primary_manifest, indent=2) + "\n", encoding="utf-8")
         if stage_spec["new_optimizer"]:
             model.rigid_psf.axisangle.requires_grad_(joint)
-            optimizer = _optimizer(model, training["learning_rates"], joint)
-            if hgnll_head is not None:
-                variance_lr = float(training["learning_rates"].get(hgnll_config.variance_learning_rate_key, 0.0))
-                if variance_lr <= 0.0:
-                    raise ValueError("HGNLL requires a positive training.learning_rates.variance")
-                optimizer.add_param_group({"name": "variance", "params": list(hgnll_head.parameters()), "lr": variance_lr})
+            optimizer = build_q002_optimizer(model, training["learning_rates"], joint, hgnll_config=hgnll_config)
             milestones = [int(float(value) * iterations) for value in training["scheduler_milestones"] if 0 < float(value) < 1]
             scheduler = MultiStepLR(optimizer, milestones=milestones, gamma=float(training["scheduler_gamma"]))
         else:
