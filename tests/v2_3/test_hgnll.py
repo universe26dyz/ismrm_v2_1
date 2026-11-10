@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import inspect
 from dataclasses import dataclass
 from types import SimpleNamespace
 
@@ -23,7 +24,11 @@ from ismrm_v2.proposed.rigid_psf.rigid_psf_forward import GroupRigidPSF, TradQua
 from ismrm_v2.v2_2.stage_b_reliability import ReliabilityConfig, compute_reliability_gate, normalize_reliability_gate
 from ismrm_v2.v2_3.hgnll import (
     HGNLLConfig,
+    HGNLL_INITIAL_RAW_PARAMETER_BIAS,
+    HGNLL_LOG_VARIANCE_INITIAL,
     HGNLL_LOG_VARIANCE_MAX,
+    HGNLL_SIGMA_INITIAL,
+    HGNLL_SIGMA_MAX,
     JointFingerprintVarianceHead,
     aggregate_log_variance,
     hgnll_objective,
@@ -39,8 +44,12 @@ def test_hgnll_config_is_explicit_and_frozen():
     assert cfg.distribution == "gaussian"
     assert cfg.output == "per_weight_log_variance"
     assert cfg.log_variance_min == -10.0
-    assert cfg.log_variance_max == pytest.approx(math.log(0.35**2))
-    assert cfg.initialization == "upper_bound_minus_epsilon"
+    assert cfg.sigma_max == pytest.approx(1.0)
+    assert cfg.log_variance_max == pytest.approx(0.0)
+    assert cfg.sigma_initial == pytest.approx(0.5)
+    assert cfg.log_variance_initial == pytest.approx(math.log(0.25))
+    assert cfg.raw_parameter_initial_bias == pytest.approx(HGNLL_INITIAL_RAW_PARAMETER_BIAS)
+    assert cfg.initialization == "inverse_sigmoid_of_sigma_initial"
     with pytest.raises(ValueError):
         HGNLLConfig.from_mapping({"enabled": True, "distribution": "laplace"})
 
@@ -49,12 +58,14 @@ def test_head_outputs_ten_log_variances_with_safe_initialization_and_gradients()
     cfg = HGNLLConfig.from_mapping({"enabled": True})
     head = JointFingerprintVarianceHead(4, cfg)
     latent = torch.randn(6, 4, requires_grad=True)
-    output = head(latent)
+    raw = head(latent)
+    output = head.bounded_log_variance_from_raw(raw)
     assert output.shape == (6, 10)
-    assert torch.allclose(output, torch.full_like(output, HGNLL_LOG_VARIANCE_MAX - cfg.initialization_epsilon))
-    output.sum().backward()
+    assert torch.allclose(output, torch.full_like(output, HGNLL_LOG_VARIANCE_INITIAL), atol=1e-6)
+    raw.sum().backward()
     assert latent.grad is not None
     assert head.network[-1].weight.grad is not None
+    assert HGNLL_SIGMA_INITIAL == 0.5 and HGNLL_SIGMA_MAX == 1.0
 
 
 def test_psf_log_mean_exp_variance_matches_definition():
@@ -63,17 +74,41 @@ def test_psf_log_mean_exp_variance_matches_definition():
     assert torch.allclose(result, torch.full((1, 10), math.log(2.5)))
 
 
-def test_clamp_bounds_and_fractions_are_reported():
+def test_smooth_bounds_and_proximity_diagnostics_are_reported():
     cfg = HGNLLConfig.from_mapping({"enabled": True})
     prediction = torch.zeros(4, 10)
     observed = torch.zeros_like(prediction)
-    raw = torch.cat((torch.full((1, 10), -20.0), torch.full((1, 10), 1.0), torch.full((2, 10), -3.0)))
-    _, diagnostics = hgnll_objective(prediction, observed, raw, torch.tensor([0, 0, 1, 1]), {0: 1.0, 1: 1.0}, config=cfg)
-    assert diagnostics["clamped_logvar_min"] == pytest.approx(-10.0)
-    assert diagnostics["clamped_logvar_max"] == pytest.approx(cfg.log_variance_max)
-    assert diagnostics["clamp_low_fraction"] == pytest.approx(.25)
-    assert diagnostics["clamp_high_fraction"] == pytest.approx(.25)
+    raw_parameter = torch.cat((torch.full((1, 10), -20.0), torch.full((1, 10), 20.0), torch.zeros((2, 10))))
+    head = JointFingerprintVarianceHead(1, cfg)
+    bounded = head.bounded_log_variance_from_raw(raw_parameter)
+    _, diagnostics = hgnll_objective(prediction, observed, bounded, torch.tensor([0, 0, 1, 1]), {0: 1.0, 1: 1.0}, raw_variance_parameter=raw_parameter, config=cfg)
+    assert diagnostics["bounded_logvar_min"] >= -10.0
+    assert diagnostics["bounded_logvar_max"] <= 0.0
+    assert torch.all(bounded >= cfg.log_variance_min) and torch.all(bounded <= cfg.log_variance_max)
+    assert diagnostics["fraction_sigma_gt_0_95_sigma_max"] > 0
+    assert diagnostics["fraction_sigma_gt_0_99_sigma_max"] > 0
     assert diagnostics["sigma_p10"] <= diagnostics["sigma_p50"] <= diagnostics["sigma_p90"]
+
+
+def test_formal_variance_mapping_has_no_hard_clamp():
+    source = inspect.getsource(JointFingerprintVarianceHead.bounded_log_variance_from_raw)
+    assert "clamp" not in source
+
+
+def test_smooth_variance_mapping_has_gradients_toward_both_bounds():
+    cfg = HGNLLConfig.from_mapping({"enabled": True})
+    head = JointFingerprintVarianceHead(1, cfg)
+    z = torch.full((1, 10), -10.0, requires_grad=True)
+    bounded = head.bounded_log_variance_from_raw(z)
+    upper_loss, _ = hgnll_objective(torch.full((1, 10), 10.0), torch.zeros(1, 10), bounded, torch.tensor([0]), {0: 1.0}, config=cfg)
+    upper_grad = torch.autograd.grad(upper_loss, z, retain_graph=True)[0]
+    z_lower = torch.full((1, 10), 10.0, requires_grad=True)
+    lower_bounded = head.bounded_log_variance_from_raw(z_lower)
+    lower_loss, _ = hgnll_objective(torch.zeros(1, 10), torch.zeros(1, 10), lower_bounded, torch.tensor([0]), {0: 1.0}, config=cfg)
+    lower_grad = torch.autograd.grad(lower_loss, z_lower)[0]
+    assert torch.all(upper_grad < 0)  # descent increases log variance
+    assert torch.all(lower_grad > 0)  # descent decreases log variance
+    assert torch.all(upper_grad.abs() > 0) and torch.all(lower_grad.abs() > 0)
 
 
 def test_hgnll_matches_complete_anchor_formula_and_stack_balance():
@@ -120,6 +155,10 @@ def test_hgnll_routes_are_new_and_old_routes_are_unchanged():
     assert h0["heteroscedastic"]["enabled"] is True and h0["cross_view_reliability"]["enabled"] is False
     assert h1["heteroscedastic"]["enabled"] is True and h1["cross_view_reliability"]["enabled"] is True
     assert h1["cross_view_reliability"]["discrepancy"] == "raw_cosine"
+    assert h1["heteroscedastic"]["variance_policy_version"] == "multimap_hgnll_smooth_sigma1_v1"
+    assert h1["heteroscedastic"]["sigma_max"] == 1.0
+    assert h1["heteroscedastic"]["sigma_max_reason"] == "pre_existing_v2_2_mse_residual_scale_audit"
+    assert "initialization_epsilon" not in h1["heteroscedastic"]
 
 
 def test_hgnll_routes_are_formally_sparse_admitted_with_batch_640():

@@ -159,7 +159,8 @@ class TradQuantitativeForward(nn.Module):
         *,
         psf_chunk_size: int | None = None,
         world_samples: torch.Tensor | None = None,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+        return_raw: bool = False,
+    ) -> tuple[torch.Tensor, torch.Tensor] | tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Return mean fingerprint and HGNLL variance from one PSF draw.
 
         Both branches consume the exact same transformed PSF sample tensor;
@@ -170,7 +171,7 @@ class TradQuantitativeForward(nn.Module):
             world_samples = self._sample_fingerprint_world(local_xyz_mm, group_idx, n_psf_samples, profile)
         return self._forward_fingerprint_from_world_samples(
             world_samples, group_idx, timing9_ms, n_psf_samples, profile,
-            psf_chunk_size=psf_chunk_size, variance_head=variance_head,
+            psf_chunk_size=psf_chunk_size, variance_head=variance_head, return_raw=return_raw,
         )
 
     def _sample_fingerprint_world(
@@ -194,7 +195,8 @@ class TradQuantitativeForward(nn.Module):
         *,
         psf_chunk_size: int | None,
         variance_head: nn.Module | None = None,
-    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
+        return_raw: bool = False,
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor] | tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         batch_size = world_samples.shape[0]
         if timing9_ms.shape != (batch_size, 9):
             raise ValueError("timing9_ms must be [B,9].")
@@ -207,6 +209,7 @@ class TradQuantitativeForward(nn.Module):
             raise ValueError("psf_chunk_size must be in [1, n_psf_samples].")
         total: torch.Tensor | None = None
         log_variance_chunks: list[torch.Tensor] = []
+        raw_variance_chunks: list[torch.Tensor] = []
         for start in range(0, n_psf_samples, int(psf_chunk_size)):
             stop = min(start + int(psf_chunk_size), n_psf_samples)
             chunk_samples = stop - start
@@ -226,10 +229,16 @@ class TradQuantitativeForward(nn.Module):
             chunk_total = (fields["amplitude"][:, None] * fingerprint).reshape(batch_size, chunk_samples, 10).sum(dim=1)
             total = chunk_total if total is None else total + chunk_total
             if variance_head is not None:
-                log_variance_chunks.append(variance_head(fields["latent"]).reshape(batch_size, chunk_samples, 10))
+                raw_variance = variance_head(fields["latent"])
+                bounded_log_variance = variance_head.bounded_log_variance_from_raw(raw_variance)
+                raw_variance_chunks.append(raw_variance.reshape(batch_size, chunk_samples, 10))
+                log_variance_chunks.append(bounded_log_variance.reshape(batch_size, chunk_samples, 10))
         assert total is not None
         mean = total / float(n_psf_samples)
         if variance_head is None:
             return mean
         from ismrm_v2.v2_3.hgnll import aggregate_log_variance
-        return mean, aggregate_log_variance(torch.cat(log_variance_chunks, dim=1))
+        bounded = aggregate_log_variance(torch.cat(log_variance_chunks, dim=1))
+        if return_raw:
+            return mean, bounded, torch.cat(raw_variance_chunks, dim=1)
+        return mean, bounded

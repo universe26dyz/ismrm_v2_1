@@ -19,10 +19,24 @@ HGNLL_DISTRIBUTION = "gaussian"
 HGNLL_OUTPUT = "per_weight_log_variance"
 HGNLL_AGGREGATION = "log_mean_exp_variance"
 HGNLL_LOG_VARIANCE_MIN = -10.0
-HGNLL_SIGMA_MAX = 0.35
+HGNLL_SIGMA_MAX = 1.0
 HGNLL_LOG_VARIANCE_MAX = math.log(HGNLL_SIGMA_MAX**2)
-HGNLL_INITIALIZATION = "upper_bound_minus_epsilon"
-HGNLL_INITIALIZATION_EPSILON = 1.0e-3
+HGNLL_SIGMA_INITIAL = 0.5
+HGNLL_LOG_VARIANCE_INITIAL = math.log(HGNLL_SIGMA_INITIAL**2)
+HGNLL_VARIANCE_POLICY_VERSION = "multimap_hgnll_smooth_sigma1_v1"
+HGNLL_INITIALIZATION = "inverse_sigmoid_of_sigma_initial"
+
+
+def _logit(probability: float) -> float:
+    return math.log(probability / (1.0 - probability))
+
+
+def _initial_raw_parameter_bias() -> float:
+    probability = (HGNLL_LOG_VARIANCE_INITIAL - HGNLL_LOG_VARIANCE_MIN) / (HGNLL_LOG_VARIANCE_MAX - HGNLL_LOG_VARIANCE_MIN)
+    return _logit(probability)
+
+
+HGNLL_INITIAL_RAW_PARAMETER_BIAS = _initial_raw_parameter_bias()
 
 
 @dataclass(frozen=True)
@@ -37,9 +51,13 @@ class HGNLLConfig:
     log_variance_min: float = HGNLL_LOG_VARIANCE_MIN
     log_variance_min_reason: str = "project_numerical_safety_floor"
     sigma_max: float = HGNLL_SIGMA_MAX
+    sigma_max_reason: str = "pre_existing_v2_2_mse_residual_scale_audit"
     log_variance_max: float = HGNLL_LOG_VARIANCE_MAX
+    sigma_initial: float = HGNLL_SIGMA_INITIAL
+    log_variance_initial: float = HGNLL_LOG_VARIANCE_INITIAL
+    raw_parameter_initial_bias: float = HGNLL_INITIAL_RAW_PARAMETER_BIAS
+    variance_policy_version: str = HGNLL_VARIANCE_POLICY_VERSION
     initialization: str = HGNLL_INITIALIZATION
-    initialization_epsilon: float = HGNLL_INITIALIZATION_EPSILON
     loss_prefactor: float = 0.5
     hidden_features: int = 32
     variance_learning_rate_key: str = "variance"
@@ -60,7 +78,8 @@ class HGNLLConfig:
         allowed = {
             "enabled", "distribution", "output", "weights_per_anchor",
             "psf_variance_aggregation", "log_variance_min", "sigma_max",
-            "log_variance_min_reason", "log_variance_max", "initialization", "initialization_epsilon",
+            "log_variance_min_reason", "sigma_max_reason", "log_variance_max", "sigma_initial", "log_variance_initial",
+            "raw_parameter_initial_bias", "variance_policy_version", "initialization",
             "loss_prefactor", "hidden_features", "variance_learning_rate_key",
         }
         unknown = sorted(set(payload) - allowed)
@@ -86,13 +105,22 @@ class HGNLLConfig:
         if self.log_variance_min_reason != "project_numerical_safety_floor":
             raise ValueError("HGNLL lower bound must be documented as the project numerical-safety floor")
         if not math.isclose(self.sigma_max, HGNLL_SIGMA_MAX, rel_tol=0.0, abs_tol=1e-12):
-            raise ValueError("HGNLL sigma_max is frozen to 0.35")
+            raise ValueError("HGNLL sigma_max is frozen to 1.0")
+        if self.sigma_max_reason != "pre_existing_v2_2_mse_residual_scale_audit":
+            raise ValueError("HGNLL sigma_max must be documented as the pre-existing v2.2 MSE residual-scale audit")
         if not math.isclose(self.log_variance_max, HGNLL_LOG_VARIANCE_MAX, rel_tol=0.0, abs_tol=1e-12):
-            raise ValueError("HGNLL log_variance_max must equal log(0.35**2)")
-        if self.initialization != HGNLL_INITIALIZATION or self.initialization_epsilon <= 0:
-            raise ValueError("HGNLL initialization must be upper_bound_minus_epsilon with positive epsilon")
-        if self.initialization_epsilon >= self.log_variance_max - self.log_variance_min:
-            raise ValueError("HGNLL initialization epsilon is too large for the clamp interval")
+            raise ValueError("HGNLL log_variance_max must equal log(1.0**2)")
+        if not math.isclose(self.sigma_initial, HGNLL_SIGMA_INITIAL, rel_tol=0.0, abs_tol=1e-12):
+            raise ValueError("HGNLL sigma_initial is frozen to 0.5")
+        if not math.isclose(self.log_variance_initial, HGNLL_LOG_VARIANCE_INITIAL, rel_tol=0.0, abs_tol=1e-12):
+            raise ValueError("HGNLL log_variance_initial must equal log(0.5**2)")
+        expected_bias = _initial_raw_parameter_bias()
+        if not math.isclose(self.raw_parameter_initial_bias, expected_bias, rel_tol=0.0, abs_tol=1e-12):
+            raise ValueError("HGNLL raw_parameter_initial_bias disagrees with the inverse-sigmoid initialization")
+        if self.variance_policy_version != HGNLL_VARIANCE_POLICY_VERSION:
+            raise ValueError("unknown HGNLL variance policy version")
+        if self.initialization != HGNLL_INITIALIZATION:
+            raise ValueError("HGNLL initialization must use inverse-sigmoid sigma_initial")
         if self.loss_prefactor != 0.5:
             raise ValueError("HGNLL loss prefactor is frozen to 0.5")
         if self.hidden_features < 1 or not self.variance_learning_rate_key:
@@ -109,9 +137,13 @@ class HGNLLConfig:
             "log_variance_min": float(self.log_variance_min),
             "log_variance_min_reason": self.log_variance_min_reason,
             "sigma_max": float(self.sigma_max),
+            "sigma_max_reason": self.sigma_max_reason,
             "log_variance_max": float(self.log_variance_max),
+            "sigma_initial": float(self.sigma_initial),
+            "log_variance_initial": float(self.log_variance_initial),
+            "raw_parameter_initial_bias": float(self.raw_parameter_initial_bias),
+            "variance_policy_version": self.variance_policy_version,
             "initialization": self.initialization,
-            "initialization_epsilon": float(self.initialization_epsilon),
             "loss_prefactor": float(self.loss_prefactor),
             "hidden_features": int(self.hidden_features),
             "variance_learning_rate_key": self.variance_learning_rate_key,
@@ -119,7 +151,7 @@ class HGNLLConfig:
 
 
 class JointFingerprintVarianceHead(nn.Module):
-    """Predict one log variance for each of the ten fingerprint weights."""
+    """Predict ten unconstrained parameters and map them smoothly to log variance."""
 
     def __init__(self, input_features: int, config: HGNLLConfig | Mapping[str, Any]) -> None:
         super().__init__()
@@ -132,19 +164,25 @@ class JointFingerprintVarianceHead(nn.Module):
             nn.SiLU(),
             nn.Linear(self.config.hidden_features, self.config.weights_per_anchor),
         )
-        # A zero final weight makes the initial output deterministic and keeps
-        # every weight at the explicitly documented upper-bound-minus-epsilon.
+        # A zero final weight makes the initial output deterministic.  The
+        # inverse-sigmoid bias places the bounded value exactly at sigma=0.5.
         nn.init.zeros_(self.network[-1].weight)
-        nn.init.constant_(self.network[-1].bias, self.config.log_variance_max - self.config.initialization_epsilon)
+        nn.init.constant_(self.network[-1].bias, self.config.raw_parameter_initial_bias)
 
     def forward(self, latent: torch.Tensor) -> torch.Tensor:
         if latent.ndim != 2:
             raise ValueError("HGNLL variance head input must be [N,features]")
         if latent.shape[1] != self.network[0].in_features:
             raise ValueError("HGNLL variance head input feature count disagrees with the INR")
-        # Return the raw head output; the objective owns the single explicit
-        # clamp so raw/clamped QC remains observable and auditable.
         return self.network(latent)
+
+    def bounded_log_variance_from_raw(self, raw_variance_parameter: torch.Tensor) -> torch.Tensor:
+        """Map unconstrained parameters smoothly into the configured interval."""
+
+        return self.config.log_variance_min + (self.config.log_variance_max - self.config.log_variance_min) * torch.sigmoid(raw_variance_parameter)
+
+    def bounded_log_variance(self, latent: torch.Tensor) -> torch.Tensor:
+        return self.bounded_log_variance_from_raw(self(latent))
 
 
 def attach_hgnll_head(model: nn.Module, config: HGNLLConfig | Mapping[str, Any]) -> JointFingerprintVarianceHead:
@@ -193,6 +231,7 @@ def hgnll_objective(
     *,
     reliability_multiplier: torch.Tensor | None = None,
     stack_balance_enabled: bool = True,
+    raw_variance_parameter: torch.Tensor | None = None,
     config: HGNLLConfig | Mapping[str, Any] | None = None,
 ) -> tuple[torch.Tensor, dict[str, Any]]:
     """Return complete-anchor HGNLL and detached diagnostics.
@@ -212,8 +251,9 @@ def hgnll_objective(
     stacks = torch.as_tensor(stack_idx, dtype=torch.long, device=prediction.device)
     if stacks.shape != prediction.shape[:1]:
         raise ValueError("HGNLL stack_idx must be [B]")
-    raw = log_variance.detach()
-    lv = log_variance.clamp(cfg.log_variance_min, cfg.log_variance_max)
+    lv = log_variance
+    if torch.any(lv < cfg.log_variance_min) or torch.any(lv > cfg.log_variance_max):
+        raise ValueError("bounded HGNLL log variance lies outside the configured interval")
     residual = prediction - observed
     per_weight_residual = cfg.loss_prefactor * torch.exp(-lv) * residual.pow(2)
     per_weight_logvar = cfg.loss_prefactor * lv
@@ -232,11 +272,14 @@ def hgnll_objective(
     weighted_residual = (weights * multiplier * per_anchor_residual).mean()
     weighted_logvar = (weights * multiplier * per_anchor_logvar).mean()
     total = weighted_residual + weighted_logvar
-    raw_cpu = raw.reshape(-1).cpu()
-    clamped_cpu = lv.detach().reshape(-1).cpu()
-    sigma_cpu = torch.exp(0.5 * clamped_cpu)
-    low_mask = raw < cfg.log_variance_min
-    high_mask = raw > cfg.log_variance_max
+    raw_parameter = log_variance.detach() if raw_variance_parameter is None else torch.as_tensor(raw_variance_parameter, device=log_variance.device).detach()
+    if raw_parameter.shape != log_variance.shape and not (raw_parameter.ndim == 3 and raw_parameter.shape[0] == log_variance.shape[0] and raw_parameter.shape[-1] == 10):
+        raise ValueError("raw_variance_parameter must be [B,10] or [B,K,10]")
+    raw_cpu = raw_parameter.reshape(-1).cpu()
+    bounded_cpu = lv.detach().reshape(-1).cpu()
+    sigma_cpu = torch.exp(0.5 * bounded_cpu)
+    sigma_max = float(cfg.sigma_max)
+    lower_proximity = torch.abs(lv.detach() - cfg.log_variance_min) <= 0.01
     diagnostics: dict[str, Any] = {
         "hgnll": total,
         "joint_signal_mse": joint_signal_mse,
@@ -244,23 +287,19 @@ def hgnll_objective(
         "data_loss": total,
         "hgnll_residual_term": weighted_residual,
         "hgnll_log_variance_term": weighted_logvar,
-        "raw_logvar_min": float(raw_cpu.min()),
-        "raw_logvar_max": float(raw_cpu.max()),
-        "raw_logvar_mean": float(raw_cpu.mean()),
-        "clamped_logvar_min": float(clamped_cpu.min()),
-        "clamped_logvar_max": float(clamped_cpu.max()),
-        "clamped_logvar_mean": float(clamped_cpu.mean()),
-        "clamp_low_fraction": float(low_mask.float().mean().cpu()),
-        "clamp_high_fraction": float(high_mask.float().mean().cpu()),
-        "hgnll_log_variance_min": float(clamped_cpu.min()),
-        "hgnll_log_variance_max": float(clamped_cpu.max()),
-        "hgnll_sigma_min": float(sigma_cpu.min()),
-        "hgnll_sigma_max": float(sigma_cpu.max()),
+        "raw_variance_parameter_min": float(raw_cpu.min()),
+        "raw_variance_parameter_max": float(raw_cpu.max()),
+        "raw_variance_parameter_mean": float(raw_cpu.mean()),
+        "bounded_logvar_min": float(bounded_cpu.min()),
+        "bounded_logvar_max": float(bounded_cpu.max()),
+        "bounded_logvar_mean": float(bounded_cpu.mean()),
         "sigma_mean": float(sigma_cpu.mean()),
         "sigma_p10": float(torch.quantile(sigma_cpu, 0.10)),
         "sigma_p50": float(torch.quantile(sigma_cpu, 0.50)),
         "sigma_p90": float(torch.quantile(sigma_cpu, 0.90)),
-        "hgnll_clamp_fraction": float((low_mask | high_mask).float().mean().cpu()),
+        "fraction_sigma_gt_0_95_sigma_max": float((sigma_cpu > 0.95 * sigma_max).float().mean()),
+        "fraction_sigma_gt_0_99_sigma_max": float((sigma_cpu > 0.99 * sigma_max).float().mean()),
+        "fraction_logvar_within_0_01_of_lower_bound": float(lower_proximity.float().mean().detach().cpu()),
         "hgnll_reliability_multiplier": multiplier,
         "total_data_loss": total,
     }
@@ -276,4 +315,6 @@ __all__ = [
     "HGNLLConfig", "JointFingerprintVarianceHead", "attach_hgnll_head", "aggregate_log_variance",
     "hgnll_objective", "hgnll_loss", "log_mean_exp_variance",
     "HGNLL_LOG_VARIANCE_MIN", "HGNLL_LOG_VARIANCE_MAX", "HGNLL_SIGMA_MAX",
+    "HGNLL_SIGMA_INITIAL", "HGNLL_LOG_VARIANCE_INITIAL", "HGNLL_INITIAL_RAW_PARAMETER_BIAS",
+    "HGNLL_VARIANCE_POLICY_VERSION",
 ]

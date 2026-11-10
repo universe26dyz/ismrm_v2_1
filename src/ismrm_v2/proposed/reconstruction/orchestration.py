@@ -111,13 +111,13 @@ class ReconstructionTrainingModel(nn.Module):
         """Q002 additive joint-anchor forward; scalar ``forward`` remains unchanged."""
         return self.forward_model.forward_fingerprint(batch["xyz"], batch["group_idx"], batch["timing"], n_psf_samples, profile, psf_chunk_size=psf_chunk_size, world_samples=world_samples)
 
-    def forward_fingerprint_hgnll(self, batch: Mapping[str, torch.Tensor], n_psf_samples: int, profile: Any = None, *, psf_chunk_size: int | None = None, world_samples: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
+    def forward_fingerprint_hgnll(self, batch: Mapping[str, torch.Tensor], n_psf_samples: int, profile: Any = None, *, psf_chunk_size: int | None = None, world_samples: torch.Tensor | None = None, return_raw: bool = False) -> tuple[torch.Tensor, torch.Tensor] | tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Evaluate mean and log variance from one shared PSF neighbourhood."""
         if self.joint_variance_head is None:
             raise RuntimeError("HGNLL forward requested without a joint variance head")
         result = self.forward_model.forward_fingerprint_with_log_variance(
             batch["xyz"], batch["group_idx"], batch["timing"], n_psf_samples,
-            self.joint_variance_head, profile, psf_chunk_size=psf_chunk_size, world_samples=world_samples,
+            self.joint_variance_head, profile, psf_chunk_size=psf_chunk_size, world_samples=world_samples, return_raw=return_raw,
         )
         if not isinstance(result, tuple):
             raise RuntimeError("HGNLL forward did not return mean and log variance")
