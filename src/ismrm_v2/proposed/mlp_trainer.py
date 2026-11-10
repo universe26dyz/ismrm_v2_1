@@ -15,6 +15,7 @@ from ismrm_v2.proposed.reconstruction.orchestration import (
     train_reconstruction,
 )
 from ismrm_v2.proposed.signal_decoder.decoder_factory import frozen_mlp_decoder_factory
+from ismrm_v2.v2_3.hgnll import HGNLLConfig, attach_hgnll_head
 
 
 MLPTrainingModel = ReconstructionTrainingModel
@@ -39,6 +40,9 @@ def build_mlp_training_model(dataset: Any, config: Mapping[str, Any], protocol_y
         initial_group_axisangle_physical=initial_group_axisangle_physical,
         decoder_factory=frozen_mlp_decoder_factory,
     )
+    hgnll = HGNLLConfig.from_mapping(config.get("heteroscedastic"))
+    if hgnll.enabled:
+        attach_hgnll_head(model, hgnll)
     return model, space, protocol, metadata.get("source_mlp_checkpoint_metadata", {})
 
 

@@ -96,6 +96,15 @@ class QuantitativeINR(nn.Module):
     def forward(self, xyz_ras_mm: torch.Tensor) -> dict[str, torch.Tensor]:
         """Evaluate physical fields at RAS-mm points ending in coordinate dimension 3."""
 
+        return self.forward_with_latent(xyz_ras_mm, include_latent=False)
+
+    def forward_with_latent(self, xyz_ras_mm: torch.Tensor, *, include_latent: bool = True) -> dict[str, torch.Tensor]:
+        """Evaluate fields and, optionally, the shared latent features.
+
+        The default ``forward`` path remains the historical four-field output;
+        v2.3 uses the latent only for its additional fingerprint variance head.
+        """
+
         if xyz_ras_mm.shape[-1] != 3:
             raise ValueError(f"xyz_ras_mm must end in 3 coordinates, got {tuple(xyz_ras_mm.shape)}.")
         if not torch.is_floating_point(xyz_ras_mm):
@@ -112,4 +121,7 @@ class QuantitativeINR(nn.Module):
         t1_ms = (t2_ms.reshape(-1) + (2500.0 - t2_ms.reshape(-1)) * torch.sigmoid(raw[..., 1])).reshape(shape)
         b1 = (0.1 + 1.1 * torch.sigmoid(raw[..., 2])).reshape(shape)
         amplitude = (F.softplus(raw[..., 3]) + torch.finfo(raw.dtype).eps).reshape(shape)
-        return {"t1_ms": t1_ms, "t2_ms": t2_ms, "b1": b1, "amplitude": amplitude}
+        result = {"t1_ms": t1_ms, "t2_ms": t2_ms, "b1": b1, "amplitude": amplitude}
+        if include_latent:
+            result["latent"] = latent
+        return result

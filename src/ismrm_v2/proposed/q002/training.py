@@ -29,6 +29,7 @@ from ismrm_v2.v2_2.stage_b_reliability import (
     ReliabilityCache, ReliabilityConfig, build_reliability_cache, gate_floor, reliability_weighted_joint_mse,
     stage_b_progress,
 )
+from ismrm_v2.v2_3.hgnll import HGNLLConfig, hgnll_objective
 
 
 def q002_training_controls(training: Mapping[str, Any], *, anchor_batch_size: int = 64, training_psf_samples: int = 8) -> dict[str, int]:
@@ -225,6 +226,8 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
     stack_balance_enabled = bool(dict(stack_balance_cfg).get("enabled", True))
     reliability_cfg = cross_view_reliability if cross_view_reliability is not None else resolved.get("cross_view_reliability")
     reliability_config = ReliabilityConfig.from_mapping(reliability_cfg)
+    hgnll_config = HGNLLConfig.from_mapping(resolved.get("heteroscedastic"))
+    hgnll_enabled = bool(hgnll_config.enabled)
     controls = q002_training_controls(training, anchor_batch_size=anchor_batch_size, training_psf_samples=training_psf_samples)
     training_psf_samples = int(controls["training_psf_samples"] if "training_psf_samples" in controls else controls["psf_samples"])
     cosine_cfg = dict(fingerprint_cosine or {"enabled": False, "weight": 0.0, "epsilon": 1.0e-8})
@@ -252,6 +255,9 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         stack_initialization = initialize_group_poses_from_hb1(scalar_dataset.group_axisangle_init, prepared_inputs, device=device, args_registration=resolved["stack_initialization"]["args_registration"])
         initial_pose = stack_initialization.post_stack_init_axisangle_physical.to(device)
     model, space, protocol, decoder_metadata = build_mlp_training_model(scalar_dataset, resolved, protocol_yaml, device, initial_group_axisangle_physical=initial_pose)
+    if hgnll_enabled and model.variance_head is not None:
+        raise ValueError("HGNLL routes require the historical scalar variance branch to remain disabled")
+    hgnll_head = model.joint_variance_head if hgnll_enabled else None
     model.intensity_scale.copy_(torch.as_tensor(normalization["scale"], device=device))
     output = Path(output_dir)
     if output.exists() and any(output.iterdir()):
@@ -280,6 +286,8 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
     (output / "fixed_monitor.json").write_text(json.dumps({"seed": monitor["seed"], "samples_per_stack": monitor["samples_per_stack"], "anchor_identity_sha256": monitor["anchor_identity_sha256"]}, indent=2) + "\n")
     resolved["stack_balance"] = {"enabled": stack_balance_enabled}
     resolved["cross_view_reliability"] = reliability_config.as_dict()
+    if hgnll_enabled:
+        resolved["heteroscedastic"] = hgnll_config.as_dict()
     resolved_record = dict(resolved); resolved_record["q002_sampling"] = controls; resolved_record["q002_joint_stack_weights"] = {int(k): float(v) for k, v in joint_dataset.stack_weights.items()}; resolved_record["q002_intensity_normalization"] = normalization
     if reliability_cache is not None:
         resolved["cross_view_reliability_cache"] = reliability_cache.manifest()
@@ -299,6 +307,8 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         fields = q003_10k_training_log_fields()
     if reliability_config.enabled:
         fields += ["reliability_enabled", "reliability_discrepancy", "reliability_valid_fraction", "reliability_invalid_reference_fraction", "reliability_target_valid_fraction", "reliability_target_invalid_reference_fraction", "reliability_tau", "reliability_w_min", "reliability_gate_mean", "reliability_gate_min", "reliability_gate_p10", "reliability_gate_p50", "reliability_gate_p90", "reliability_multiplier_mean", "reliability_multiplier_mean_by_stack", "reliability_fraction_gate_lt_0_25", "reliability_fraction_gate_lt_0_5"]
+    if hgnll_enabled:
+        fields += ["hgnll", "data_loss", "hgnll_residual_term", "hgnll_log_variance_term", "raw_logvar_min", "raw_logvar_max", "raw_logvar_mean", "clamped_logvar_min", "clamped_logvar_max", "clamped_logvar_mean", "clamp_low_fraction", "clamp_high_fraction", "sigma_mean", "sigma_p10", "sigma_p50", "sigma_p90", "lr_variance"]
     log_handle = (output / "training_log.csv").open("w", newline="", encoding="utf-8"); monitor_handle = (output / "monitor_log.csv").open("w", newline="", encoding="utf-8")
     monitor_fields = ["iteration", "stage", "monitor_mse", "per_weight_mse", "per_stack_mse", "fixed_monitor_anchor_identity_sha256"]
     if cosine_enabled:
@@ -310,14 +320,26 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         for iteration in range(iterations):
             global_iteration += 1
             batch = sampler.sample(); batch["xyz"] = space.local_to_train(batch["xyz"].to(device)); batch["group_idx"] = batch["group_idx"].to(device); batch["stack_idx"] = batch["stack_idx"].to(device); batch["timing"] = batch["timing"].to(device); batch["observed"] = batch["observed"].to(device)
-            prediction = model.forward_fingerprint(batch, training_psf_samples, psf_chunk_size=controls["psf_forward_chunk_size"])
+            if hgnll_enabled:
+                prediction, log_variance = model.forward_fingerprint_hgnll(batch, training_psf_samples, psf_chunk_size=controls["psf_forward_chunk_size"])
+            else:
+                prediction = model.forward_fingerprint(batch, training_psf_samples, psf_chunk_size=controls["psf_forward_chunk_size"])
+                log_variance = None
             observed = batch["observed"] / model.intensity_scale
-            if reliability_config.enabled or not stack_balance_enabled:
+            gate = None
+            if reliability_cache is not None and stage == "B":
+                gate = reliability_cache.gate_for_indices(batch["anchor_idx"], progress=stage_b_progress(iteration, iterations), config=reliability_config)
+            if hgnll_enabled:
+                multiplier = None
+                if gate is not None:
+                    from ismrm_v2.v2_2.stage_b_reliability import normalize_reliability_gate
+                    multiplier = normalize_reliability_gate(gate, batch["stack_idx"])
+                data, hgnll_terms = hgnll_objective(prediction, observed, log_variance, batch["stack_idx"], joint_dataset.stack_weights, reliability_multiplier=multiplier, stack_balance_enabled=stack_balance_enabled, config=hgnll_config)
+                data_terms = dict(hgnll_terms)
+                data_terms["reliability_terms"] = {"reliability_enabled": bool(reliability_config.enabled), "reliability_active": gate is not None, "reliability_gate": gate, "reliability_multiplier": multiplier}
+            elif reliability_config.enabled or not stack_balance_enabled:
                 base_weights = joint_dataset.stack_weights if stack_balance_enabled else {int(stack): 1.0 for stack in batch["stack_idx"].unique().tolist()}
                 base_terms = joint_fingerprint_objective(prediction, observed, batch["stack_idx"], base_weights, cosine_weight=0.0, cosine_epsilon=cosine_epsilon)
-                gate = None
-                if reliability_cache is not None and stage == "B":
-                    gate = reliability_cache.gate_for_indices(batch["anchor_idx"], progress=stage_b_progress(iteration, iterations), config=reliability_config)
                 data, reliability_terms = reliability_weighted_joint_mse(prediction, observed, batch["stack_idx"], joint_dataset.stack_weights, gate, enabled=reliability_config.enabled, stage=stage, stack_balance_enabled=stack_balance_enabled)
                 data_terms = dict(base_terms); data_terms["total_data_loss"] = data; data_terms["reliability_terms"] = reliability_terms
             else:
@@ -334,6 +356,8 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
             optimizer.zero_grad(set_to_none=True); total.backward(); _assert_finite_gradients(model, stage, iteration + 1); optimizer.step(); _assert_finite_parameters(model, stage, iteration + 1); scheduler.step()
             lrs = {group["name"]: group["lr"] for group in optimizer.param_groups}
             row = {"stage": stage, "iteration": global_iteration, "joint_signal_mse": float(data_terms["joint_signal_mse"].detach()), "reg_t1": float(regularization["t1"].detach()), "reg_t2": float(regularization["t2"].detach()), "reg_b1": float(regularization["b1"].detach()), "amplitude_reg_t1": float(regularization["amplitude_t1"].detach()), "amplitude_reg_t2": float(regularization["amplitude_t2"].detach()), "transformation": float(model.rigid_psf.transformation_loss(space.spatial_scaling).detach()), "total": float(total.detach()), "intensity_scale": float(model.intensity_scale.detach()), "lr_encoding": lrs["encoding"], "lr_network": lrs["network"], "lr_rigid": lrs.get("rigid", ""), "regularization_candidate_count": regularization_batch["candidate_count"], "regularization_effective_point_count": regularization_batch["effective_point_count"], "regularization_sampling_source": regularization_batch["sampling_source"]}
+            if hgnll_enabled:
+                row.update({"hgnll": float(data_terms["hgnll"].detach()), "data_loss": float(data_terms["data_loss"].detach()), "hgnll_residual_term": float(data_terms["hgnll_residual_term"].detach()), "hgnll_log_variance_term": float(data_terms["hgnll_log_variance_term"].detach()), "raw_logvar_min": data_terms["raw_logvar_min"], "raw_logvar_max": data_terms["raw_logvar_max"], "raw_logvar_mean": data_terms["raw_logvar_mean"], "clamped_logvar_min": data_terms["clamped_logvar_min"], "clamped_logvar_max": data_terms["clamped_logvar_max"], "clamped_logvar_mean": data_terms["clamped_logvar_mean"], "clamp_low_fraction": data_terms["clamp_low_fraction"], "clamp_high_fraction": data_terms["clamp_high_fraction"], "sigma_mean": data_terms["sigma_mean"], "sigma_p10": data_terms["sigma_p10"], "sigma_p50": data_terms["sigma_p50"], "sigma_p90": data_terms["sigma_p90"], "lr_variance": lrs["variance"]})
             if cosine_enabled:
                 row.update({"fingerprint_cosine_loss": float(data_terms["fingerprint_cosine_loss"].detach()), "weighted_fingerprint_cosine_loss": float(data_terms["weighted_fingerprint_cosine_loss"].detach()), "total_data_loss": float(data_terms["total_data_loss"].detach()), "pred_norm_clamp_count": data_terms["pred_norm_clamp_count"], "obs_norm_clamp_count": data_terms["obs_norm_clamp_count"], "any_norm_clamp_count": data_terms["any_norm_clamp_count"]})
             if controls["anchor_batch_size"] == 640:
@@ -389,6 +413,11 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         if stage_spec["new_optimizer"]:
             model.rigid_psf.axisangle.requires_grad_(joint)
             optimizer = _optimizer(model, training["learning_rates"], joint)
+            if hgnll_head is not None:
+                variance_lr = float(training["learning_rates"].get(hgnll_config.variance_learning_rate_key, 0.0))
+                if variance_lr <= 0.0:
+                    raise ValueError("HGNLL requires a positive training.learning_rates.variance")
+                optimizer.add_param_group({"name": "variance", "params": list(hgnll_head.parameters()), "lr": variance_lr})
             milestones = [int(float(value) * iterations) for value in training["scheduler_milestones"] if 0 < float(value) < 1]
             scheduler = MultiStepLR(optimizer, milestones=milestones, gamma=float(training["scheduler_gamma"]))
         else:

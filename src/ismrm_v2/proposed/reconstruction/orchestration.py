@@ -98,6 +98,10 @@ class ReconstructionTrainingModel(nn.Module):
         self.forward_model = TradQuantitativeForward(inr, self.signal_simulator, rigid_psf, protocol)
         self.protocol = protocol
         self.variance_head = _ExperimentalHeteroscedasticVarianceHead(rigid_psf.group_count, variance) if bool(variance["enabled"]) else None
+        # v2.3 attaches a distinct ten-weight head only for its HGNLL routes.
+        # The historical scalar ``variance_head`` above is intentionally not
+        # reused or reinterpreted.
+        self.joint_variance_head: nn.Module | None = None
         self.register_buffer("intensity_scale", torch.ones(()))
 
     def forward(self, batch: Mapping[str, torch.Tensor], n_psf_samples: int, profile: Any = None) -> torch.Tensor:
@@ -106,6 +110,18 @@ class ReconstructionTrainingModel(nn.Module):
     def forward_fingerprint(self, batch: Mapping[str, torch.Tensor], n_psf_samples: int, profile: Any = None, *, psf_chunk_size: int | None = None) -> torch.Tensor:
         """Q002 additive joint-anchor forward; scalar ``forward`` remains unchanged."""
         return self.forward_model.forward_fingerprint(batch["xyz"], batch["group_idx"], batch["timing"], n_psf_samples, profile, psf_chunk_size=psf_chunk_size)
+
+    def forward_fingerprint_hgnll(self, batch: Mapping[str, torch.Tensor], n_psf_samples: int, profile: Any = None, *, psf_chunk_size: int | None = None) -> tuple[torch.Tensor, torch.Tensor]:
+        """Evaluate mean and log variance from one shared PSF neighbourhood."""
+        if self.joint_variance_head is None:
+            raise RuntimeError("HGNLL forward requested without a joint variance head")
+        result = self.forward_model.forward_fingerprint_with_log_variance(
+            batch["xyz"], batch["group_idx"], batch["timing"], n_psf_samples,
+            self.joint_variance_head, profile, psf_chunk_size=psf_chunk_size,
+        )
+        if not isinstance(result, tuple):
+            raise RuntimeError("HGNLL forward did not return mean and log variance")
+        return result
 
 
 # Existing checkpoint state-dict keys retain the ``signal_simulator`` name;
@@ -332,6 +348,8 @@ def save_checkpoint(path: str | Path, model: TradTrainingModel, config: Mapping[
     for key in ("source_mlp_checkpoint_path", "source_mlp_checkpoint_sha256", "source_mlp_checkpoint_metadata", "scientific_checkpoint"):
         if decoder_metadata is not None and key in decoder_metadata:
             payload[key] = decoder_metadata[key]
+    if "heteroscedastic" in config:
+        payload["hgnll_config"] = dict(config["heteroscedastic"])
     torch.save(payload, Path(path))
 
 
