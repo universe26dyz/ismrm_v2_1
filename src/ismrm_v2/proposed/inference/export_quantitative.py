@@ -217,7 +217,7 @@ def _support_and_coverage(model: torch.nn.Module, space: TrainingSpace, dataset:
     return (coverage > 0).astype(np.uint8), coverage
 
 
-def export_quantitative_outputs(model: torch.nn.Module, space: TrainingSpace, output_dir: str | Path, output_resolution_mm: float, output_batch_size: int, *, dataset: Any | None = None, export_config: dict[str, Any] | None = None) -> dict[str, Path]:
+def export_quantitative_outputs(model: torch.nn.Module, space: TrainingSpace, output_dir: str | Path, output_resolution_mm: float, output_batch_size: int, *, dataset: Any | None = None, export_config: dict[str, Any] | None = None, bbox_ras_mm: torch.Tensor | None = None) -> dict[str, Path]:
     """Write the four required NIfTI volumes and physical final group poses."""
 
     try:
@@ -228,7 +228,7 @@ def export_quantitative_outputs(model: torch.nn.Module, space: TrainingSpace, ou
     if not output.is_dir():
         raise FileNotFoundError(f"Output directory does not exist: {output}")
     settings = export_config or {}
-    bbox = resolve_quantitative_export_bbox(model, space, dataset=dataset, export_config=settings)
+    bbox = resolve_quantitative_export_bbox(model, space, dataset=dataset, export_config=settings) if bbox_ras_mm is None else torch.as_tensor(bbox_ras_mm, dtype=torch.float32)
     fields, affine = sample_quantitative_fields(model, space, output_resolution_mm, output_batch_size, bbox_ras_mm=bbox)
     names = {"t1_ms": "T1_3D.nii.gz", "t2_ms": "T2_3D.nii.gz", "b1": "B1_3D.nii.gz", "amplitude": "amplitude_3D.nii.gz"}
     paths: dict[str, Path] = {}

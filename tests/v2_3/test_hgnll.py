@@ -14,10 +14,11 @@ from ismrm_v2.proposed.q002.contracts import (
     B1_R0_HGNLL_EXPERIMENT_ID,
     B1_R1_EXPERIMENT_ID,
     B1_R1_HGNLL_EXPERIMENT_ID,
+    B1_R0_HGNLL_10K_EXPERIMENT_ID,
     build_q002_route_config,
 )
 from ismrm_v2.proposed.q002.run_q002_reconstruction import FORMAL_SPARSE_EXPERIMENT_IDS
-from ismrm_v2.proposed.q002.training import joint_vector_mse
+from ismrm_v2.proposed.q002.training import fixed_monitor_forward, hgnll_10k_training_plan, joint_vector_mse
 from ismrm_v2.proposed.q002.training import build_q002_optimizer
 from ismrm_v2.proposed.reconstruction.orchestration import load_checkpoint, save_checkpoint
 from ismrm_v2.proposed.rigid_psf.rigid_psf_forward import GroupRigidPSF, TradQuantitativeForward
@@ -88,6 +89,9 @@ def test_smooth_bounds_and_proximity_diagnostics_are_reported():
     assert diagnostics["fraction_sigma_gt_0_95_sigma_max"] > 0
     assert diagnostics["fraction_sigma_gt_0_99_sigma_max"] > 0
     assert diagnostics["sigma_p10"] <= diagnostics["sigma_p50"] <= diagnostics["sigma_p90"]
+    for field in ("sigma_mean_by_weight", "sigma_p10_by_weight", "sigma_p50_by_weight", "sigma_p90_by_weight"):
+        assert set(diagnostics[field]) == {str(index) for index in range(10)}
+    assert sum(diagnostics["sigma_mean_by_weight"].values()) / 10.0 == pytest.approx(diagnostics["sigma_mean"])
 
 
 def test_formal_variance_mapping_has_no_hard_clamp():
@@ -164,10 +168,64 @@ def test_hgnll_routes_are_new_and_old_routes_are_unchanged():
 def test_hgnll_routes_are_formally_sparse_admitted_with_batch_640():
     assert B1_R0_HGNLL_EXPERIMENT_ID in FORMAL_SPARSE_EXPERIMENT_IDS
     assert B1_R1_HGNLL_EXPERIMENT_ID in FORMAL_SPARSE_EXPERIMENT_IDS
+    assert B1_R0_HGNLL_10K_EXPERIMENT_ID in FORMAL_SPARSE_EXPERIMENT_IDS
     for route_id in (B1_R0_HGNLL_EXPERIMENT_ID, B1_R1_HGNLL_EXPERIMENT_ID):
         route = build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=route_id, anchor_batch_size=640)["route"]
         assert route["sampling"]["anchor_batch_size"] == 640
         assert route["sampling"]["shared_training_psf_samples"] == 8
+
+
+def test_hgnll_10k_route_is_a_pure_continuation_ablation():
+    base = build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=B1_R0_HGNLL_EXPERIMENT_ID, anchor_batch_size=640)["route"]
+    ablation = build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=B1_R0_HGNLL_10K_EXPERIMENT_ID, anchor_batch_size=640)["route"]
+    assert ablation["parent_experiment"] == B1_R0_HGNLL_EXPERIMENT_ID
+    assert ablation["role"] == "convergence_ablation"
+    assert ablation["scientific_change"] == "none"
+    assert ablation["optimization_change"] == "continue_same_HGNLL_optimization_from_6000_to_10000"
+    assert ablation["diagnostic_changes"] == "additive_only"
+    for key in ("heteroscedastic", "stack_balance", "cross_view_reliability", "sampling"):
+        assert ablation[key] == base[key]
+    assert ablation["continuation"]["primary_checkpoint_iteration"] == 6000
+    assert ablation["continuation"]["midpoint_checkpoint_iteration"] == 8000
+    assert ablation["continuation"]["final_checkpoint_iteration"] == 10000
+    assert ablation["continuation"]["extension_optimizer_reset"] is False
+    assert ablation["continuation"]["extension_scheduler_reset"] is False
+    assert ablation["continuation"]["new_extension_milestones"] == "none"
+    assert ablation["continuation"]["expected_extension_lr_by_group"] == {"encoding": 0.0025, "network": 0.00025, "variance": 0.000025, "rigid": 0.000025}
+    assert ablation["continuation"]["monitor_psf_seed"] == 20260911
+
+
+def test_hgnll_10k_stage_plan_has_no_extension_optimizer_or_scheduler_reset():
+    training = {"stage_a_iterations": 2000, "stage_b_iterations": 4000, "batch_size": 640, "psf_samples": 8, "seed": 20260911, "scheduler_milestones": [0.5, 0.8]}
+    plan = hgnll_10k_training_plan(training)
+    assert [(stage["label"], stage["iterations"]) for stage in plan["stages"]] == [("A", 2000), ("B", 4000), ("B_extension", 4000)]
+    assert plan["stage_b_scheduler_milestones"] == [2000, 3200]
+    assert plan["extension_optimizer_reset"] is False
+    assert plan["extension_scheduler_reset"] is False
+    assert plan["new_extension_milestones"] == "none"
+
+
+class _MonitorSpace:
+    @staticmethod
+    def local_to_train(xyz):
+        return xyz
+
+
+class _RandomMonitorModel:
+    def forward_fingerprint(self, batch, n_psf_samples, *, psf_chunk_size):
+        return torch.randn(batch["xyz"].shape[0], 10)
+
+
+def test_fixed_monitor_seed_repeats_psf_prediction_without_consuming_training_rng():
+    monitor = {"xyz": torch.zeros(3, 3), "observed": torch.zeros(3, 10), "group_idx": torch.zeros(3, dtype=torch.long), "stack_idx": torch.zeros(3, dtype=torch.long), "timing": torch.zeros(3, 9)}
+    torch.manual_seed(1234)
+    before = torch.get_rng_state()
+    first, first_logvar = fixed_monitor_forward(_RandomMonitorModel(), monitor, _MonitorSpace(), torch.device("cpu"), 8, 8, hgnll_enabled=False, monitor_psf_seed=20260911)
+    after = torch.get_rng_state()
+    second, second_logvar = fixed_monitor_forward(_RandomMonitorModel(), monitor, _MonitorSpace(), torch.device("cpu"), 8, 8, hgnll_enabled=False, monitor_psf_seed=20260911)
+    assert torch.equal(before, after)
+    assert torch.equal(first, second)
+    assert first_logvar is None and second_logvar is None
 
 
 class _FakeINR(nn.Module):

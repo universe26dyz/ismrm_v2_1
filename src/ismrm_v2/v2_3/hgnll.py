@@ -278,6 +278,7 @@ def hgnll_objective(
     raw_cpu = raw_parameter.reshape(-1).cpu()
     bounded_cpu = lv.detach().reshape(-1).cpu()
     sigma_cpu = torch.exp(0.5 * bounded_cpu)
+    sigma_matrix_cpu = torch.exp(0.5 * lv.detach()).cpu()
     sigma_max = float(cfg.sigma_max)
     lower_proximity = torch.abs(lv.detach() - cfg.log_variance_min) <= 0.01
     diagnostics: dict[str, Any] = {
@@ -297,6 +298,10 @@ def hgnll_objective(
         "sigma_p10": float(torch.quantile(sigma_cpu, 0.10)),
         "sigma_p50": float(torch.quantile(sigma_cpu, 0.50)),
         "sigma_p90": float(torch.quantile(sigma_cpu, 0.90)),
+        "sigma_mean_by_weight": {str(index): float(value) for index, value in enumerate(sigma_matrix_cpu.mean(dim=0))},
+        "sigma_p10_by_weight": {str(index): float(value) for index, value in enumerate(torch.quantile(sigma_matrix_cpu, 0.10, dim=0))},
+        "sigma_p50_by_weight": {str(index): float(value) for index, value in enumerate(torch.quantile(sigma_matrix_cpu, 0.50, dim=0))},
+        "sigma_p90_by_weight": {str(index): float(value) for index, value in enumerate(torch.quantile(sigma_matrix_cpu, 0.90, dim=0))},
         "fraction_sigma_gt_0_95_sigma_max": float((sigma_cpu > 0.95 * sigma_max).float().mean()),
         "fraction_sigma_gt_0_99_sigma_max": float((sigma_cpu > 0.99 * sigma_max).float().mean()),
         "fraction_logvar_within_0_01_of_lower_bound": float(lower_proximity.float().mean().detach().cpu()),

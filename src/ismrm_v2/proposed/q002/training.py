@@ -83,6 +83,27 @@ def q003_10k_training_plan(training: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def hgnll_10k_training_plan(training: Mapping[str, Any]) -> dict[str, Any]:
+    """Define the additive B1_R0_HGNLL continuation without changing its loss."""
+
+    controls = q002_training_controls(training, anchor_batch_size=640)
+    milestones = [int(float(value) * controls["stage_b_iterations"]) for value in training["scheduler_milestones"] if 0 < float(value) < 1]
+    return {
+        "stages": [
+            {"label": "A", "iterations": controls["stage_a_iterations"], "joint": False, "new_optimizer": True},
+            {"label": "B", "iterations": controls["stage_b_iterations"], "joint": True, "new_optimizer": True},
+            {"label": "B_extension", "iterations": 4000, "joint": True, "new_optimizer": False},
+        ],
+        "stage_b_scheduler_milestones": milestones,
+        "primary_checkpoint_iteration": 6000,
+        "midpoint_checkpoint_iteration": 8000,
+        "final_checkpoint_iteration": 10000,
+        "extension_optimizer_reset": False,
+        "extension_scheduler_reset": False,
+        "new_extension_milestones": "none",
+    }
+
+
 def q003_10k_training_log_fields() -> list[str]:
     """Required complete 10k convergence-log schema, with no semantic batch ambiguity."""
 
@@ -240,6 +261,25 @@ def reliability_sample_coverage(stack_idx: torch.Tensor, reference_valid: torch.
     }
 
 
+def fixed_monitor_forward(model: Any, monitor: Mapping[str, torch.Tensor], space: Any, device: torch.device, n_psf_samples: int, psf_chunk_size: int, *, hgnll_enabled: bool, monitor_psf_seed: int | None) -> tuple[torch.Tensor, torch.Tensor | None]:
+    """Evaluate fixed anchors with an isolated, optionally seeded PSF RNG stream."""
+
+    monitor_batch = {key: value.to(device) for key, value in monitor.items() if key in {"xyz", "observed", "group_idx", "stack_idx", "timing"}}
+    monitor_batch["xyz"] = space.local_to_train(monitor_batch["xyz"])
+    devices = [device.index or 0] if device.type == "cuda" else []
+    with torch.random.fork_rng(devices=devices), torch.no_grad():
+        if monitor_psf_seed is not None:
+            torch.manual_seed(int(monitor_psf_seed))
+            if device.type == "cuda":
+                torch.cuda.manual_seed_all(int(monitor_psf_seed))
+        if hgnll_enabled:
+            prediction, log_variance = model.forward_fingerprint_hgnll(monitor_batch, n_psf_samples, psf_chunk_size=psf_chunk_size)
+        else:
+            prediction = model.forward_fingerprint(monitor_batch, n_psf_samples, psf_chunk_size=psf_chunk_size)
+            log_variance = None
+    return prediction, log_variance
+
+
 def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: Mapping[str, Any], protocol_yaml: str | Path, output_dir: str | Path, *, prepared_inputs: list[str | Path], anchor_batch_size: int = 64, fingerprint_cosine: Mapping[str, Any] | None = None, continuation: Mapping[str, Any] | None = None, training_psf_samples: int = 8, cross_view_reliability: Mapping[str, Any] | None = None, stack_balance: Mapping[str, Any] | None = None, reliability_provenance: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Train fresh same-anchor state; Q003 changes only the shared data objective."""
 
@@ -264,9 +304,15 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
     if reliability_config.enabled and cosine_enabled:
         raise ValueError("Stage-B reliability routes must keep the Q003 prediction-vs-observation cosine objective disabled.")
     continuation_enabled = continuation is not None
-    continuation_plan = q003_10k_training_plan(training) if continuation_enabled else None
-    if continuation_enabled and (not cosine_enabled or controls["anchor_batch_size"] != 640 or dict(continuation or {}).get("stage_b_extension_iterations") != 4000):
-        raise ValueError("Q003-10k continuation requires the fixed S640 cosine route and 4000 extension iterations.")
+    continuation_kind = str(dict(continuation or {}).get("kind", "q003_10k")) if continuation_enabled else None
+    if continuation_kind == "hgnll_10k":
+        if not hgnll_enabled or cosine_enabled or controls["anchor_batch_size"] != 640 or dict(continuation or {}).get("stage_b_extension_iterations") != 4000:
+            raise ValueError("HGNLL-10k continuation requires the fixed S640 HGNLL route and 4000 extension iterations.")
+        continuation_plan = hgnll_10k_training_plan(training)
+    else:
+        continuation_plan = q003_10k_training_plan(training) if continuation_enabled else None
+        if continuation_enabled and (not cosine_enabled or controls["anchor_batch_size"] != 640 or dict(continuation or {}).get("stage_b_extension_iterations") != 4000):
+            raise ValueError("Q003-10k continuation requires the fixed S640 cosine route and 4000 extension iterations.")
     device = torch.device(training["device"])
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError(f"Requested CUDA device is unavailable: {device}")
@@ -304,8 +350,9 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         # objective implementation while removing only the balance prefactor.
         reliability_cache = None
     regularization_sampler = CachedBalancedSampler(scalar_dataset)
+    monitor_psf_seed = int(dict(continuation)["monitor_psf_seed"]) if continuation_enabled and "monitor_psf_seed" in dict(continuation or {}) else None
     monitor = joint_dataset.fixed_monitor(seed=controls["seed"], samples_per_stack=int(training.get("monitor_samples_per_weight_per_stack", 1)))
-    (output / "fixed_monitor.json").write_text(json.dumps({"seed": monitor["seed"], "samples_per_stack": monitor["samples_per_stack"], "anchor_identity_sha256": monitor["anchor_identity_sha256"]}, indent=2) + "\n")
+    (output / "fixed_monitor.json").write_text(json.dumps({"seed": monitor["seed"], "samples_per_stack": monitor["samples_per_stack"], "anchor_identity_sha256": monitor["anchor_identity_sha256"], "monitor_psf_seed": monitor_psf_seed, "monitor_anchors_fixed": True, "monitor_psf_fixed": monitor_psf_seed is not None}, indent=2) + "\n")
     resolved["stack_balance"] = {"enabled": stack_balance_enabled}
     resolved["cross_view_reliability"] = reliability_config.as_dict()
     if hgnll_enabled:
@@ -318,6 +365,8 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         resolved_record["q003_fingerprint_cosine"] = {"enabled": True, "weight": cosine_weight, "epsilon": cosine_epsilon}
     if continuation_plan is not None:
         resolved_record["q003_10k_continuation"] = continuation_plan
+    if continuation_kind == "hgnll_10k":
+        resolved_record["hgnll_10k_diagnostics"] = {"checkpoint_iterations": [6000, 8000, 10000], "extension_optimizer_reset": False, "extension_scheduler_reset": False, "new_extension_milestones": "none", "monitor_anchors_fixed": True, "monitor_psf_fixed": True, "monitor_psf_seed": monitor_psf_seed, "per_weight_variance_logging": True}
     (output / "config_resolved.yaml").write_text(yaml.safe_dump(resolved_record, sort_keys=False))
     started = time.perf_counter(); global_iteration = 0
     fields = ["stage", "iteration", "joint_signal_mse", "reg_t1", "reg_t2", "reg_b1", "amplitude_reg_t1", "amplitude_reg_t2", "transformation", "total", "intensity_scale", "lr_encoding", "lr_network", "lr_rigid", "regularization_candidate_count", "regularization_effective_point_count", "regularization_sampling_source"]
@@ -325,14 +374,16 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         fields += ["anchor_batch_size", "weights_per_anchor", "signal_residual_count", "training_psf_samples", "data_psf_inr_location_count", "psf_forward_chunk_size", "regularization_application_count"]
     if cosine_enabled:
         fields[2:2] = ["fingerprint_cosine_loss", "weighted_fingerprint_cosine_loss", "total_data_loss", "pred_norm_clamp_count", "obs_norm_clamp_count", "any_norm_clamp_count"]
-    if continuation_plan is not None:
+    if continuation_plan is not None and continuation_kind != "hgnll_10k":
         fields = q003_10k_training_log_fields()
     if reliability_config.enabled:
         fields += ["reliability_enabled", "reliability_discrepancy", "reliability_valid_fraction", "reliability_invalid_reference_fraction", "reliability_target_valid_fraction", "reliability_target_invalid_reference_fraction", "reliability_tau", "reliability_w_min", "reliability_gate_mean", "reliability_gate_min", "reliability_gate_p10", "reliability_gate_p50", "reliability_gate_p90", "reliability_multiplier_mean", "reliability_multiplier_mean_by_stack", "reliability_fraction_gate_lt_0_25", "reliability_fraction_gate_lt_0_5"]
     if hgnll_enabled:
-        fields += ["raw_signal_mse", "hgnll", "data_loss", "hgnll_residual_term", "hgnll_log_variance_term", "raw_variance_parameter_min", "raw_variance_parameter_max", "raw_variance_parameter_mean", "bounded_logvar_min", "bounded_logvar_max", "bounded_logvar_mean", "sigma_mean", "sigma_p10", "sigma_p50", "sigma_p90", "fraction_sigma_gt_0_95_sigma_max", "fraction_sigma_gt_0_99_sigma_max", "fraction_logvar_within_0_01_of_lower_bound", "lr_variance"]
+        fields += ["raw_signal_mse", "hgnll", "data_loss", "hgnll_residual_term", "hgnll_log_variance_term", "raw_variance_parameter_min", "raw_variance_parameter_max", "raw_variance_parameter_mean", "bounded_logvar_min", "bounded_logvar_max", "bounded_logvar_mean", "sigma_mean", "sigma_p10", "sigma_p50", "sigma_p90", "sigma_mean_by_weight", "sigma_p10_by_weight", "sigma_p50_by_weight", "sigma_p90_by_weight", "fraction_sigma_gt_0_95_sigma_max", "fraction_sigma_gt_0_99_sigma_max", "fraction_logvar_within_0_01_of_lower_bound", "lr_variance"]
     log_handle = (output / "training_log.csv").open("w", newline="", encoding="utf-8"); monitor_handle = (output / "monitor_log.csv").open("w", newline="", encoding="utf-8")
     monitor_fields = ["iteration", "stage", "monitor_mse", "per_weight_mse", "per_stack_mse", "fixed_monitor_anchor_identity_sha256"]
+    if hgnll_enabled:
+        monitor_fields = ["iteration", "stage", "monitor_raw_mse", "monitor_hgnll", "per_weight_mse", "per_stack_mse", "per_weight_sigma_mean", "per_weight_sigma_p50", "per_weight_sigma_p90", "monitor_psf_seed", "fixed_monitor_anchor_identity_sha256"]
     if cosine_enabled:
         monitor_fields = ["iteration", "stage", "monitor_joint_mse", "monitor_cosine_loss", "monitor_cosine_similarity", "per_weight_mse", "per_stack_mse", "per_stack_cosine", "fixed_monitor_anchor_identity_sha256"]
     writer, monitor_writer = csv.DictWriter(log_handle, fieldnames=fields), csv.DictWriter(monitor_handle, fieldnames=monitor_fields)
@@ -380,7 +431,7 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
             lrs = {group["name"]: group["lr"] for group in optimizer.param_groups}
             row = {"stage": stage, "iteration": global_iteration, "joint_signal_mse": float(data_terms["joint_signal_mse"].detach()), "reg_t1": float(regularization["t1"].detach()), "reg_t2": float(regularization["t2"].detach()), "reg_b1": float(regularization["b1"].detach()), "amplitude_reg_t1": float(regularization["amplitude_t1"].detach()), "amplitude_reg_t2": float(regularization["amplitude_t2"].detach()), "transformation": float(model.rigid_psf.transformation_loss(space.spatial_scaling).detach()), "total": float(total.detach()), "intensity_scale": float(model.intensity_scale.detach()), "lr_encoding": lrs["encoding"], "lr_network": lrs["network"], "lr_rigid": lrs.get("rigid", ""), "regularization_candidate_count": regularization_batch["candidate_count"], "regularization_effective_point_count": regularization_batch["effective_point_count"], "regularization_sampling_source": regularization_batch["sampling_source"]}
             if hgnll_enabled:
-                row.update({"raw_signal_mse": float(data_terms["raw_signal_mse"].detach()), "hgnll": float(data_terms["hgnll"].detach()), "data_loss": float(data_terms["data_loss"].detach()), "hgnll_residual_term": float(data_terms["hgnll_residual_term"].detach()), "hgnll_log_variance_term": float(data_terms["hgnll_log_variance_term"].detach()), "raw_variance_parameter_min": data_terms["raw_variance_parameter_min"], "raw_variance_parameter_max": data_terms["raw_variance_parameter_max"], "raw_variance_parameter_mean": data_terms["raw_variance_parameter_mean"], "bounded_logvar_min": data_terms["bounded_logvar_min"], "bounded_logvar_max": data_terms["bounded_logvar_max"], "bounded_logvar_mean": data_terms["bounded_logvar_mean"], "sigma_mean": data_terms["sigma_mean"], "sigma_p10": data_terms["sigma_p10"], "sigma_p50": data_terms["sigma_p50"], "sigma_p90": data_terms["sigma_p90"], "fraction_sigma_gt_0_95_sigma_max": data_terms["fraction_sigma_gt_0_95_sigma_max"], "fraction_sigma_gt_0_99_sigma_max": data_terms["fraction_sigma_gt_0_99_sigma_max"], "fraction_logvar_within_0_01_of_lower_bound": data_terms["fraction_logvar_within_0_01_of_lower_bound"], "lr_variance": lrs["variance"]})
+                row.update({"raw_signal_mse": float(data_terms["raw_signal_mse"].detach()), "hgnll": float(data_terms["hgnll"].detach()), "data_loss": float(data_terms["data_loss"].detach()), "hgnll_residual_term": float(data_terms["hgnll_residual_term"].detach()), "hgnll_log_variance_term": float(data_terms["hgnll_log_variance_term"].detach()), "raw_variance_parameter_min": data_terms["raw_variance_parameter_min"], "raw_variance_parameter_max": data_terms["raw_variance_parameter_max"], "raw_variance_parameter_mean": data_terms["raw_variance_parameter_mean"], "bounded_logvar_min": data_terms["bounded_logvar_min"], "bounded_logvar_max": data_terms["bounded_logvar_max"], "bounded_logvar_mean": data_terms["bounded_logvar_mean"], "sigma_mean": data_terms["sigma_mean"], "sigma_p10": data_terms["sigma_p10"], "sigma_p50": data_terms["sigma_p50"], "sigma_p90": data_terms["sigma_p90"], "sigma_mean_by_weight": json.dumps(data_terms["sigma_mean_by_weight"], sort_keys=True), "sigma_p10_by_weight": json.dumps(data_terms["sigma_p10_by_weight"], sort_keys=True), "sigma_p50_by_weight": json.dumps(data_terms["sigma_p50_by_weight"], sort_keys=True), "sigma_p90_by_weight": json.dumps(data_terms["sigma_p90_by_weight"], sort_keys=True), "fraction_sigma_gt_0_95_sigma_max": data_terms["fraction_sigma_gt_0_95_sigma_max"], "fraction_sigma_gt_0_99_sigma_max": data_terms["fraction_sigma_gt_0_99_sigma_max"], "fraction_logvar_within_0_01_of_lower_bound": data_terms["fraction_logvar_within_0_01_of_lower_bound"], "lr_variance": lrs["variance"]})
             if cosine_enabled:
                 row.update({"fingerprint_cosine_loss": float(data_terms["fingerprint_cosine_loss"].detach()), "weighted_fingerprint_cosine_loss": float(data_terms["weighted_fingerprint_cosine_loss"].detach()), "total_data_loss": float(data_terms["total_data_loss"].detach()), "pred_norm_clamp_count": data_terms["pred_norm_clamp_count"], "obs_norm_clamp_count": data_terms["obs_norm_clamp_count"], "any_norm_clamp_count": data_terms["any_norm_clamp_count"]})
             if controls["anchor_batch_size"] == 640:
@@ -402,8 +453,7 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
             writer.writerow(row)
             if int(training.get("monitor_every", 0)) and global_iteration % int(training["monitor_every"]) == 0:
                 monitor_batch = {key: value.to(device) for key, value in monitor.items() if key in {"xyz", "observed", "group_idx", "stack_idx", "timing"}}
-                monitor_batch["xyz"] = space.local_to_train(monitor_batch["xyz"])
-                with torch.random.fork_rng(devices=[device.index or 0] if device.type == "cuda" else []), torch.no_grad(): prediction_monitor = model.forward_fingerprint(monitor_batch, training_psf_samples, psf_chunk_size=controls["psf_forward_chunk_size"])
+                prediction_monitor, log_variance_monitor = fixed_monitor_forward(model, monitor, space, device, training_psf_samples, controls["psf_forward_chunk_size"], hgnll_enabled=hgnll_enabled, monitor_psf_seed=monitor_psf_seed)
                 observed_monitor = monitor_batch["observed"] / model.intensity_scale
                 error = (prediction_monitor - observed_monitor).pow(2)
                 if cosine_enabled:
@@ -413,26 +463,60 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
                     per_anchor_cosine = (pred_unit * obs_unit).sum(dim=-1)
                     monitor_writer.writerow({"iteration": global_iteration, "stage": stage, "monitor_joint_mse": float(monitor_terms["joint_signal_mse"]), "monitor_cosine_loss": float(monitor_terms["fingerprint_cosine_loss"]), "monitor_cosine_similarity": float(1.0 - monitor_terms["fingerprint_cosine_loss"]), "per_weight_mse": json.dumps({weight: float(error[:, weight].mean()) for weight in range(10)}), "per_stack_mse": json.dumps({int(stack): float(error[monitor_batch["stack_idx"] == stack].mean()) for stack in monitor_batch["stack_idx"].unique().tolist()}), "per_stack_cosine": json.dumps({int(stack): float(per_anchor_cosine[monitor_batch["stack_idx"] == stack].mean()) for stack in monitor_batch["stack_idx"].unique().tolist()}), "fixed_monitor_anchor_identity_sha256": monitor["anchor_identity_sha256"]})
                 else:
-                    monitor_writer.writerow({"iteration": global_iteration, "stage": stage, "monitor_mse": float(error.mean()), "per_weight_mse": json.dumps({weight: float(error[:, weight].mean()) for weight in range(10)}), "per_stack_mse": json.dumps({int(stack): float(error[monitor_batch["stack_idx"] == stack].mean()) for stack in monitor_batch["stack_idx"].unique().tolist()}), "fixed_monitor_anchor_identity_sha256": monitor["anchor_identity_sha256"]})
+                    if hgnll_enabled:
+                        monitor_hgnll, _ = hgnll_objective(prediction_monitor, observed_monitor, log_variance_monitor, monitor_batch["stack_idx"], joint_dataset.stack_weights, config=hgnll_config)
+                        monitor_sigma = torch.exp(0.5 * log_variance_monitor)
+                        monitor_writer.writerow({"iteration": global_iteration, "stage": stage, "monitor_raw_mse": float(error.mean()), "monitor_hgnll": float(monitor_hgnll), "per_weight_mse": json.dumps({str(weight): float(error[:, weight].mean()) for weight in range(10)}, sort_keys=True), "per_stack_mse": json.dumps({str(int(stack)): float(error[monitor_batch["stack_idx"] == stack].mean()) for stack in monitor_batch["stack_idx"].unique().tolist()}, sort_keys=True), "per_weight_sigma_mean": json.dumps({str(weight): float(monitor_sigma[:, weight].mean()) for weight in range(10)}, sort_keys=True), "per_weight_sigma_p50": json.dumps({str(weight): float(torch.quantile(monitor_sigma[:, weight], 0.50)) for weight in range(10)}, sort_keys=True), "per_weight_sigma_p90": json.dumps({str(weight): float(torch.quantile(monitor_sigma[:, weight], 0.90)) for weight in range(10)}, sort_keys=True), "monitor_psf_seed": monitor_psf_seed, "fixed_monitor_anchor_identity_sha256": monitor["anchor_identity_sha256"]})
+                    else:
+                        monitor_writer.writerow({"iteration": global_iteration, "stage": stage, "monitor_mse": float(error.mean()), "per_weight_mse": json.dumps({weight: float(error[:, weight].mean()) for weight in range(10)}), "per_stack_mse": json.dumps({int(stack): float(error[monitor_batch["stack_idx"] == stack].mean()) for stack in monitor_batch["stack_idx"].unique().tolist()}), "fixed_monitor_anchor_identity_sha256": monitor["anchor_identity_sha256"]})
     optimizer = scheduler = None
     primary_checkpoint = None
+    checkpoint_paths: dict[int, Path] = {}
+
+    def save_continuation_checkpoint(iteration: int, stage: str) -> Path:
+        checkpoint_root = output / "checkpoints"
+        checkpoint_root.mkdir(exist_ok=True)
+        if iteration == 6000 and continuation_kind == "hgnll_10k":
+            expected_lrs = dict(dict(continuation or {}).get("expected_extension_lr_by_group", {}))
+            actual_lrs = {group["name"]: float(group["lr"]) for group in optimizer.param_groups}
+            if expected_lrs and any(abs(actual_lrs.get(name, float("nan")) - float(value)) > 1.0e-12 for name, value in expected_lrs.items()):
+                raise RuntimeError(f"HGNLL-10k extension LR contract mismatch: expected {expected_lrs}, got {actual_lrs}")
+        checkpoint_path = checkpoint_root / f"model_iter_{iteration}.pt"
+        save_checkpoint(checkpoint_path, model, resolved, protocol, scalar_dataset, space, controls["seed"], normalization, decoder_metadata)
+        continuation_state = {
+            "optimizer_state": optimizer.state_dict(),
+            "scheduler_state": scheduler.state_dict(),
+            "torch_rng_state": torch.get_rng_state(),
+            "torch_cuda_rng_state_all": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+            "numpy_rng_state": np.random.get_state(),
+            "python_random_state": random.getstate(),
+            "sampler_generator_state": sampler.generator.get_state(),
+            "global_iteration": global_iteration,
+            "stage": stage,
+            "current_lr_by_group": {group["name"]: group["lr"] for group in optimizer.param_groups},
+        }
+        torch.save(continuation_state, checkpoint_root / f"continuation_state_iter_{iteration}.pt")
+        checkpoint_paths[iteration] = checkpoint_path
+        return checkpoint_path
+
     for stage_spec in (continuation_plan["stages"] if continuation_plan is not None else [{"label": "A", "iterations": controls["stage_a_iterations"], "joint": False, "new_optimizer": True}, {"label": "B", "iterations": controls["stage_b_iterations"], "joint": True, "new_optimizer": True}]):
         stage, iterations, joint = stage_spec["label"], int(stage_spec["iterations"]), bool(stage_spec["joint"])
         if stage == "B_extension":
             if global_iteration != 6000 or optimizer is None or scheduler is None:
-                raise RuntimeError("Q003-10k extension must begin from the in-memory 6000-step Stage-B state.")
-            checkpoint_root = output / "checkpoints"; checkpoint_root.mkdir(exist_ok=False)
-            primary_checkpoint = checkpoint_root / "model_iter_6000.pt"
-            save_checkpoint(primary_checkpoint, model, resolved, protocol, scalar_dataset, space, controls["seed"], normalization, decoder_metadata)
-            continuation_state = {
-                "optimizer_state": optimizer.state_dict(), "scheduler_state": scheduler.state_dict(), "torch_rng_state": torch.get_rng_state(),
-                "torch_cuda_rng_state_all": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
-                "numpy_rng_state": np.random.get_state(), "python_random_state": random.getstate(), "sampler_generator_state": sampler.generator.get_state(),
-                "global_iteration": global_iteration, "stage": "B_extension",
-            }
-            torch.save(continuation_state, checkpoint_root / "continuation_state_iter_6000.pt")
-            primary_manifest = {"role": "primary_cosine_ablation", "global_iteration": 6000, "stage_a_iterations": 2000, "stage_b_standard_iterations": 4000, "extension_iterations_completed": 0, "anchor_batch_size": 640, "weights_per_anchor": 10, "signal_residual_count": 6400, "training_psf_samples": 8, "data_psf_inr_location_count": 5120, "fingerprint_cosine_enabled": True, "fingerprint_cosine_weight": 1.0, "fingerprint_cosine_epsilon": 1.0e-8, "seed": 20260911, "git_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(), "checkpoint_sha256": _sha256(primary_checkpoint), "extension_lr_policy": continuation_plan["extension_lr_policy"], "lr_at_extension_start": {group["name"]: group["lr"] for group in optimizer.param_groups}}
-            (checkpoint_root / "model_iter_6000_manifest.json").write_text(json.dumps(primary_manifest, indent=2) + "\n", encoding="utf-8")
+                raise RuntimeError("10k extension must begin from the in-memory 6000-step Stage-B state.")
+            primary_checkpoint = save_continuation_checkpoint(6000, "B_extension")
+            checkpoint_root = output / "checkpoints"
+            if continuation_kind != "hgnll_10k":
+                primary_manifest = {"role": "primary_cosine_ablation", "global_iteration": 6000, "stage_a_iterations": 2000, "stage_b_standard_iterations": 4000, "extension_iterations_completed": 0, "anchor_batch_size": 640, "weights_per_anchor": 10, "signal_residual_count": 6400, "training_psf_samples": 8, "data_psf_inr_location_count": 5120, "fingerprint_cosine_enabled": True, "fingerprint_cosine_weight": 1.0, "fingerprint_cosine_epsilon": 1.0e-8, "seed": 20260911, "git_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(), "checkpoint_sha256": _sha256(primary_checkpoint), "extension_lr_policy": continuation_plan["extension_lr_policy"], "lr_at_extension_start": {group["name"]: group["lr"] for group in optimizer.param_groups}}
+                (checkpoint_root / "model_iter_6000_manifest.json").write_text(json.dumps(primary_manifest, indent=2) + "\n", encoding="utf-8")
+            model.rigid_psf.axisangle.requires_grad_(joint)
+            if continuation_kind == "hgnll_10k":
+                run_iterations(stage, 2000, optimizer=optimizer, scheduler=scheduler, joint=joint)
+                save_continuation_checkpoint(8000, "B_extension")
+                run_iterations(stage, 2000, optimizer=optimizer, scheduler=scheduler, joint=joint)
+            else:
+                run_iterations(stage, iterations, optimizer=optimizer, scheduler=scheduler, joint=joint)
+            continue
         if stage_spec["new_optimizer"]:
             model.rigid_psf.axisangle.requires_grad_(joint)
             optimizer = build_q002_optimizer(model, training["learning_rates"], joint, hgnll_config=hgnll_config)
@@ -443,9 +527,11 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         run_iterations(stage, iterations, optimizer=optimizer, scheduler=scheduler, joint=joint)
     log_handle.close(); monitor_handle.close()
     save_checkpoint(output / "model.pt", model, resolved, protocol, scalar_dataset, space, controls["seed"], normalization, decoder_metadata)
+    if continuation_kind == "hgnll_10k":
+        checkpoint_paths[10000] = output / "model.pt"
     if continuation_plan is not None and global_iteration != continuation_plan["final_checkpoint_iteration"]:
         raise RuntimeError("Q003-10k final checkpoint must be saved exactly at global iteration 10000.")
     if stack_initialization is not None:
         (output / "stack_initialization_poses.json").write_text(json.dumps({"coordinate_convention": "physical RAS mm; trans_first=true", "stacks": list(stack_initialization.stack_pose_records)}, indent=2) + "\n")
     (output / "timing_profile.csv").write_text("section,milliseconds\noptimization_total,{:.6f}\n".format((time.perf_counter() - started) * 1000.0))
-    return {"model": model, "training_space": space, "protocol": protocol, "decoder_metadata": decoder_metadata, "intensity_normalization": normalization, "controls": controls, "stack_weights": joint_dataset.stack_weights, "output_dir": output, "stack_initialization": stack_initialization, "fixed_monitor": monitor, "resolved_config": resolved, "primary_checkpoint": primary_checkpoint, "global_iteration": global_iteration, "continuation_plan": continuation_plan, "reliability_cache": reliability_cache}
+    return {"model": model, "training_space": space, "protocol": protocol, "decoder_metadata": decoder_metadata, "intensity_normalization": normalization, "controls": controls, "stack_weights": joint_dataset.stack_weights, "output_dir": output, "stack_initialization": stack_initialization, "fixed_monitor": monitor, "resolved_config": resolved, "primary_checkpoint": primary_checkpoint, "checkpoint_paths": checkpoint_paths, "global_iteration": global_iteration, "continuation_plan": continuation_plan, "reliability_cache": reliability_cache}
