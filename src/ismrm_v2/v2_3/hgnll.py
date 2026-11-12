@@ -47,6 +47,9 @@ class HGNLLConfig:
     distribution: str = HGNLL_DISTRIBUTION
     output: str = HGNLL_OUTPUT
     weights_per_anchor: int = 10
+    variance_parameterization: str = "per_weight"
+    variance_output_dim: int = 10
+    variance_shared_across_weights: bool = False
     psf_variance_aggregation: str = HGNLL_AGGREGATION
     log_variance_min: float = HGNLL_LOG_VARIANCE_MIN
     log_variance_min_reason: str = "project_numerical_safety_floor"
@@ -76,7 +79,7 @@ class HGNLLConfig:
             raise ValueError("HGNLL routes require heteroscedastic.enabled=true")
         # Do not accept arbitrary policy strings or silently substitute them.
         allowed = {
-            "enabled", "distribution", "output", "weights_per_anchor",
+            "enabled", "distribution", "output", "weights_per_anchor", "variance_parameterization", "variance_output_dim", "variance_shared_across_weights",
             "psf_variance_aggregation", "log_variance_min", "sigma_max",
             "log_variance_min_reason", "sigma_max_reason", "log_variance_max", "sigma_initial", "log_variance_initial",
             "raw_parameter_initial_bias", "variance_policy_version", "initialization",
@@ -92,8 +95,10 @@ class HGNLLConfig:
     def validate(self) -> None:
         if self.distribution != HGNLL_DISTRIBUTION:
             raise ValueError("HGNLL distribution is frozen to gaussian")
-        if self.output != HGNLL_OUTPUT:
-            raise ValueError("HGNLL output is frozen to per_weight_log_variance")
+        if self.output != ("anchor_scalar_log_variance" if self.variance_shared_across_weights else HGNLL_OUTPUT):
+            raise ValueError("HGNLL output disagrees with variance parameterization")
+        if (self.variance_parameterization, self.variance_output_dim, self.variance_shared_across_weights) not in (("per_weight", 10, False), ("anchor_scalar_shared_across_weights", 1, True)):
+            raise ValueError("invalid variance parameterization or output dimension")
         if self.weights_per_anchor != 10:
             raise ValueError("HGNLL requires exactly ten weights per anchor")
         if self.psf_variance_aggregation != HGNLL_AGGREGATION:
@@ -133,6 +138,9 @@ class HGNLLConfig:
             "distribution": self.distribution,
             "output": self.output,
             "weights_per_anchor": int(self.weights_per_anchor),
+            "variance_parameterization": self.variance_parameterization,
+            "variance_output_dim": self.variance_output_dim,
+            "variance_shared_across_weights": self.variance_shared_across_weights,
             "psf_variance_aggregation": self.psf_variance_aggregation,
             "log_variance_min": float(self.log_variance_min),
             "log_variance_min_reason": self.log_variance_min_reason,
@@ -162,7 +170,7 @@ class JointFingerprintVarianceHead(nn.Module):
         self.network = nn.Sequential(
             nn.Linear(int(input_features), self.config.hidden_features),
             nn.SiLU(),
-            nn.Linear(self.config.hidden_features, self.config.weights_per_anchor),
+            nn.Linear(self.config.hidden_features, self.config.variance_output_dim),
         )
         # A zero final weight makes the initial output deterministic.  The
         # inverse-sigmoid bias places the bounded value exactly at sigma=0.5.
@@ -205,8 +213,8 @@ def attach_hgnll_head(model: nn.Module, config: HGNLLConfig | Mapping[str, Any])
 def aggregate_log_variance(logvar_psf: torch.Tensor, *, psf_dim: int = 1) -> torch.Tensor:
     """Aggregate per-PSF log variance as log(mean(exp(logvar)))."""
 
-    if logvar_psf.ndim != 3 or logvar_psf.shape[-1] != 10:
-        raise ValueError("logvar_psf must have shape [B,K,10] (or a specified PSF dimension)")
+    if logvar_psf.ndim != 3 or logvar_psf.shape[-1] not in (1, 10):
+        raise ValueError("logvar_psf must have shape [B,K,1] or [B,K,10]")
     k = int(logvar_psf.shape[psf_dim])
     if k < 1:
         raise ValueError("PSF dimension must be non-empty")
@@ -246,8 +254,8 @@ def hgnll_objective(
 
     cfg = config if isinstance(config, HGNLLConfig) else HGNLLConfig.from_mapping(config or {"enabled": True}, required=True)
     cfg.validate()
-    if prediction.shape != observed.shape or prediction.ndim != 2 or prediction.shape[1] != 10 or log_variance.shape != prediction.shape:
-        raise ValueError("HGNLL prediction, observation, and log_variance must be matching [B,10] tensors")
+    if prediction.shape != observed.shape or prediction.ndim != 2 or prediction.shape[1] != 10 or log_variance.shape != (prediction.shape[0], cfg.variance_output_dim):
+        raise ValueError("HGNLL prediction and observation must be [B,10]; log_variance must match configured output dimension")
     stacks = torch.as_tensor(stack_idx, dtype=torch.long, device=prediction.device)
     if stacks.shape != prediction.shape[:1]:
         raise ValueError("HGNLL stack_idx must be [B]")
@@ -255,6 +263,7 @@ def hgnll_objective(
     if torch.any(lv < cfg.log_variance_min) or torch.any(lv > cfg.log_variance_max):
         raise ValueError("bounded HGNLL log variance lies outside the configured interval")
     residual = prediction - observed
+    # One learned scalar per anchor is shared across all ten residuals.
     per_weight_residual = cfg.loss_prefactor * torch.exp(-lv) * residual.pow(2)
     per_weight_logvar = cfg.loss_prefactor * lv
     per_anchor_residual = per_weight_residual.mean(dim=1)
@@ -273,7 +282,7 @@ def hgnll_objective(
     weighted_logvar = (weights * multiplier * per_anchor_logvar).mean()
     total = weighted_residual + weighted_logvar
     raw_parameter = log_variance.detach() if raw_variance_parameter is None else torch.as_tensor(raw_variance_parameter, device=log_variance.device).detach()
-    if raw_parameter.shape != log_variance.shape and not (raw_parameter.ndim == 3 and raw_parameter.shape[0] == log_variance.shape[0] and raw_parameter.shape[-1] == 10):
+    if raw_parameter.shape != log_variance.shape and not (raw_parameter.ndim == 3 and raw_parameter.shape[0] == log_variance.shape[0] and raw_parameter.shape[-1] == cfg.variance_output_dim):
         raise ValueError("raw_variance_parameter must be [B,10] or [B,K,10]")
     raw_cpu = raw_parameter.reshape(-1).cpu()
     bounded_cpu = lv.detach().reshape(-1).cpu()
@@ -308,6 +317,9 @@ def hgnll_objective(
         "hgnll_reliability_multiplier": multiplier,
         "total_data_loss": total,
     }
+    if cfg.variance_shared_across_weights:
+        for key in ("sigma_mean_by_weight", "sigma_p10_by_weight", "sigma_p50_by_weight", "sigma_p90_by_weight"):
+            diagnostics[key] = {}
     return total, diagnostics
 
 

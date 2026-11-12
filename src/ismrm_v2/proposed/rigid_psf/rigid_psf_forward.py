@@ -231,8 +231,8 @@ class TradQuantitativeForward(nn.Module):
             if variance_head is not None:
                 raw_variance = variance_head(fields["latent"])
                 bounded_log_variance = variance_head.bounded_log_variance_from_raw(raw_variance)
-                raw_variance_chunks.append(raw_variance.reshape(batch_size, chunk_samples, 10))
-                log_variance_chunks.append(bounded_log_variance.reshape(batch_size, chunk_samples, 10))
+                raw_variance_chunks.append(raw_variance.reshape(batch_size, chunk_samples, variance_head.config.variance_output_dim))
+                log_variance_chunks.append(bounded_log_variance.reshape(batch_size, chunk_samples, variance_head.config.variance_output_dim))
         assert total is not None
         mean = total / float(n_psf_samples)
         if variance_head is None:

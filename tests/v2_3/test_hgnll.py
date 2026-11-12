@@ -363,3 +363,64 @@ def test_old_routes_have_no_hgnll_provenance_and_nl1_stays_unchanged():
     h1 = build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=B1_R1_HGNLL_EXPERIMENT_ID, anchor_batch_size=640)["route"]
     assert h0["parent_experiment"] == B1_R0_EXPERIMENT_ID
     assert h1["parent_experiment"] == B1_R1_EXPERIMENT_ID
+
+
+def test_anchor_scalar_route_forward_loss_and_checkpoint():
+    from ismrm_v2.proposed.q002.contracts import B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID
+    route = build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID, anchor_batch_size=640)
+    cfg = HGNLLConfig.from_mapping(route["resolved_config"]["heteroscedastic"], required=True)
+    legacy = HGNLLConfig.from_mapping({"enabled": True})
+    assert (cfg.variance_output_dim, cfg.variance_shared_across_weights) == (1, True)
+    assert (legacy.variance_output_dim, legacy.variance_shared_across_weights) == (10, False)
+    assert B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID in FORMAL_SPARSE_EXPERIMENT_IDS
+    head = JointFingerprintVarianceHead(4, cfg)
+    old = JointFingerprintVarianceHead(4, legacy)
+    latent_net = nn.Linear(3, 4)
+    quantitative = nn.Linear(4, 10)
+    latent = latent_net(torch.randn(3, 3))
+    raw = head(latent)
+    bounded = head.bounded_log_variance_from_raw(raw)
+    assert raw.shape == bounded.shape == (3, 1)
+    assert old(latent).shape == (3, 10)
+    assert torch.allclose(torch.exp(bounded / 2), torch.full_like(bounded, .5), atol=1e-6)
+    assert torch.allclose(old.bounded_log_variance(latent), bounded.expand(-1, 10), atol=1e-6)
+    samples = torch.randn(3, 8, 1) - 3
+    aggregated = aggregate_log_variance(samples)
+    assert aggregated.shape == (3, 1)
+    assert torch.allclose(aggregated, samples.exp().mean(1).log())
+    prediction = quantitative(latent)
+    observed = torch.randn(3, 10)
+    stacks = torch.zeros(3, dtype=torch.long)
+    loss, _ = hgnll_objective(prediction, observed, bounded, stacks, {0: 1}, config=cfg)
+    expanded, _ = hgnll_objective(prediction, observed, bounded.expand(-1, 10), stacks, {0: 1}, config=legacy)
+    assert torch.allclose(loss, expanded)
+    loss.backward()
+    for parameter in (head.network[-1].weight, latent_net.weight, quantitative.weight):
+        assert parameter.grad is not None and torch.isfinite(parameter.grad).all()
+    other = JointFingerprintVarianceHead(4, cfg)
+    other.load_state_dict(head.state_dict())
+    with pytest.raises(RuntimeError, match="size mismatch"):
+        other.load_state_dict(old.state_dict())
+    rigid = GroupRigidPSF(torch.zeros(1, 6), torch.ones(1, 3))
+    forward = TradQuantitativeForward(_DummyQuantitative(), _DummySimulator(), rigid, object())
+    xyz = torch.zeros(3, 3); groups = torch.zeros(3, dtype=torch.long); timing = torch.ones(3, 9)
+    mean, lv, raw_psf = forward.forward_fingerprint_with_log_variance(xyz, groups, timing, 8, head, world_samples=torch.randn(3, 8, 3), return_raw=True)
+    assert mean.shape == (3, 10) and lv.shape == (3, 1) and raw_psf.shape == (3, 8, 1)
+
+
+def test_anchor_scalar_real_inr_cpu_smoke():
+    from ismrm_v2.proposed.trad_quantitative_inr import QuantitativeINR, QuantitativeINRConfig
+    from ismrm_v2.proposed.q002.contracts import B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID
+    route = build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID, anchor_batch_size=640)
+    cfg = HGNLLConfig.from_mapping(route["resolved_config"]["heteroscedastic"])
+    inr = QuantitativeINR(torch.tensor([[0., 0., 0.], [16., 16., 16.]]), QuantitativeINRConfig(latent_features=4))
+    head = JointFingerprintVarianceHead(4, cfg)
+    fields = inr.forward_with_latent(torch.rand(4, 3) * 16)
+    prediction = (fields["t1_ms"] / 2500 + fields["t2_ms"] / 200 + fields["b1"] + fields["amplitude"])[:, None].expand(-1, 10)
+    lv = head.bounded_log_variance(fields["latent"])
+    loss, _ = hgnll_objective(prediction, torch.ones_like(prediction), lv, torch.zeros(4, dtype=torch.long), {0: 1.}, config=cfg)
+    loss.backward()
+    assert torch.isfinite(loss)
+    for module in (inr.shared_latent, inr.parameter_head, head):
+        grads = [p.grad for p in module.parameters() if p.grad is not None]
+        assert grads and all(torch.isfinite(g).all() for g in grads)
