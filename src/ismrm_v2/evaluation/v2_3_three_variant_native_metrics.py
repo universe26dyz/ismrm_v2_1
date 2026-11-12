@@ -15,18 +15,20 @@ import numpy as np
 from ismrm_v2.fit_first.contracts import sha256
 from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
 from ismrm_v2.evaluation.evaluation import _metrics, PSNR_DATA_RANGES_MS, reproject_volume_to_native_plane
-from ismrm_v2.evaluation.current_native_central_component_mask import load_validated_current_native_mask_plane
 from ismrm_v2.evaluation.final_cyj_reporting import _load_all_verified_native_cache_groups
 from ismrm_v2.evaluation.final_native_grid_metrics import native_ras_affine
-from ismrm_v2.evaluation.aha.final5_adapter import resolve_subject_roi, require_exact_native_roi_mapping
-from ismrm_v2.evaluation.aha.final5_myocardial_roi_metrics import PRIMARY_ROI, mapped_roi_plane
+from ismrm_v2.evaluation.aha.cyj11_myocardial_roi_metrics import PRIMARY_ROI, _load_scmr_masks
+from ismrm_v2.evaluation.aha.paired_final_pose_lv_metrics import load_outer_filled_masks
+from ismrm_v2.evaluation.aha.common_native_all_stack_roi_metrics import (
+    ALL_ROIS, load_legacy_blood_pool_masks, stack_sax_masks_as_volume, project_sax_mask_volume,
+)
 from ismrm_v2.evaluation.v2_3_boundary_mechanism_metrics import mechanism_statistics
 from ismrm_v2.v2_3.hgnll import HGNLLConfig
 
 METHODS = ("torch_mse", "torch_hgnll10", "torch_hgnll1")
 STACKS = ("sax", "2ch", "4ch")
 PARAMETERS = ("t1", "t2")
-SUPPORT = "native mask AND finite(reference) AND all three method valid AND finite(all three predictions)"
+SUPPORT = "R0 source_support AND finite(reference) AND all three method valid AND finite(all three predictions)"
 
 
 def common_support(reference, predictions, valid, roi):
@@ -194,7 +196,7 @@ def _audit_shared_contracts(shared_contracts):
     return {"status": "PASS", "shared_contract": shared_contracts[METHODS[0]], "allowed_differences": ["experiment_id", "loss", "variance_parameterization", "checkpoint", "final_pose"]}
 
 
-def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, native_mask_root, r0_native_maps_root, sparse_manifest, roi_root, roi_mapping, output, standardization_manifest=None, cardiac_crop_root=None, require_deterministic_torch_provenance=False):
+def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, r0_native_maps_root, sparse_manifest, roi_bundle, output, require_deterministic_torch_provenance=False):
     import nibabel as nib
     from ismrm_v2.evaluation.v2_3_three_variant_visualization import render_plane, render_sax_reformats
     roots = dict(zip(METHODS, map(Path, (torch_mse_root, torch_hgnll10_root, torch_hgnll1_root))))
@@ -202,16 +204,9 @@ def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, native_mask_ro
     if sparse.get("status") != "ELIGIBLE" or not subject or not case: raise ValueError("eligible subject/case sparse manifest required")
     output = Path(output).resolve()
     if output.exists(): raise FileExistsError(output)
-    inputs = [*roots.values(), Path(native_mask_root), Path(r0_native_maps_root), Path(roi_root)]
+    roi_bundle = Path(roi_bundle)
+    inputs = [*roots.values(), Path(r0_native_maps_root), roi_bundle]
     if any(output.is_relative_to(p.resolve()) for p in inputs): raise ValueError("output must be outside input roots")
-    roi = resolve_subject_roi(roi_root, subject)
-    if roi is None: raise ValueError("audited subject-specific ROI bundle required")
-    mapping = require_exact_native_roi_mapping(roi_mapping, subject=subject, case=case, roi_root=roi, standardization_manifest_path=standardization_manifest)
-    outer_path, inner_path = roi / "Segmentation_1-out-label.nii.gz", roi / "Segmentation_2-in-label.nii.gz"
-    outer, inner = nib.load(str(outer_path)), nib.load(str(inner_path))
-    if outer.shape != inner.shape or not np.allclose(outer.affine, inner.affine, atol=1e-6, rtol=0): raise ValueError("ROI geometries differ")
-    entries = {int(e["native_group_idx"]): e for e in mapping["planes"]}
-    if len(entries) != len(mapping["planes"]): raise ValueError("duplicate ROI group mapping")
     group_mapping = _derived_groups(sparse)
     images, provenance, mappings, shared_contracts = {}, {}, {}, {}
     for name in METHODS:
@@ -226,6 +221,18 @@ def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, native_mask_ro
         variance_configs.append(normalized)
     if variance_configs[0] != variance_configs[1]: raise ValueError("HGNLL variance policies differ beyond output parameterization")
     caches = {s: _load_all_verified_native_cache_groups(r0_native_maps_root, sparse_path, s) for s in STACKS}
+    sax = caches["sax"]
+    sax_groups = np.asarray(sax["group_idx"], int)
+    sax_shape = tuple(map(int, sax["t1_ms"].shape[1:]))
+    roi_manifest = json.loads((roi_bundle / "manifest.json").read_text())
+    if roi_manifest.get("subject_id") != subject: raise ValueError("ROI bundle subject identity mismatch")
+    archive_path = roi_bundle / "sax_myocardium_masks.npz"
+    if roi_manifest.get("sax_myocardium_masks", {}).get("sha256") != sha256(archive_path): raise ValueError("ROI bundle archive SHA mismatch")
+    myocardium = _load_scmr_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape)
+    outer = load_outer_filled_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape)
+    blood = load_legacy_blood_pool_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape, outer_filled=outer)
+    sax_masks = {"lv_outer_filled": outer, "blood_pool": blood, **myocardium}
+    mask_volumes, mask_affine = stack_sax_masks_as_volume(sax, sax_masks)
     roles = {}
     for stack in STACKS:
         retained = set(group_mapping[stack]); heldout = set(sparse["stacks"][stack]["heldout_original_group_ids"])
@@ -235,17 +242,19 @@ def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, native_mask_ro
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="." + output.name + ".", dir=output.parent))
     try:
-        rows, mechanism, figures, roi_by_index, crop_sources = [], [], [], {}, {}
-        pool = {p: {g: {domain: {n: [] for n in ("reference", *METHODS)} for domain in ("common_native", PRIMARY_ROI)} for g in ("all", "observed", "heldout")} for p in PARAMETERS}
+        rows, mechanism, figures = [], [], []
+        roi_by_index = {i: mask for i, mask in enumerate(myocardium["myocardium_full"])}
+        partitions = ("all", "observed", "heldout", "stack_sax", "stack_2ch", "stack_4ch", "heldout_2ch", "heldout_4ch")
+        pool = {p: {g: {domain: {n: [] for n in ("reference", *METHODS)} for domain in ("common_native", *ALL_ROIS)} for g in partitions} for p in PARAMETERS}
         for stack in STACKS:
             cache = caches[stack]
             for i, group in enumerate(cache["group_idx"]):
                 group = int(group); role = roles[(stack, group)]; affine = native_ras_affine(cache["affine_lps_rc"][i])
-                entry = entries.get(group) if stack == "sax" else None
+                shape = tuple(cache["t1_ms"][i].shape)
+                rois = {name: project_sax_mask_volume(volume, mask_affine, affine, shape) for name, volume in mask_volumes.items()}
                 observed = {name: _observed_plane(mappings[name][stack], group_mapping[stack][group], tuple(cache["t1_ms"][i].shape)) for name in METHODS} if role == "observed" else {}
                 for p in PARAMETERS:
                     ref = np.asarray(cache[p + "_ms"][i], float); source = np.asarray(cache["source_support"][i], bool)
-                    native, _ = load_validated_current_native_mask_plane(Path(native_mask_root), parameter=p, stack=stack, original_group_idx=group, shape_rc=ref.shape, source_support=source)
                     pred, valid = {}, {}
                     for name in METHODS:
                         if role == "observed":
@@ -253,26 +262,19 @@ def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, native_mask_ro
                         else:
                             image = images[name][p]
                             pred[name], valid[name] = reproject_volume_to_native_plane(image.get_fdata(), image.affine, affine, ref.shape)
-                    common = common_support(ref, pred, valid, native["primary_native_mask"])
-                    rois = mapped_roi_plane(outer, inner, entry=entry, expected_shape=ref.shape, spacing_rc_mm=tuple(map(float, cache["pixel_spacing_rc_mm"][i][:2])))["rois"] if entry else None
-                    if rois is not None: roi_by_index[i] = rois["myocardium_full"]
-                    masks = {"common_native": common}
-                    if rois is not None: masks[PRIMARY_ROI] = common & rois[PRIMARY_ROI]
+                    common = common_support(ref, pred, valid, source)
+                    masks = {"common_native": common, **{name: common & roi for name, roi in rois.items()}}
                     row = {"stack": stack, "group": group, "role": role, "parameter": p, "domains": {d: statistics(ref, pred, m, p) for d, m in masks.items()}}
                     rows.append(row)
                     for domain, mask in masks.items():
                         if mask.any():
-                            for part in ("all", role):
+                            plane_partitions = ["all", role, f"stack_{stack}"]
+                            if role == "heldout" and stack in ("2ch", "4ch"): plane_partitions.append(f"heldout_{stack}")
+                            for part in plane_partitions:
                                 pool[p][part][domain]["reference"].append(ref[mask])
                                 for n in METHODS: pool[p][part][domain][n].append(pred[n][mask])
-                    if rois is not None:
-                        mechanism.append({"stack": stack, "group": group, "role": role, "parameter": p, **mechanism_statistics(ref, pred, common, rois[PRIMARY_ROI], rois["myocardium_full"])})
-                    crop = rois["myocardium_full"] if rois is not None else None
-                    if crop is None and cardiac_crop_root is not None:
-                        path = Path(cardiac_crop_root) / stack / f"group{group:03d}.npy"
-                        if path.is_file():
-                            crop = np.load(path, allow_pickle=False)
-                            crop_sources[f"{stack}/{group}"] = _record(path)
+                    mechanism.append({"stack": stack, "group": group, "role": role, "parameter": p, **mechanism_statistics(ref, pred, common, rois[PRIMARY_ROI], rois["myocardium_full"])})
+                    crop = rois["lv_outer_filled"]
                     if crop is not None and np.any(crop) and common.any():
                         fig = render_plane(ref, pred, common, crop, p, stage / "figures" / stack / f"group{group:03d}_{p}.png", title=f"{subject} {case} {stack} {group} {p.upper()} ({role})")
                         fig["path"] = str(Path(fig["path"]).relative_to(stage)); fig.update({"stack": stack, "group": group, "parameter": p}); figures.append(fig)
@@ -288,8 +290,23 @@ def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, native_mask_ro
                         ref = np.concatenate(values["reference"]); predictions = {n: np.concatenate(values[n]) for n in METHODS}
                         aggregates[p][part][domain] = statistics(ref, predictions, np.ones(ref.shape, bool), p)
                     else: aggregates[p][part][domain] = {"support_voxels": 0, "methods": {n: None for n in METHODS}}
-        standard = Path(standardization_manifest) if standardization_manifest else Path(mapping["standardization_manifest"]["path"])
-        manifest = {"schema": "v2_3_three_variant_native/v2", "authority_mode": "q002_training_roots", "comparability_audit": comparability, "subject": subject, "case": case, "primary_roi": PRIMARY_ROI, "support_equation": SUPPORT, "methods": provenance, "sparse_manifest": _record(sparse_path), "native_mask_manifest": _record(Path(native_mask_root) / "manifest.json"), "native_reference": {s: caches[s]["provenance"] for s in STACKS}, "roi_mapping": _record(roi_mapping), "standardization_manifest": _record(standard), "roi_outer": _record(outer_path), "roi_inner": _record(inner_path), "observed_mapping_policy": "per-group ten weight maps audited on overlapping mask pixels; valid support is intersection of ten masks; canonical weight 0", "mapping_provenance_limit": "training-root mapping files have no independent checkpoint digest; files are identified by path and SHA256 but their creation from the checkpoint cannot be independently verified", "geometry_policy": {"observed": "per-method final learned pose mapping_central_no_psf", "heldout": "central endpoint reprojected to original native plane"}, "crop_policy": "legacy _crop_bounds on audited myocardium full + 3 pixels; optional explicit native cardiac masks for 2ch/4ch", "cardiac_crop_root": str(Path(cardiac_crop_root).resolve()) if cardiac_crop_root else None, "cardiac_crop_inputs": crop_sources, "colorbar_policy": "legacy Lipari/Navia map LUTs and ranges; signed coolwarm with symmetric legacy residual magnitude ranges", "figures": figures, "mechanism_ring": "three 3x3 dilations outside full myocardium intersected with three-way common native support", "roi_note": "primary ROI applies only to explicitly mapped SAX planes; held-out LAX myocardium unavailable from current ROI authority; empty partitions remain empty",  "long_axis_note": "SAX centre-plane dense reformats use shared physical geometry; at least two SAX slices required. 2ch/4ch panels use matched native planes and optional explicit cardiac crop masks"}
+        manifest = {
+            "schema": "v2_3_three_variant_native/v3", "authority_mode": "q002_training_roots",
+            "comparability_audit": comparability, "subject": subject, "case": case,
+            "primary_roi": PRIMARY_ROI, "support_equation": SUPPORT,
+            "roi_support_equation": "common_native AND nearest-neighbour projected ROI",
+            "methods": provenance, "sparse_manifest": _record(sparse_path),
+            "native_reference": {s: caches[s]["provenance"] for s in STACKS},
+            "roi_authority": {"mode": "exact_native_myocardium_bundle_v2", "bundle_root": str(roi_bundle.resolve()), "manifest": _record(roi_bundle / "manifest.json"), "archive": _record(archive_path)},
+            "roi_projection": {"source": "regular physical SAX mask volume", "method": "nearest-neighbour world-space projection", "source_functions": ["stack_sax_masks_as_volume", "project_sax_mask_volume"], "mask_affine_ras": mask_affine.tolist()},
+            "observed_mapping_policy": "per-group ten weight maps audited on overlapping mask pixels; valid support is intersection of ten masks; canonical weight 0",
+            "mapping_provenance_limit": "training-root mapping files have no independent checkpoint digest; files are identified by path and SHA256 but their creation from the checkpoint cannot be independently verified",
+            "geometry_policy": {"observed": "per-method final learned pose mapping_central_no_psf", "heldout": "central endpoint reprojected to original native plane"},
+            "crop_policy": "legacy _crop_bounds on projected lv_outer_filled + 3 pixels", "colorbar_policy": "legacy Lipari/Navia map LUTs and ranges; signed coolwarm with symmetric legacy residual magnitude ranges",
+            "figures": figures, "mechanism_ring": "three 3x3 dilations outside full myocardium intersected with three-way common native support",
+            "roi_note": "held-out LAX ROI is nearest-neighbour projection of immutable SAX mask volume; coverage depends on physical overlap",
+            "long_axis_note": "SAX centre-plane dense reformats use shared physical geometry; 2ch/4ch panels use matched native planes and projected cardiac masks",
+        }
         for filename, data in (("per_plane_metrics.json", {"planes": rows}), ("aggregate_metrics.json", {"primary_roi": PRIMARY_ROI, "partitions": aggregates}), ("mechanism_metrics.json", {"planes": mechanism}), ("manifest.json", manifest)):
             (stage / filename).write_text(json.dumps(_clean(data), indent=2, allow_nan=False) + "\n")
         stage.rename(output)
@@ -301,10 +318,8 @@ def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, native_mask_ro
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("torch-mse-root", "torch-hgnll10-root", "torch-hgnll1-root", "native-mask-root", "r0-native-maps-root", "sparse-manifest", "roi-root", "roi-mapping", "output"):
+    for name in ("torch-mse-root", "torch-hgnll10-root", "torch-hgnll1-root", "r0-native-maps-root", "sparse-manifest", "roi-bundle", "output"):
         parser.add_argument("--" + name, required=True)
-    parser.add_argument("--standardization-manifest")
-    parser.add_argument("--cardiac-crop-root", help="optional native cardiac masks: STACK/groupNNN.npy for long-axis planes")
     parser.add_argument("--require-deterministic-torch-provenance", action="store_true")
     print(run(**vars(parser.parse_args())))
 

@@ -98,40 +98,77 @@ def training_fixture(tmp_path):
 
 def test_pipeline_training_roots_observed_heldout_and_visualization(tmp_path, monkeypatch, training_fixture):
     import json
-    import nibabel as nib
     import ismrm_v2.evaluation.v2_3_three_variant_native_metrics as module
     import ismrm_v2.evaluation.v2_3_three_variant_visualization as visual
-    sparse, _, roots = training_fixture
+    from ismrm_v2.fit_first.contracts import sha256
+    from scipy.ndimage import binary_erosion
+    sparse, payload, roots = training_fixture
+    # The second SAX and the 2CH plane are held out; each target intersects the SAX volume.
+    payload["stacks"]["sax"]["heldout_original_group_ids"] = [1]
+    payload["stacks"]["4ch"]["heldout_original_group_ids"] = [1]
     roiroot = tmp_path / "roi"; roiroot.mkdir()
-    for name in ("Segmentation_1-out-label.nii.gz", "Segmentation_2-in-label.nii.gz"):
-        nib.save(nib.Nifti1Image(np.ones((12, 12, 1)), np.eye(4)), roiroot / name)
-    mapping = tmp_path / "map.json"; mapping.write_text("{}")
-    standard = tmp_path / "standard.json"; standard.write_text("{}")
-    native_mask = tmp_path / "mask"; native_mask.mkdir(); (native_mask / "manifest.json").write_text("{}")
+    outer = np.zeros((2, 12, 12), bool); outer[:, 2:10, 2:10] = True
+    inner = np.zeros_like(outer); inner[:, 5:7, 5:7] = True
+    full = outer & ~inner
+    core = np.stack([binary_erosion(x, structure=np.ones((3, 3), bool)) for x in full])
+    archive = roiroot / "sax_myocardium_masks.npz"
+    np.savez(archive, group_idx=np.arange(2), outer_filled=outer, inner_filled=inner, blood_pool=inner, myocardium_full=full, myocardium_core_legacy=core, myocardium_core_1px=core, landmark_labels=np.zeros_like(outer))
+    (roiroot / "manifest.json").write_text(json.dumps({"schema": "exact_native_myocardium_bundle/v2", "status": "PASS", "subject_id": "S", "sax_myocardium_masks": {"sha256": sha256(archive)}}))
     native_root = tmp_path / "native"; native_root.mkdir()
-    cache = {"group_idx": np.array([0]), "t1_ms": np.full((1, 12, 12), 100.), "t2_ms": np.full((1, 12, 12), 50.), "affine_lps_rc": np.diag([-1., -1., 1., 1.])[None], "pixel_spacing_rc_mm": np.ones((1, 2)), "slice_thickness_mm": np.ones(1), "source_support": np.ones((1, 12, 12), bool), "provenance": {}}
-    roi = np.zeros((12, 12), bool); roi[3:9, 3:9] = True
-    monkeypatch.setattr(module, "validate_sparse_profile_manifest", lambda path, **kwargs: training_fixture[1])
-    monkeypatch.setattr(module, "resolve_subject_roi", lambda *_: roiroot)
-    monkeypatch.setattr(module, "require_exact_native_roi_mapping", lambda *a, **kw: {"planes": [{"native_group_idx": 0}], "standardization_manifest": {"path": str(standard)}})
-    monkeypatch.setattr(module, "mapped_roi_plane", lambda *a, **kw: {"rois": {"myocardium_full": roi, "myocardium_core_1px": roi}})
-    monkeypatch.setattr(module, "_load_all_verified_native_cache_groups", lambda *a: cache)
-    monkeypatch.setattr(module, "load_validated_current_native_mask_plane", lambda *a, **kw: ({"primary_native_mask": np.ones((12, 12), bool)}, {}))
+    def make_cache(n, affines):
+        return {"group_idx": np.arange(n), "t1_ms": np.full((n, 12, 12), 100.), "t2_ms": np.full((n, 12, 12), 50.), "affine_lps_rc": affines, "pixel_spacing_rc_mm": np.ones((n, 2)), "slice_thickness_mm": np.ones(n), "source_support": np.ones((n, 12, 12), bool), "provenance": {}}
+    lps = np.diag([-1., -1., 1., 1.]); sax_affines = np.repeat(lps[None], 2, axis=0); sax_affines[1, 2, 3] = 1
+    target = np.array([[1., 0., 0., 0.], [0., 0., 1., 3.], [0., 1., 0., 0.], [0., 0., 0., 1.]])
+    caches = {"sax": make_cache(2, sax_affines), "2ch": make_cache(1, (lps @ target)[None]), "4ch": make_cache(2, np.repeat((lps @ target)[None], 2, axis=0))}
+    monkeypatch.setattr(module, "validate_sparse_profile_manifest", lambda path, **kwargs: payload)
+    monkeypatch.setattr(module, "_load_all_verified_native_cache_groups", lambda root, path, stack: caches[stack])
     captured = []
     def capture(ref, pred, support, crop, parameter, output, **kwargs):
-        captured.append((parameter, pred[METHODS[0]].copy()))
+        captured.append((str(output), parameter, pred[METHODS[0]].copy(), crop.copy()))
         return {"path": str(output)}
     monkeypatch.setattr(visual, "render_plane", capture)
-    out = module.run(torch_mse_root=roots[0], torch_hgnll10_root=roots[1], torch_hgnll1_root=roots[2], native_mask_root=native_mask, r0_native_maps_root=native_root, sparse_manifest=sparse, roi_root=roiroot, roi_mapping=mapping, output=tmp_path / "result", standardization_manifest=standard, require_deterministic_torch_provenance=True)
-    data = json.loads((out / "aggregate_metrics.json").read_text())
-    assert data["partitions"]["t1"]["all"]["common_native"]["support_voxels"] == 432
-    assert data["partitions"]["t1"]["observed"]["common_native"]["methods"][METHODS[0]]["bias"] == 10
-    assert data["partitions"]["t1"]["heldout"]["common_native"]["methods"][METHODS[0]]["bias"] == 20
-    assert data["partitions"]["t1"]["heldout"][PRIMARY_ROI]["support_voxels"] == 0
-    assert np.all(captured[0][1] == 110)
+    monkeypatch.setattr(visual, "render_sax_reformats", lambda *args: [])
+    out = module.run(torch_mse_root=roots[0], torch_hgnll10_root=roots[1], torch_hgnll1_root=roots[2], r0_native_maps_root=native_root, sparse_manifest=sparse, roi_bundle=roiroot, output=tmp_path / "result", require_deterministic_torch_provenance=True)
+    data = json.loads((out / "aggregate_metrics.json").read_text())["partitions"]["t1"]
+    assert data["observed"]["common_native"]["methods"][METHODS[0]]["bias"] == 10
+    assert data["heldout"]["common_native"]["methods"][METHODS[0]]["bias"] == 20
+    assert data["heldout_2ch"][PRIMARY_ROI]["support_voxels"] > 0
+    assert data["heldout_4ch"][PRIMARY_ROI]["support_voxels"] > 0
+    assert set(data["all"]) == {"common_native", "lv_outer_filled", "blood_pool", "myocardium_full", "myocardium_core_legacy", "myocardium_core_1px"}
+    assert np.all(captured[0][2] == 110)
+    from ismrm_v2.evaluation.aha.common_native_all_stack_roi_metrics import stack_sax_masks_as_volume, project_sax_mask_volume
+    from ismrm_v2.evaluation.final_native_grid_metrics import native_ras_affine
+    volumes, affine = stack_sax_masks_as_volume(caches["sax"], {"outer": outer})
+    for stack in ("sax", "2ch", "4ch"):
+        crop = next(mask for path, _, _, mask in captured if f"/{stack}/" in path)
+        expected = project_sax_mask_volume(volumes["outer"], affine, native_ras_affine(caches[stack]["affine_lps_rc"][0]), (12, 12))
+        assert crop.any() and np.array_equal(crop, expected)
     manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["primary_roi"] == PRIMARY_ROI and manifest["roi_authority"]["archive"]["sha256"] == sha256(archive)
     assert manifest["authority_mode"] == "q002_training_roots" and manifest["comparability_audit"]["status"] == "PASS"
     assert all(manifest["methods"][n]["backend_provenance"]["status"] == "PASS" for n in METHODS)
+    archive.write_bytes(b"corrupted archive")
+    with pytest.raises(ValueError, match="archive SHA mismatch"):
+        module.run(torch_mse_root=roots[0], torch_hgnll10_root=roots[1], torch_hgnll1_root=roots[2], r0_native_maps_root=native_root, sparse_manifest=sparse, roi_bundle=roiroot, output=tmp_path / "bad-result", require_deterministic_torch_provenance=True)
+
+
+def test_clean_roi_projection_and_three_way_support():
+    from ismrm_v2.evaluation.aha.common_native_all_stack_roi_metrics import stack_sax_masks_as_volume, project_sax_mask_volume
+    from ismrm_v2.evaluation.final_native_grid_metrics import native_ras_affine
+    lps = np.diag([-1., -1., 1., 1.]); affines = np.repeat(lps[None], 3, axis=0); affines[:, 2, 3] = np.arange(3)
+    native = {"affine_lps_rc": affines}
+    core = np.zeros((3, 12, 12), bool); core[:, 3:9, 3:9] = True
+    volumes, affine = stack_sax_masks_as_volume(native, {"core": core})
+    for i in range(3):
+        assert np.array_equal(project_sax_mask_volume(volumes["core"], affine, native_ras_affine(affines[i]), (12, 12)), core[i])
+    target = np.array([[1., 0., 0., 0.], [0., 0., 1., 4.], [0., 1., 0., 0.], [0., 0., 0., 1.]])
+    projected = project_sax_mask_volume(volumes["core"], affine, target, (12, 12))
+    assert projected.any()
+    ref = np.ones((12, 12)); predictions = {n: ref.copy() for n in METHODS}; valid = {n: np.ones_like(projected) for n in METHODS}
+    index = tuple(np.argwhere(projected)[0]); valid[METHODS[1]][index] = False
+    support = common_support(ref, predictions, valid, np.ones_like(projected)) & projected
+    assert support.sum() == projected.sum() - 1
+    assert all(x["support_voxels"] == support.sum() for x in statistics(ref, predictions, support, "t1")["methods"].values())
 
 
 def test_authority_identity_and_backend_fail_closed(training_fixture):
