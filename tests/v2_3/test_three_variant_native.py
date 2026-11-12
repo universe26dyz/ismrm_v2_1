@@ -59,28 +59,49 @@ def test_long_axis_reformats_synthetic(tmp_path):
     assert all((tmp_path / __import__("pathlib").Path(r["path"]).name).is_file() for r in records)
 
 
-def test_pipeline_synthetic_inputs(tmp_path, monkeypatch):
+
+
+@pytest.fixture
+def training_fixture(tmp_path):
+    import json
+    import nibabel as nib
+    from ismrm_v2.fit_first.contracts import sha256
+    from ismrm_v2.proposed.q002.contracts import build_q002_route_config
+    from ismrm_v2.proposed.q002.training import q002_training_controls
+    training = {"stage_a_iterations": 2000, "stage_b_iterations": 4000, "batch_size": 640, "psf_samples": 8, "seed": 20260911}
+    sparse = tmp_path / "sparse.json"
+    stacks = {}
+    for stack in ("sax", "2ch", "4ch"):
+        active = stack != "2ch"
+        stacks[stack] = {"retained_original_group_ids": [0] if active else [], "heldout_original_group_ids": [] if active else [0], "training_stack_present": active}
+        if active:
+            stacks[stack].update({"derived_to_original_group_idx": [{"derived_group_idx": 0, "original_group_idx": 0}], "derived_observation": {"sha256": "input_" + stack}})
+    payload = {"subject": "S", "case_id": "L50_fold0", "profile_id": "L50", "status": "ELIGIBLE", "schema_version": "phase4r_sparse_profile_v2", "stacks": stacks}
+    sparse.write_text(json.dumps(payload))
+    roots = []
+    for name, route_id in zip(METHODS, ("B1_R0", "B1_R0_HGNLL", "B1_R0_HGNLL_ANCHORVAR1")):
+        root = tmp_path / name; root.mkdir(); roots.append(root)
+        (root / "model.pt").write_bytes(name.encode())
+        for p in ("t1", "t2"):
+            nib.save(nib.Nifti1Image(np.full((12, 12, 4), 120. if p == "t1" else 60.), np.eye(4)), root / f"{p.upper()}_3D.nii.gz")
+        mapping = root / "evaluation" / "mapping_central_no_psf"; mapping.mkdir(parents=True)
+        for stack in ("sax", "4ch"):
+            np.savez(mapping / f"t1_t2_native_plane_{stack}.npz", group_idx=np.zeros(10, int), weight_idx=np.arange(10), t1_ms=np.full((10, 12, 12), 110.), t2_ms=np.full((10, 12, 12), 55.), masks=np.ones((10, 12, 12), bool), timing9_ms=np.zeros((10, 9)), tr_ms=np.ones(10), vps=np.ones(10))
+        route = build_q002_route_config({"training": training, "decoder": {}}, cropped_prepared_root="cropped", experiment_id=route_id, anchor_batch_size=640)["route"]
+        dep = {"B6_model": "b6", "frozen_decoder": "decoder", "protocol": "protocol"}
+        manifest = {"experiment_id": route_id, "subject_id": "S", "case_id": "L50_fold0", "profile_id": "L50", "sparse_manifest": {"sha256": sha256(sparse)}, "route": route, "controls": q002_training_controls(training, anchor_batch_size=640), "q002_checkpoint_sha256": sha256(root / "model.pt"), "prepared_inputs_sha256": {"/data/sax/observations.npz": "input_sax", "/data/4ch/observations.npz": "input_4ch"}, "b6_model_sha256": "b6", "approved_decoder_sha256": "decoder", "protocol_sha256": "protocol", "dependency_sha256": dep}
+        if name != "torch_mse": manifest.update({"loss": "HGNLL", "hgnll": route["heteroscedastic"]})
+        for file in ("q002_route_manifest.json", "experiment_manifest.json"): (root / file).write_text(json.dumps(manifest))
+        (root / "run.log").write_text("USE_TORCH = True\ndeterministic_algorithms = True\nCUBLAS_WORKSPACE_CONFIG = :4096:8\nPYTHONHASHSEED = 20260911\n")
+    return sparse, payload, roots
+
+
+def test_pipeline_training_roots_observed_heldout_and_visualization(tmp_path, monkeypatch, training_fixture):
     import json
     import nibabel as nib
     import ismrm_v2.evaluation.v2_3_three_variant_native_metrics as module
-    from ismrm_v2.fit_first.contracts import sha256
-    sparse = tmp_path / "sparse.json"
-    sparse.write_text(json.dumps({"subject": "S", "case_id": "L50_fold0", "status": "ELIGIBLE", "stacks": {"2ch": {"retained_original_group_ids": [], "heldout_original_group_ids": [0]}, "4ch": {"retained_original_group_ids": [0], "heldout_original_group_ids": []}}}))
-    roots, bundles = [], []
-    for method in METHODS:
-        root, bundle = tmp_path / (method + "_root"), tmp_path / (method + "_bundle")
-        root.mkdir(); bundle.mkdir(); roots.append(root); bundles.append(bundle)
-        volpaths = {}
-        for p in ("t1", "t2"):
-            path = root / f"{p.upper()}_3D.nii.gz"
-            nib.save(nib.Nifti1Image(np.ones((12, 12, 4)) * (100 if p == "t1" else 50), np.eye(4)), path)
-            volpaths[p] = {"sha256": sha256(path)}
-        (root / "manifest.json").write_text(json.dumps({"schema": "phase4r_formal_proposed_export/v1", "subject": "S", "condition": "L50_fold0", "endpoint": "central", "source_checkpoint": {"sha256": method}, "source_volumes": volpaths}))
-        planes = []
-        for stack in ("sax", "4ch"):
-            path = bundle / (stack + ".npz"); np.savez(path, t1_ms=np.full((12, 12), 100.), t2_ms=np.full((12, 12), 50.))
-            planes.append({"stack": stack, "original_group_idx": 0, "path": path.name, "sha256": sha256(path)})
-        (bundle / "manifest.json").write_text(json.dumps({"schema": "direct_sparse_native_prediction_bundle/v1", "subject": "S", "case_id": "L50_fold0", "endpoint": "central", "sparse_manifest": {"sha256": sha256(sparse)}, "checkpoint": {"sha256": method}, "planes": planes}))
+    import ismrm_v2.evaluation.v2_3_three_variant_visualization as visual
+    sparse, _, roots = training_fixture
     roiroot = tmp_path / "roi"; roiroot.mkdir()
     for name in ("Segmentation_1-out-label.nii.gz", "Segmentation_2-in-label.nii.gz"):
         nib.save(nib.Nifti1Image(np.ones((12, 12, 1)), np.eye(4)), roiroot / name)
@@ -95,8 +116,74 @@ def test_pipeline_synthetic_inputs(tmp_path, monkeypatch):
     monkeypatch.setattr(module, "mapped_roi_plane", lambda *a, **kw: {"rois": {"myocardium_full": roi, "myocardium_core_1px": roi}})
     monkeypatch.setattr(module, "_load_all_verified_native_cache_groups", lambda *a: cache)
     monkeypatch.setattr(module, "load_validated_current_native_mask_plane", lambda *a, **kw: ({"primary_native_mask": np.ones((12, 12), bool)}, {}))
-    out = module.run(torch_mse_root=roots[0], torch_hgnll10_root=roots[1], torch_hgnll1_root=roots[2], torch_mse_bundle=bundles[0], torch_hgnll10_bundle=bundles[1], torch_hgnll1_bundle=bundles[2], native_mask_root=native_mask, r0_native_maps_root=native_root, sparse_manifest=sparse, roi_root=roiroot, roi_mapping=mapping, output=tmp_path / "result", standardization_manifest=standard)
+    captured = []
+    def capture(ref, pred, support, crop, parameter, output, **kwargs):
+        captured.append((parameter, pred[METHODS[0]].copy()))
+        return {"path": str(output)}
+    monkeypatch.setattr(visual, "render_plane", capture)
+    out = module.run(torch_mse_root=roots[0], torch_hgnll10_root=roots[1], torch_hgnll1_root=roots[2], native_mask_root=native_mask, r0_native_maps_root=native_root, sparse_manifest=sparse, roi_root=roiroot, roi_mapping=mapping, output=tmp_path / "result", standardization_manifest=standard, require_deterministic_torch_provenance=True)
     data = json.loads((out / "aggregate_metrics.json").read_text())
     assert data["partitions"]["t1"]["all"]["common_native"]["support_voxels"] == 432
+    assert data["partitions"]["t1"]["observed"]["common_native"]["methods"][METHODS[0]]["bias"] == 10
+    assert data["partitions"]["t1"]["heldout"]["common_native"]["methods"][METHODS[0]]["bias"] == 20
     assert data["partitions"]["t1"]["heldout"][PRIMARY_ROI]["support_voxels"] == 0
-    assert len(json.loads((out / "mechanism_metrics.json").read_text())["planes"]) == 2
+    assert np.all(captured[0][1] == 110)
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["authority_mode"] == "q002_training_roots" and manifest["comparability_audit"]["status"] == "PASS"
+    assert all(manifest["methods"][n]["backend_provenance"]["status"] == "PASS" for n in METHODS)
+
+
+def test_authority_identity_and_backend_fail_closed(training_fixture):
+    import json
+    from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _training_authority, _derived_groups, _backend_provenance
+    sparse, payload, roots = training_fixture
+    groups = _derived_groups(payload)
+    for name, root in zip(METHODS, roots): _training_authority(name, root, payload, sparse, groups, True)
+    with pytest.raises(ValueError, match="identity"): _training_authority(METHODS[2], roots[0], payload, sparse, groups, True)
+    with pytest.raises(ValueError, match="identity"): _training_authority(METHODS[0], roots[1], payload, sparse, groups, True)
+    root = roots[2]; path = root / "q002_route_manifest.json"; manifest = json.loads(path.read_text())
+    manifest["route"]["heteroscedastic"]["variance_output_dim"] = 10
+    manifest["hgnll"] = manifest["route"]["heteroscedastic"]
+    for file in ("q002_route_manifest.json", "experiment_manifest.json"): (root / file).write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="variance identity"): _training_authority(METHODS[2], root, payload, sparse, groups, True)
+    path = roots[0] / "run.log"; path.unlink()
+    assert _backend_provenance(path, False)["status"] == "NOT_VERIFIABLE_FROM_ROOT"
+    with pytest.raises(ValueError): _backend_provenance(path, True)
+    path.write_text("USE_TORCH = False\ndeterministic_algorithms = True\nCUBLAS_WORKSPACE_CONFIG = :4096:8\n")
+    with pytest.raises(ValueError): _backend_provenance(path, True)
+
+
+def test_mapping_weight_consistency_and_shape(training_fixture):
+    from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _observed_plane
+    path = training_fixture[2][0] / "evaluation/mapping_central_no_psf/t1_t2_native_plane_sax.npz"
+    assert np.all(_observed_plane(path, 0, (12, 12))["t1"][0] == 110)
+    with np.load(path) as data: arrays = {key: data[key] for key in data.files}
+    arrays["t1_ms"][5, 3, 4] += 2
+    np.savez(path, **arrays)
+    with pytest.raises(ValueError, match="inconsistent t1"): _observed_plane(path, 0, (12, 12))
+    with pytest.raises(ValueError, match="weights"): _observed_plane(path, 1, (12, 12))
+
+
+@pytest.mark.parametrize("field", ["protocol_sha256", "approved_decoder_sha256", "b6_model_sha256", "seed", "sparse_sha"])
+def test_scientific_provenance_mismatch_fails(training_fixture, field):
+    import json
+    from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _training_authority, _derived_groups
+    sparse, payload, roots = training_fixture
+    root = roots[0]; manifest = json.loads((root / "q002_route_manifest.json").read_text())
+    if field == "seed": manifest["controls"]["seed"] = 1
+    elif field == "sparse_sha": manifest["sparse_manifest"]["sha256"] = "wrong"
+    else: manifest[field] = "wrong"
+    for file in ("q002_route_manifest.json", "experiment_manifest.json"): (root / file).write_text(json.dumps(manifest))
+    with pytest.raises(ValueError): _training_authority(METHODS[0], root, payload, sparse, _derived_groups(payload), True)
+
+
+def test_cross_method_scientific_comparability(training_fixture):
+    import json
+    from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _training_authority, _derived_groups, _audit_shared_contracts
+    sparse, payload, roots = training_fixture
+    root = roots[1]; manifest = json.loads((root / "q002_route_manifest.json").read_text())
+    manifest["protocol_sha256"] = "different_protocol"
+    manifest["dependency_sha256"]["protocol"] = "different_protocol"
+    for file in ("q002_route_manifest.json", "experiment_manifest.json"): (root / file).write_text(json.dumps(manifest))
+    contracts = {name: _training_authority(name, root, payload, sparse, _derived_groups(payload), True)[1] for name, root in zip(METHODS, roots)}
+    with pytest.raises(ValueError, match="comparability"): _audit_shared_contracts(contracts)
