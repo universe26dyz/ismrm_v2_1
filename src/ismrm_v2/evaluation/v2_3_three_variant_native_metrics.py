@@ -13,6 +13,7 @@ import tempfile
 from pathlib import Path
 import numpy as np
 from ismrm_v2.fit_first.contracts import sha256
+from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
 from ismrm_v2.evaluation.evaluation import _metrics, PSNR_DATA_RANGES_MS, reproject_volume_to_native_plane
 from ismrm_v2.evaluation.current_native_central_component_mask import load_validated_current_native_mask_plane
 from ismrm_v2.evaluation.final_cyj_reporting import _load_all_verified_native_cache_groups
@@ -59,6 +60,15 @@ def _clean(value):
 
 
 EXPECTED_ROUTES = {"torch_mse": "B1_R0", "torch_hgnll10": "B1_R0_HGNLL", "torch_hgnll1": "B1_R0_HGNLL_ANCHORVAR1"}
+
+
+def _resolve_run_log(root):
+    local, parent = root / "run.log", root.parent / "run.log"
+    if local.is_file() and parent.is_file():
+        if sha256(local) != sha256(parent):
+            raise ValueError(f"ambiguous deterministic backend logs: {local} and {parent}")
+        return local
+    return local if local.is_file() else parent
 
 
 def _backend_provenance(path, required):
@@ -147,7 +157,7 @@ def _training_authority(name, root, sparse, sparse_path, group_mapping, strict):
     mappings = {stack: root / "evaluation" / "mapping_central_no_psf" / f"t1_t2_native_plane_{stack}.npz" for stack in active}
     for path in mappings.values():
         if not path.is_file(): raise FileNotFoundError(path)
-    provenance = {"training_root": str(root.resolve()), "q002_route_manifest": _record(paths[0]), "experiment_manifest": _record(paths[1]), "checkpoint": _record(checkpoint), "t1_volume": _record(root / "T1_3D.nii.gz"), "t2_volume": _record(root / "T2_3D.nii.gz"), "observed_native_mapping": {k: _record(v) for k, v in mappings.items()}, "experiment_identity": identity, "backend_provenance": _backend_provenance(root / "run.log", strict)}
+    provenance = {"training_root": str(root.resolve()), "q002_route_manifest": _record(paths[0]), "experiment_manifest": _record(paths[1]), "checkpoint": _record(checkpoint), "t1_volume": _record(root / "T1_3D.nii.gz"), "t2_volume": _record(root / "T2_3D.nii.gz"), "observed_native_mapping": {k: _record(v) for k, v in mappings.items()}, "experiment_identity": identity, "backend_provenance": _backend_provenance(_resolve_run_log(root), strict)}
     return provenance, shared, mappings
 
 
@@ -188,7 +198,7 @@ def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, native_mask_ro
     import nibabel as nib
     from ismrm_v2.evaluation.v2_3_three_variant_visualization import render_plane, render_sax_reformats
     roots = dict(zip(METHODS, map(Path, (torch_mse_root, torch_hgnll10_root, torch_hgnll1_root))))
-    sparse_path = Path(sparse_manifest); sparse = json.loads(sparse_path.read_text()); subject, case = sparse.get("subject"), sparse.get("case_id")
+    sparse_path = Path(sparse_manifest); sparse = validate_sparse_profile_manifest(sparse_path, strict=False); subject, case = sparse.get("subject"), sparse.get("case_id")
     if sparse.get("status") != "ELIGIBLE" or not subject or not case: raise ValueError("eligible subject/case sparse manifest required")
     output = Path(output).resolve()
     if output.exists(): raise FileExistsError(output)

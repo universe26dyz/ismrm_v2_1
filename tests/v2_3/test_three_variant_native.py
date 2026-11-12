@@ -111,6 +111,7 @@ def test_pipeline_training_roots_observed_heldout_and_visualization(tmp_path, mo
     native_root = tmp_path / "native"; native_root.mkdir()
     cache = {"group_idx": np.array([0]), "t1_ms": np.full((1, 12, 12), 100.), "t2_ms": np.full((1, 12, 12), 50.), "affine_lps_rc": np.diag([-1., -1., 1., 1.])[None], "pixel_spacing_rc_mm": np.ones((1, 2)), "slice_thickness_mm": np.ones(1), "source_support": np.ones((1, 12, 12), bool), "provenance": {}}
     roi = np.zeros((12, 12), bool); roi[3:9, 3:9] = True
+    monkeypatch.setattr(module, "validate_sparse_profile_manifest", lambda path, **kwargs: training_fixture[1])
     monkeypatch.setattr(module, "resolve_subject_roi", lambda *_: roiroot)
     monkeypatch.setattr(module, "require_exact_native_roi_mapping", lambda *a, **kw: {"planes": [{"native_group_idx": 0}], "standardization_manifest": {"path": str(standard)}})
     monkeypatch.setattr(module, "mapped_roi_plane", lambda *a, **kw: {"rois": {"myocardium_full": roi, "myocardium_core_1px": roi}})
@@ -187,3 +188,62 @@ def test_cross_method_scientific_comparability(training_fixture):
     for file in ("q002_route_manifest.json", "experiment_manifest.json"): (root / file).write_text(json.dumps(manifest))
     contracts = {name: _training_authority(name, root, payload, sparse, _derived_groups(payload), True)[1] for name, root in zip(METHODS, roots)}
     with pytest.raises(ValueError, match="comparability"): _audit_shared_contracts(contracts)
+
+
+def test_parent_and_ambiguous_backend_logs(training_fixture):
+    from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _training_authority, _derived_groups
+    sparse, payload, roots = training_fixture
+    root = roots[0]
+    local = root / "run.log"; parent = root.parent / "run.log"
+    parent.write_bytes(local.read_bytes()); local.unlink()
+    record = _training_authority(METHODS[0], root, payload, sparse, _derived_groups(payload), True)[0]["backend_provenance"]
+    from ismrm_v2.fit_first.contracts import sha256
+    assert record["status"] == "PASS" and record["run_log"] == {"path": str(parent.resolve()), "sha256": sha256(parent)}
+    local.write_bytes(parent.read_bytes())
+    record = _training_authority(METHODS[0], root, payload, sparse, _derived_groups(payload), True)[0]["backend_provenance"]
+    assert record["run_log"]["path"] == str(local.resolve())
+    local.write_text("different")
+    with pytest.raises(ValueError, match="ambiguous"):
+        _training_authority(METHODS[0], root, payload, sparse, _derived_groups(payload), False)
+
+
+@pytest.mark.parametrize("schema", ["legacy", "v2"])
+def test_real_sparse_profile_identity_normalization(tmp_path, training_fixture, schema):
+    import json
+    from pathlib import Path
+    from ismrm_v2.fit_first.contracts import sha256
+    from ismrm_v2.sampling.sparse import build_sparse_condition, build_sparse_profile_condition
+    from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
+    from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _training_authority, _derived_groups
+    source = tmp_path / "source"
+    groups = np.repeat(np.arange(4), 10); weights = np.tile(np.arange(10), 4); rows = len(groups)
+    affine = np.repeat(np.eye(4)[None], rows, axis=0); affine[:, 2, 2] = 5.; affine[:, 2, 3] = -groups
+    for stack in ("sax", "2ch", "4ch"):
+        path = source / "S" / stack / "observations.npz"; path.parent.mkdir(parents=True)
+        np.savez_compressed(path, images=np.ones((rows, 2, 2)), masks=np.ones((rows, 2, 2), bool), group_idx=groups, weight_idx=weights, stack_idx=np.zeros(rows, int), acquisition_time_ms=np.zeros(rows), timing9_ms=np.tile(np.arange(9), (rows, 1)), affine_lps_rc=affine, pixel_spacing_rc_mm=np.ones((rows, 2)), slice_thickness_mm=np.full(rows, 5.), tr_ms=np.full(rows, 2.61), vps=np.full(rows, 87))
+    def audit(path):
+        with np.load(path) as data:
+            ids = np.unique(data["group_idx"])
+            positions = [float(data["affine_lps_rc"][np.flatnonzero(data["group_idx"] == group)[0], 2, 3]) for group in ids]
+        return {"regular_gap": True, "gap_mm": abs(positions[1] - positions[0]) if len(ids) > 1 else 0., "group_count": len(ids)}
+    if schema == "legacy":
+        result = build_sparse_condition(source, "S", "L50", 0, tmp_path / "legacy", git_sha="a" * 40, audit_stack=audit)
+    else:
+        profile = Path(__file__).resolve().parents[2] / "configs/sparse_profiles/S2CH50_4CH100.json"
+        result = build_sparse_profile_condition(source, "S", profile, 0, tmp_path / "profile", git_sha="a" * 40, audit_stack=audit)
+    sparse_path = Path(result["manifest_path"]); raw = json.loads(sparse_path.read_text())
+    normalized = validate_sparse_profile_manifest(sparse_path, strict=False)
+    if schema == "legacy":
+        assert "case_id" not in raw and "profile_id" not in raw
+        assert (normalized["profile_id"], normalized["case_id"]) == ("legacy_group_id_modulo_L50", "L50_fold0")
+    else:
+        assert normalized["profile_id"] == raw["profile_id"] and normalized["case_id"] == raw["case_id"]
+    root = training_fixture[2][0]; manifest = json.loads((root / "q002_route_manifest.json").read_text())
+    manifest.update({"profile_id": normalized["profile_id"], "case_id": normalized["case_id"], "sparse_manifest": {"sha256": sha256(sparse_path)}, "prepared_inputs_sha256": {f"/data/{stack}/observations.npz": item["derived_observation"]["sha256"] for stack, item in normalized["stacks"].items() if item.get("derived_observation")}})
+    for file in ("q002_route_manifest.json", "experiment_manifest.json"): (root / file).write_text(json.dumps(manifest))
+    mapping_dir = root / "evaluation/mapping_central_no_psf"
+    for stack in ("sax", "2ch", "4ch"):
+        target = mapping_dir / f"t1_t2_native_plane_{stack}.npz"
+        if normalized["stacks"][stack].get("derived_observation") and not target.exists(): target.write_bytes((mapping_dir / "t1_t2_native_plane_sax.npz").read_bytes())
+    record, shared, _ = _training_authority(METHODS[0], root, normalized, sparse_path, _derived_groups(normalized), True)
+    assert shared["profile_id"] == normalized["profile_id"] and record["experiment_identity"]["experiment_id"] == "B1_R0"
