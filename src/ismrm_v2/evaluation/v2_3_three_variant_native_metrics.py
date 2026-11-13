@@ -61,10 +61,22 @@ def _validate_roi_bundle_manifest(roi_bundle, subject):
     archive = roi_bundle / "sax_myocardium_masks.npz"
     if not archive.is_file():
         raise FileNotFoundError(archive)
+    candidates = []
     outputs = manifest.get("outputs")
-    if not isinstance(outputs, dict) or outputs.get(archive.name) != sha256(archive):
+    if isinstance(outputs, dict) and isinstance(outputs.get(archive.name), str) and outputs[archive.name]:
+        candidates.append(("current_writer", outputs[archive.name]))
+    migrated = manifest.get("sax_myocardium_masks")
+    if isinstance(migrated, dict) and isinstance(migrated.get("sha256"), str) and migrated["sha256"]:
+        candidates.append(("migrated_clean", migrated["sha256"]))
+    if not candidates:
+        raise ValueError("ROI bundle manifest lacks authoritative archive SHA")
+    if len({value for _, value in candidates}) != 1:
+        raise ValueError("ROI bundle manifest contains conflicting archive SHA declarations")
+    if candidates[0][1] != sha256(archive):
         raise ValueError("ROI bundle archive SHA mismatch")
-    return archive
+    layout = "both_consistent" if len(candidates) == 2 else candidates[0][0]
+    historical_path = migrated.get("path") if isinstance(migrated, dict) else None
+    return archive, {"layout": layout, "historical_path": historical_path}
 
 
 def _clean(value):
@@ -237,7 +249,7 @@ def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, r0_native_maps
     sax = caches["sax"]
     sax_groups = np.asarray(sax["group_idx"], int)
     sax_shape = tuple(map(int, sax["t1_ms"].shape[1:]))
-    archive_path = _validate_roi_bundle_manifest(roi_bundle, subject)
+    archive_path, roi_provenance = _validate_roi_bundle_manifest(roi_bundle, subject)
     myocardium = _load_scmr_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape)
     outer = load_outer_filled_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape)
     blood = load_legacy_blood_pool_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape, outer_filled=outer)
@@ -307,7 +319,7 @@ def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, r0_native_maps
             "roi_support_equation": "common_native AND nearest-neighbour projected ROI",
             "methods": provenance, "sparse_manifest": _record(sparse_path),
             "native_reference": {s: caches[s]["provenance"] for s in STACKS},
-            "roi_authority": {"mode": "exact_native_myocardium_bundle_v2", "bundle_root": str(roi_bundle.resolve()), "manifest": _record(roi_bundle / "manifest.json"), "archive": _record(archive_path)},
+            "roi_authority": {"mode": "exact_native_myocardium_bundle_v2", "bundle_root": str(roi_bundle.resolve()), "manifest": _record(roi_bundle / "manifest.json"), "archive": _record(archive_path), "archive_provenance": roi_provenance},
             "roi_projection": {"source": "regular physical SAX mask volume", "method": "nearest-neighbour world-space projection", "source_functions": ["stack_sax_masks_as_volume", "project_sax_mask_volume"], "mask_affine_ras": mask_affine.tolist()},
             "observed_mapping_policy": "per-group ten weight maps audited on overlapping mask pixels; valid support is intersection of ten masks; canonical weight 0",
             "mapping_provenance_limit": "training-root mapping files have no independent checkpoint digest; files are identified by path and SHA256 but their creation from the checkpoint cannot be independently verified",

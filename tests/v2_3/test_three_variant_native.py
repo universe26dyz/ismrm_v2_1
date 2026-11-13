@@ -145,6 +145,7 @@ def test_pipeline_training_roots_observed_heldout_and_visualization(tmp_path, mo
         assert crop.any() and np.array_equal(crop, expected)
     manifest = json.loads((out / "manifest.json").read_text())
     assert manifest["primary_roi"] == PRIMARY_ROI and manifest["roi_authority"]["archive"]["sha256"] == sha256(archive)
+    assert manifest["roi_authority"]["archive_provenance"]["layout"] == "current_writer"
     assert manifest["authority_mode"] == "q002_training_roots" and manifest["comparability_audit"]["status"] == "PASS"
     assert all(manifest["methods"][n]["backend_provenance"]["status"] == "PASS" for n in METHODS)
     archive.write_bytes(b"corrupted archive")
@@ -293,7 +294,7 @@ def test_roi_bundle_rejects_invalid_identity(tmp_path, field, value):
     from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _validate_roi_bundle_manifest
     archive = tmp_path / "sax_myocardium_masks.npz"; archive.write_bytes(b"archive")
     manifest = {"schema": "exact_native_myocardium_bundle/v2", "status": "PASS", "subject_id": "S", "outputs": {archive.name: sha256(archive)}}
-    assert _write_roi_manifest_and_validate(tmp_path, manifest, "S") == archive
+    assert _write_roi_manifest_and_validate(tmp_path, manifest, "S")[0] == archive
     manifest[field] = value
     (tmp_path / "manifest.json").write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="schema, status, or subject"):
@@ -307,15 +308,37 @@ def _write_roi_manifest_and_validate(root, manifest, subject):
     return _validate_roi_bundle_manifest(root, subject)
 
 
-def test_roi_bundle_requires_authoritative_hash_and_archive(tmp_path):
+@pytest.mark.parametrize("layout", ["migrated_clean", "current_writer", "both_consistent"])
+def test_roi_bundle_known_provenance_layouts(tmp_path, layout):
+    from ismrm_v2.fit_first.contracts import sha256
+    archive = tmp_path / "sax_myocardium_masks.npz"; archive.write_bytes(b"archive")
+    manifest = {"schema": "exact_native_myocardium_bundle/v2", "status": "PASS", "subject_id": "S"}
+    if layout in ("migrated_clean", "both_consistent"):
+        manifest["sax_myocardium_masks"] = {"path": "/historical/path/sax_myocardium_masks.npz", "sha256": sha256(archive)}
+    if layout in ("current_writer", "both_consistent"):
+        manifest["outputs"] = {archive.name: sha256(archive)}
+    selected, provenance = _write_roi_manifest_and_validate(tmp_path, manifest, "S")
+    assert selected == archive and provenance["layout"] == layout
+    if layout != "current_writer":
+        assert provenance["historical_path"] == "/historical/path/sax_myocardium_masks.npz"
+
+
+def test_roi_bundle_rejects_conflicting_missing_and_wrong_hashes(tmp_path):
     from ismrm_v2.fit_first.contracts import sha256
     from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _validate_roi_bundle_manifest
     archive = tmp_path / "sax_myocardium_masks.npz"; archive.write_bytes(b"archive")
-    manifest = {"schema": "exact_native_myocardium_bundle/v2", "status": "PASS", "subject_id": "S", "sax_myocardium_masks": {"sha256": sha256(archive)}}
-    with pytest.raises(ValueError, match="archive SHA mismatch"):
+    manifest = {"schema": "exact_native_myocardium_bundle/v2", "status": "PASS", "subject_id": "S"}
+    with pytest.raises(ValueError, match="lacks authoritative archive SHA"):
         _write_roi_manifest_and_validate(tmp_path, manifest, "S")
     manifest["outputs"] = {archive.name: sha256(archive)}
+    manifest["sax_myocardium_masks"] = {"sha256": "different"}
+    with pytest.raises(ValueError, match="conflicting archive SHA"):
+        _write_roi_manifest_and_validate(tmp_path, manifest, "S")
+    manifest["sax_myocardium_masks"]["sha256"] = sha256(archive)
     _write_roi_manifest_and_validate(tmp_path, manifest, "S")
+    archive.write_bytes(b"changed")
+    with pytest.raises(ValueError, match="archive SHA mismatch"):
+        _validate_roi_bundle_manifest(tmp_path, "S")
     archive.unlink()
     with pytest.raises(FileNotFoundError):
         _validate_roi_bundle_manifest(tmp_path, "S")
