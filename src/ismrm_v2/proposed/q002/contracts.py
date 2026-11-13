@@ -24,6 +24,7 @@ B0_R1_EXPERIMENT_ID = "B0_R1"
 B1_R1_EXPERIMENT_ID = "B1_R1"
 B1_R1_NL1_EXPERIMENT_ID = "B1_R1_NL1"
 B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID = "B1_R0_HGNLL_ANCHORVAR1"
+B1_R0_HGNLL_DETACH_EXPERIMENT_ID = "B1_R0_HGNLL_DETACH"
 B1_R0_HGNLL_EXPERIMENT_ID = "B1_R0_HGNLL"
 B1_R1_HGNLL_EXPERIMENT_ID = "B1_R1_HGNLL"
 B1_R0_HGNLL_10K_EXPERIMENT_ID = "B1_R0_HGNLL_10K"
@@ -95,7 +96,7 @@ def build_q002_route_config(
     root = Path(cropped_prepared_root)
     if "full_fov" in str(root).lower():
         raise ValueError("Q002 training root must be B6 cropped, not full-FOV.")
-    expected_batch_size = {Q002_EXPERIMENT_ID: 64, Q002S640_EXPERIMENT_ID: 640, Q002S640_K256_EXPERIMENT_ID: 640, Q003S640_EXPERIMENT_ID: 640, Q003S640_10K_EXPERIMENT_ID: 640, Q004S640_K1_EXPERIMENT_ID: 640, Q005S640_K4_EXPERIMENT_ID: 640, B0_R0_EXPERIMENT_ID: 640, B1_R0_EXPERIMENT_ID: 640, B0_R1_EXPERIMENT_ID: 640, B1_R1_EXPERIMENT_ID: 640, B1_R1_NL1_EXPERIMENT_ID: 640, B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID: 640, B1_R0_HGNLL_EXPERIMENT_ID: 640, B1_R1_HGNLL_EXPERIMENT_ID: 640, B1_R0_HGNLL_10K_EXPERIMENT_ID: 640}.get(experiment_id)
+    expected_batch_size = {Q002_EXPERIMENT_ID: 64, Q002S640_EXPERIMENT_ID: 640, Q002S640_K256_EXPERIMENT_ID: 640, Q003S640_EXPERIMENT_ID: 640, Q003S640_10K_EXPERIMENT_ID: 640, Q004S640_K1_EXPERIMENT_ID: 640, Q005S640_K4_EXPERIMENT_ID: 640, B0_R0_EXPERIMENT_ID: 640, B1_R0_EXPERIMENT_ID: 640, B0_R1_EXPERIMENT_ID: 640, B1_R1_EXPERIMENT_ID: 640, B1_R1_NL1_EXPERIMENT_ID: 640, B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID: 640, B1_R0_HGNLL_DETACH_EXPERIMENT_ID: 640, B1_R0_HGNLL_EXPERIMENT_ID: 640, B1_R1_HGNLL_EXPERIMENT_ID: 640, B1_R0_HGNLL_10K_EXPERIMENT_ID: 640}.get(experiment_id)
     if expected_batch_size is None or int(anchor_batch_size) != expected_batch_size:
         raise ValueError("Q002 route experiment_id must use its fixed anchor_batch_size.")
     sampling: dict[str, Any]
@@ -190,8 +191,9 @@ def build_q002_route_config(
         })
         route["resolved_config"]["stack_balance"] = copy.deepcopy(route["route"]["stack_balance"])
         route["resolved_config"]["cross_view_reliability"] = copy.deepcopy(route["route"]["cross_view_reliability"])
-    if experiment_id in (B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID, B1_R0_HGNLL_EXPERIMENT_ID, B1_R1_HGNLL_EXPERIMENT_ID, B1_R0_HGNLL_10K_EXPERIMENT_ID):
+    if experiment_id in (B1_R0_HGNLL_DETACH_EXPERIMENT_ID, B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID, B1_R0_HGNLL_EXPERIMENT_ID, B1_R1_HGNLL_EXPERIMENT_ID, B1_R0_HGNLL_10K_EXPERIMENT_ID):
         hgnll_parent = {
+            B1_R0_HGNLL_DETACH_EXPERIMENT_ID: B1_R0_HGNLL_EXPERIMENT_ID,
             B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID: B1_R0_HGNLL_EXPERIMENT_ID,
             B1_R1_HGNLL_EXPERIMENT_ID: B1_R1_EXPERIMENT_ID,
             B1_R0_HGNLL_10K_EXPERIMENT_ID: B1_R0_HGNLL_EXPERIMENT_ID,
@@ -208,6 +210,7 @@ def build_q002_route_config(
                 "variance_parameterization": "anchor_scalar_shared_across_weights" if experiment_id == B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID else "per_weight",
                 "variance_output_dim": 1 if experiment_id == B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID else 10,
                 "variance_shared_across_weights": experiment_id == B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID,
+                "variance_detach_shared_latent": experiment_id == B1_R0_HGNLL_DETACH_EXPERIMENT_ID,
                 "psf_variance_aggregation": "log_mean_exp_variance",
                 "variance_policy_version": "multimap_hgnll_smooth_sigma1_v1",
                 "log_variance_min": -10.0,
@@ -238,6 +241,9 @@ def build_q002_route_config(
                 "invalid_reference_policy": "neutral",
             },
         })
+        route["route"]["variance_gradient_policy"] = ("variance_head_input_detached_from_shared_latent" if experiment_id == B1_R0_HGNLL_DETACH_EXPERIMENT_ID else "shared_latent_gradient_enabled")
+        if experiment_id == B1_R0_HGNLL_DETACH_EXPERIMENT_ID:
+            route["route"]["scientific_change"] = "variance-head input is detached from shared latent"
         if experiment_id == B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID:
             route["route"]["scientific_change"] = "variance output dimension 10 to 1, shared across weights"
             route["route"]["monitor_sigma_columns"] = "broadcast views of one shared scalar"

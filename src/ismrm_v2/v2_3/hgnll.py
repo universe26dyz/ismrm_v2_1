@@ -50,6 +50,7 @@ class HGNLLConfig:
     variance_parameterization: str = "per_weight"
     variance_output_dim: int = 10
     variance_shared_across_weights: bool = False
+    variance_detach_shared_latent: bool = False
     psf_variance_aggregation: str = HGNLL_AGGREGATION
     log_variance_min: float = HGNLL_LOG_VARIANCE_MIN
     log_variance_min_reason: str = "project_numerical_safety_floor"
@@ -79,7 +80,7 @@ class HGNLLConfig:
             raise ValueError("HGNLL routes require heteroscedastic.enabled=true")
         # Do not accept arbitrary policy strings or silently substitute them.
         allowed = {
-            "enabled", "distribution", "output", "weights_per_anchor", "variance_parameterization", "variance_output_dim", "variance_shared_across_weights",
+            "enabled", "distribution", "output", "weights_per_anchor", "variance_parameterization", "variance_output_dim", "variance_shared_across_weights", "variance_detach_shared_latent",
             "psf_variance_aggregation", "log_variance_min", "sigma_max",
             "log_variance_min_reason", "sigma_max_reason", "log_variance_max", "sigma_initial", "log_variance_initial",
             "raw_parameter_initial_bias", "variance_policy_version", "initialization",
@@ -99,6 +100,10 @@ class HGNLLConfig:
             raise ValueError("HGNLL output disagrees with variance parameterization")
         if (self.variance_parameterization, self.variance_output_dim, self.variance_shared_across_weights) not in (("per_weight", 10, False), ("anchor_scalar_shared_across_weights", 1, True)):
             raise ValueError("invalid variance parameterization or output dimension")
+        if type(self.variance_detach_shared_latent) is not bool:
+            raise ValueError("variance_detach_shared_latent must be a boolean")
+        if self.variance_detach_shared_latent and self.variance_output_dim != 10:
+            raise ValueError("variance latent detach is only supported for per-weight HGNLL")
         if self.weights_per_anchor != 10:
             raise ValueError("HGNLL requires exactly ten weights per anchor")
         if self.psf_variance_aggregation != HGNLL_AGGREGATION:
@@ -141,6 +146,7 @@ class HGNLLConfig:
             "variance_parameterization": self.variance_parameterization,
             "variance_output_dim": self.variance_output_dim,
             "variance_shared_across_weights": self.variance_shared_across_weights,
+            "variance_detach_shared_latent": self.variance_detach_shared_latent,
             "psf_variance_aggregation": self.psf_variance_aggregation,
             "log_variance_min": float(self.log_variance_min),
             "log_variance_min_reason": self.log_variance_min_reason,
@@ -182,7 +188,8 @@ class JointFingerprintVarianceHead(nn.Module):
             raise ValueError("HGNLL variance head input must be [N,features]")
         if latent.shape[1] != self.network[0].in_features:
             raise ValueError("HGNLL variance head input feature count disagrees with the INR")
-        return self.network(latent)
+        variance_input = latent.detach() if self.config.variance_detach_shared_latent else latent
+        return self.network(variance_input)
 
     def bounded_log_variance_from_raw(self, raw_variance_parameter: torch.Tensor) -> torch.Tensor:
         """Map unconstrained parameters smoothly into the configured interval."""

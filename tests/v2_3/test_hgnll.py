@@ -424,3 +424,93 @@ def test_anchor_scalar_real_inr_cpu_smoke():
     for module in (inr.shared_latent, inr.parameter_head, head):
         grads = [p.grad for p in module.parameters() if p.grad is not None]
         assert grads and all(torch.isfinite(g).all() for g in grads)
+
+
+def test_hgnll_detach_route_is_only_gradient_ablation():
+    from ismrm_v2.proposed.q002.contracts import B1_R0_HGNLL_DETACH_EXPERIMENT_ID, B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID
+    from ismrm_v2.proposed.q002.run_q002_reconstruction import build_parser
+    def route(name):
+        return build_q002_route_config(_base(), cropped_prepared_root="cropped", experiment_id=name, anchor_batch_size=640)
+    old, new = route(B1_R0_HGNLL_EXPERIMENT_ID), route(B1_R0_HGNLL_DETACH_EXPERIMENT_ID)
+    old_h = old["route"]["heteroscedastic"]; new_h = new["route"]["heteroscedastic"]
+    assert HGNLLConfig.from_mapping({"enabled": True}).variance_detach_shared_latent is False
+    assert old_h["variance_detach_shared_latent"] is False
+    assert new_h["variance_detach_shared_latent"] is True
+    assert {k: v for k, v in old_h.items() if k != "variance_detach_shared_latent"} == {k: v for k, v in new_h.items() if k != "variance_detach_shared_latent"}
+    assert (new_h["variance_parameterization"], new_h["variance_output_dim"], new_h["variance_shared_across_weights"]) == ("per_weight", 10, False)
+    assert new["route"]["variance_gradient_policy"] == "variance_head_input_detached_from_shared_latent"
+    assert old["route"]["variance_gradient_policy"] == "shared_latent_gradient_enabled"
+    assert new["route"]["loss"] == "HGNLL" and new["route"]["parent_experiment"] == B1_R0_HGNLL_EXPERIMENT_ID
+    assert B1_R0_HGNLL_DETACH_EXPERIMENT_ID in FORMAL_SPARSE_EXPERIMENT_IDS
+    assert B1_R0_HGNLL_DETACH_EXPERIMENT_ID in build_parser()._option_string_actions["--experiment-id"].choices
+    assert route(B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID)["route"]["heteroscedastic"]["variance_detach_shared_latent"] is False
+    assert "heteroscedastic" not in route(B1_R0_EXPERIMENT_ID)["route"]
+    with pytest.raises(ValueError):
+        HGNLLConfig.from_mapping({"enabled": True, "variance_detach_shared_latent": "false"})
+
+
+class _TrainableQuantitative(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.shared = nn.Linear(3, 4)
+        self.parameters_net = nn.Linear(4, 4)
+
+    def forward_with_latent(self, xyz):
+        latent = self.shared(xyz)
+        params = self.parameters_net(latent)
+        return {"latent": latent, "t1_ms": 1000 + params[:, 0], "t2_ms": 50 + params[:, 1], "b1": 1 + params[:, 2], "amplitude": 1 + params[:, 3]}
+
+
+@pytest.mark.parametrize("detach", [False, True])
+def test_detach_variance_gradient_paths_through_psf(detach):
+    torch.manual_seed(42)
+    model = _TrainableQuantitative()
+    head = JointFingerprintVarianceHead(4, HGNLLConfig.from_mapping({"enabled": True, "variance_detach_shared_latent": detach}))
+    # The production initializer deliberately starts the final weights at zero;
+    # use a nonzero trained state to test whether the gradient path exists.
+    nn.init.constant_(head.network[-1].weight, 0.03)
+    forward = TradQuantitativeForward(model, _DummySimulator(), GroupRigidPSF(torch.zeros(1, 6), torch.ones(1, 3)), object())
+    xyz = torch.zeros(3, 3); groups = torch.zeros(3, dtype=torch.long); timing = torch.ones(3, 9); world = torch.randn(3, 8, 3)
+    mean, logvar, raw = forward.forward_fingerprint_with_log_variance(xyz, groups, timing, 8, head, world_samples=world, return_raw=True)
+    assert mean.shape == (3, 10) and logvar.shape == (3, 10) and raw.shape == (3, 8, 10)
+    assert torch.allclose(logvar, aggregate_log_variance(head.bounded_log_variance_from_raw(raw)))
+    logvar.sum().backward(retain_graph=True)
+    assert head.network[-1].weight.grad.abs().sum() > 0
+    assert (model.shared.weight.grad is None or model.shared.weight.grad.abs().sum() == 0) if detach else model.shared.weight.grad.abs().sum() > 0
+    model.zero_grad(); head.zero_grad()
+    mean.sum().backward(retain_graph=True)
+    assert model.parameters_net.weight.grad.abs().sum() > 0 and model.shared.weight.grad.abs().sum() > 0
+    model.zero_grad(); head.zero_grad()
+    loss, _ = hgnll_objective(mean, torch.zeros_like(mean), logvar, groups, {0: 1.0}, raw_variance_parameter=raw, config=head.config)
+    loss.backward()
+    assert torch.isfinite(loss) and model.shared.weight.grad.abs().sum() > 0 and model.parameters_net.weight.grad.abs().sum() > 0
+    assert head.network[-1].weight.grad.abs().sum() > 0
+
+
+def test_detach_checkpoint_policy_roundtrip_and_legacy(tmp_path):
+    old = _FakeModel(True)
+    cfg = HGNLLConfig.from_mapping({"enabled": True, "variance_detach_shared_latent": True})
+    detached = _FakeModel(True); detached.joint_variance_head = JointFingerprintVarianceHead(2, cfg)
+    path = tmp_path / "detach.pt"
+    save_checkpoint(path, detached, {"heteroscedastic": cfg.as_dict()}, _Protocol(), _FakeDataset(), _FakeSpace(), 20260911, {}, {})
+    assert torch.load(path, map_location="cpu", weights_only=False)["hgnll_config"]["variance_detach_shared_latent"] is True
+    load_checkpoint(path, detached, torch.device("cpu"))
+    with pytest.raises(ValueError, match="detach policy"):
+        load_checkpoint(path, old, torch.device("cpu"))
+    legacy = tmp_path / "legacy.pt"; old_cfg = HGNLLConfig.from_mapping({"enabled": True}).as_dict(); old_cfg.pop("variance_detach_shared_latent")
+    save_checkpoint(legacy, old, {"heteroscedastic": old_cfg}, _Protocol(), _FakeDataset(), _FakeSpace(), 20260911, {}, {})
+    load_checkpoint(legacy, old, torch.device("cpu"))
+    with pytest.raises(ValueError, match="detach policy"):
+        load_checkpoint(legacy, detached, torch.device("cpu"))
+
+
+def test_detach_preserves_forward_values():
+    old = JointFingerprintVarianceHead(4, HGNLLConfig.from_mapping({"enabled": True}))
+    new = JointFingerprintVarianceHead(4, HGNLLConfig.from_mapping({"enabled": True, "variance_detach_shared_latent": True}))
+    torch.manual_seed(3)
+    nn.init.normal_(old.network[-1].weight, std=0.03)
+    new.load_state_dict(old.state_dict())
+    latent = torch.randn(16, 4, requires_grad=True)
+    old_raw = old(latent); new_raw = new(latent)
+    assert torch.equal(old_raw, new_raw)
+    assert torch.equal(old.bounded_log_variance_from_raw(old_raw), new.bounded_log_variance_from_raw(new_raw))

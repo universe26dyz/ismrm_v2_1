@@ -380,6 +380,8 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
         fields += ["reliability_enabled", "reliability_discrepancy", "reliability_valid_fraction", "reliability_invalid_reference_fraction", "reliability_target_valid_fraction", "reliability_target_invalid_reference_fraction", "reliability_tau", "reliability_w_min", "reliability_gate_mean", "reliability_gate_min", "reliability_gate_p10", "reliability_gate_p50", "reliability_gate_p90", "reliability_multiplier_mean", "reliability_multiplier_mean_by_stack", "reliability_fraction_gate_lt_0_25", "reliability_fraction_gate_lt_0_5"]
     if hgnll_enabled:
         fields += ["raw_signal_mse", "hgnll", "data_loss", "hgnll_residual_term", "hgnll_log_variance_term", "raw_variance_parameter_min", "raw_variance_parameter_max", "raw_variance_parameter_mean", "bounded_logvar_min", "bounded_logvar_max", "bounded_logvar_mean", "sigma_mean", "sigma_p10", "sigma_p50", "sigma_p90", "sigma_mean_by_weight", "sigma_p10_by_weight", "sigma_p50_by_weight", "sigma_p90_by_weight", "fraction_sigma_gt_0_95_sigma_max", "fraction_sigma_gt_0_99_sigma_max", "fraction_logvar_within_0_01_of_lower_bound", "lr_variance"]
+    if hgnll_enabled and hgnll_config.variance_detach_shared_latent:
+        fields.append("variance_detach_shared_latent")
     log_handle = (output / "training_log.csv").open("w", newline="", encoding="utf-8"); monitor_handle = (output / "monitor_log.csv").open("w", newline="", encoding="utf-8")
     monitor_fields = ["iteration", "stage", "monitor_mse", "per_weight_mse", "per_stack_mse", "fixed_monitor_anchor_identity_sha256"]
     if hgnll_enabled:
@@ -450,6 +452,8 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
                     per_stack = {str(int(stack)): float(multiplier_cpu[batch["stack_idx"].detach().cpu() == stack].mean()) for stack in batch["stack_idx"].detach().cpu().unique().tolist()}
                     reliability_row = {"reliability_enabled": True, "reliability_discrepancy": reliability_config.discrepancy, **coverage, "reliability_tau": json.dumps(reliability_cache.tau_by_stack if reliability_cache is not None else {}, sort_keys=True), "reliability_w_min": gate_floor(stage_b_progress(iteration, iterations), reliability_config), "reliability_gate_mean": float(gate_cpu.mean()), "reliability_gate_min": float(gate_cpu.min()), "reliability_gate_p10": float(torch.quantile(gate_cpu, .10)), "reliability_gate_p50": float(torch.quantile(gate_cpu, .50)), "reliability_gate_p90": float(torch.quantile(gate_cpu, .90)), "reliability_multiplier_mean": float(multiplier_cpu.mean()), "reliability_multiplier_mean_by_stack": json.dumps(per_stack, sort_keys=True), "reliability_fraction_gate_lt_0_25": float((gate_cpu < .25).float().mean()), "reliability_fraction_gate_lt_0_5": float((gate_cpu < .5).float().mean())}
                 row.update(reliability_row)
+            if hgnll_enabled and hgnll_config.variance_detach_shared_latent:
+                row["variance_detach_shared_latent"] = True
             writer.writerow(row)
             if int(training.get("monitor_every", 0)) and global_iteration % int(training["monitor_every"]) == 0:
                 monitor_batch = {key: value.to(device) for key, value in monitor.items() if key in {"xyz", "observed", "group_idx", "stack_idx", "timing"}}

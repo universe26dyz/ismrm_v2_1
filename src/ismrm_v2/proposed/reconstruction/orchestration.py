@@ -359,6 +359,12 @@ def load_checkpoint(path: str | Path, model: TradTrainingModel, device: torch.de
     missing = required.difference(checkpoint)
     if missing:
         raise ValueError(f"Checkpoint lacks required fields: {sorted(missing)}")
+    head = getattr(model, "joint_variance_head", None)
+    saved_hgnll = checkpoint.get("hgnll_config")
+    if head is not None and isinstance(saved_hgnll, Mapping):
+        saved_detach = saved_hgnll.get("variance_detach_shared_latent", False)
+        if type(saved_detach) is not bool or saved_detach != head.config.variance_detach_shared_latent:
+            raise ValueError("checkpoint variance latent detach policy does not match model")
     model.load_state_dict(checkpoint["model_state"])
     return checkpoint
 
