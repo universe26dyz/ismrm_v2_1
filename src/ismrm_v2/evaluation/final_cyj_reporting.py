@@ -16,7 +16,7 @@ import numpy as np
 from ismrm_v2.fit_first.contracts import sha256, write_immutable_json
 from ismrm_v2.evaluation.evaluation import _world_sample, reproject_volume_to_native_plane
 from ismrm_v2.evaluation.current_native_central_component_mask import load_validated_current_native_mask_plane
-from ismrm_v2.fit_first.fit_first import NATIVE_FIT_METHOD, _complete_source_group, _dictionary_contract, select_verified_native_cache_groups
+from ismrm_v2.fit_first.fit_first import _complete_source_group, _supported_native_cache_contract, select_verified_native_cache_groups
 from ismrm_v2.evaluation.heldout import _heldout_ids
 from ismrm_v2.evaluation.visualization import DISPLAY_RANGES_MS, colorbars, final5_paired_display_support
 
@@ -685,16 +685,30 @@ def _load_all_verified_native_cache_groups(native_root: str | Path, sparse_manif
     cache_root = root / stack
     maps_path, geometry_path, cache_manifest_path = cache_root / "native_maps.npz", cache_root / "geometry.npz", cache_root / "manifest.json"
     cache_manifest = json.loads(cache_manifest_path.read_text(encoding="utf-8"))
-    if cache_manifest.get("method") != NATIVE_FIT_METHOD or cache_manifest.get("dictionary_contract") != _dictionary_contract():
+    if not _supported_native_cache_contract(cache_manifest):
         raise ValueError(f"{stack}: native cache does not satisfy the frozen dictionary contract")
     if cache_manifest.get("native_maps_sha256") != sha256(maps_path) or cache_manifest.get("geometry_sha256") != sha256(geometry_path):
         raise ValueError(f"{stack}: native cache SHA256 mismatch")
     sparse_source = sparse_stack.get("source_observation", {})
-    if cache_manifest.get("source_observations", {}).get("sha256") != sparse_source.get("sha256"):
+    cache_source = cache_manifest.get("source_observations", {})
+    if not isinstance(sparse_source, Mapping) or not isinstance(cache_source, Mapping):
+        raise ValueError(f"{stack}: source observation provenance is invalid")
+    expected_sha = sparse_source.get("sha256")
+    if not isinstance(expected_sha, str) or not expected_sha or cache_source.get("sha256") != expected_sha:
         raise ValueError(f"{stack}: sparse and cached source observation identities differ")
-    source = Path(str(cache_manifest["source_observations"]["path"]))
-    if not source.is_file() or sha256(source) != cache_manifest["source_observations"]["sha256"]:
-        raise ValueError(f"{stack}: cached source observations are unavailable or changed")
+    available = []
+    for label, record in (("sparse_manifest", sparse_source), ("cache_manifest", cache_source)):
+        declared = record.get("path")
+        if not isinstance(declared, str) or not declared:
+            continue
+        path = Path(declared)
+        if path.is_file():
+            if sha256(path) != expected_sha:
+                raise ValueError(f"{stack}: {label} source observation SHA256 mismatch")
+            available.append((label, path.resolve()))
+    if not available:
+        raise ValueError(f"{stack}: source observations are unavailable")
+    selected_from, source = available[0]
     with np.load(maps_path, allow_pickle=False) as maps, np.load(geometry_path, allow_pickle=False) as geometry, np.load(source, allow_pickle=False) as observations:
         if any(name not in maps.files for name in ("t1_ms", "t2_ms", "b1", "group_idx")) or any(name not in geometry.files for name in ("affine_lps_rc", "pixel_spacing_rc_mm", "slice_thickness_mm")):
             raise ValueError(f"{stack}: native cache is incomplete")
@@ -723,6 +737,7 @@ def _load_all_verified_native_cache_groups(native_root: str | Path, sparse_manif
         "geometry_path": str(geometry_path.resolve()), "geometry_sha256": sha256(geometry_path),
         "manifest_path": str(cache_manifest_path.resolve()), "manifest_sha256": sha256(cache_manifest_path),
         "source_observations": _file_record(source), "selected_original_group_ids": groups,
+        "source_observation_resolution": {"selected_from": selected_from, "cache_declared_path": cache_source.get("path"), "sparse_declared_path": sparse_source.get("path"), "declared_sha256_equal": True},
         "report_only_all_source_groups": True,
     }
     return result
