@@ -54,6 +54,19 @@ def _record(path):
     return {"path": str(path.resolve()), "sha256": sha256(path)}
 
 
+def _validate_roi_bundle_manifest(roi_bundle, subject):
+    manifest = json.loads((roi_bundle / "manifest.json").read_text())
+    if (manifest.get("schema"), manifest.get("status"), manifest.get("subject_id")) != ("exact_native_myocardium_bundle/v2", "PASS", subject):
+        raise ValueError("ROI bundle schema, status, or subject identity mismatch")
+    archive = roi_bundle / "sax_myocardium_masks.npz"
+    if not archive.is_file():
+        raise FileNotFoundError(archive)
+    outputs = manifest.get("outputs")
+    if not isinstance(outputs, dict) or outputs.get(archive.name) != sha256(archive):
+        raise ValueError("ROI bundle archive SHA mismatch")
+    return archive
+
+
 def _clean(value):
     if isinstance(value, dict): return {k: _clean(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)): return [_clean(v) for v in value]
@@ -224,10 +237,7 @@ def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll1_root, r0_native_maps
     sax = caches["sax"]
     sax_groups = np.asarray(sax["group_idx"], int)
     sax_shape = tuple(map(int, sax["t1_ms"].shape[1:]))
-    roi_manifest = json.loads((roi_bundle / "manifest.json").read_text())
-    if roi_manifest.get("subject_id") != subject: raise ValueError("ROI bundle subject identity mismatch")
-    archive_path = roi_bundle / "sax_myocardium_masks.npz"
-    if roi_manifest.get("sax_myocardium_masks", {}).get("sha256") != sha256(archive_path): raise ValueError("ROI bundle archive SHA mismatch")
+    archive_path = _validate_roi_bundle_manifest(roi_bundle, subject)
     myocardium = _load_scmr_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape)
     outer = load_outer_filled_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape)
     blood = load_legacy_blood_pool_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape, outer_filled=outer)

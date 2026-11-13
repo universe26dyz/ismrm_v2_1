@@ -113,7 +113,7 @@ def test_pipeline_training_roots_observed_heldout_and_visualization(tmp_path, mo
     core = np.stack([binary_erosion(x, structure=np.ones((3, 3), bool)) for x in full])
     archive = roiroot / "sax_myocardium_masks.npz"
     np.savez(archive, group_idx=np.arange(2), outer_filled=outer, inner_filled=inner, blood_pool=inner, myocardium_full=full, myocardium_core_legacy=core, myocardium_core_1px=core, landmark_labels=np.zeros_like(outer))
-    (roiroot / "manifest.json").write_text(json.dumps({"schema": "exact_native_myocardium_bundle/v2", "status": "PASS", "subject_id": "S", "sax_myocardium_masks": {"sha256": sha256(archive)}}))
+    (roiroot / "manifest.json").write_text(json.dumps({"schema": "exact_native_myocardium_bundle/v2", "status": "PASS", "subject_id": "S", "outputs": {"sax_myocardium_masks.npz": sha256(archive)}}))
     native_root = tmp_path / "native"; native_root.mkdir()
     def make_cache(n, affines):
         return {"group_idx": np.arange(n), "t1_ms": np.full((n, 12, 12), 100.), "t2_ms": np.full((n, 12, 12), 50.), "affine_lps_rc": affines, "pixel_spacing_rc_mm": np.ones((n, 2)), "slice_thickness_mm": np.ones(n), "source_support": np.ones((n, 12, 12), bool), "provenance": {}}
@@ -284,3 +284,38 @@ def test_real_sparse_profile_identity_normalization(tmp_path, training_fixture, 
         if normalized["stacks"][stack].get("derived_observation") and not target.exists(): target.write_bytes((mapping_dir / "t1_t2_native_plane_sax.npz").read_bytes())
     record, shared, _ = _training_authority(METHODS[0], root, normalized, sparse_path, _derived_groups(normalized), True)
     assert shared["profile_id"] == normalized["profile_id"] and record["experiment_identity"]["experiment_id"] == "B1_R0"
+
+
+@pytest.mark.parametrize("field,value", [("schema", "wrong"), ("status", "FAIL"), ("subject_id", "other")])
+def test_roi_bundle_rejects_invalid_identity(tmp_path, field, value):
+    import json
+    from ismrm_v2.fit_first.contracts import sha256
+    from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _validate_roi_bundle_manifest
+    archive = tmp_path / "sax_myocardium_masks.npz"; archive.write_bytes(b"archive")
+    manifest = {"schema": "exact_native_myocardium_bundle/v2", "status": "PASS", "subject_id": "S", "outputs": {archive.name: sha256(archive)}}
+    assert _write_roi_manifest_and_validate(tmp_path, manifest, "S") == archive
+    manifest[field] = value
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="schema, status, or subject"):
+        _validate_roi_bundle_manifest(tmp_path, "S")
+
+
+def _write_roi_manifest_and_validate(root, manifest, subject):
+    import json
+    from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _validate_roi_bundle_manifest
+    (root / "manifest.json").write_text(json.dumps(manifest))
+    return _validate_roi_bundle_manifest(root, subject)
+
+
+def test_roi_bundle_requires_authoritative_hash_and_archive(tmp_path):
+    from ismrm_v2.fit_first.contracts import sha256
+    from ismrm_v2.evaluation.v2_3_three_variant_native_metrics import _validate_roi_bundle_manifest
+    archive = tmp_path / "sax_myocardium_masks.npz"; archive.write_bytes(b"archive")
+    manifest = {"schema": "exact_native_myocardium_bundle/v2", "status": "PASS", "subject_id": "S", "sax_myocardium_masks": {"sha256": sha256(archive)}}
+    with pytest.raises(ValueError, match="archive SHA mismatch"):
+        _write_roi_manifest_and_validate(tmp_path, manifest, "S")
+    manifest["outputs"] = {archive.name: sha256(archive)}
+    _write_roi_manifest_and_validate(tmp_path, manifest, "S")
+    archive.unlink()
+    with pytest.raises(FileNotFoundError):
+        _validate_roi_bundle_manifest(tmp_path, "S")
