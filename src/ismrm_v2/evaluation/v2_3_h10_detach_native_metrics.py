@@ -1,0 +1,409 @@
+"""Three-way downstream native-plane comparison. See --help for explicit inputs.
+
+Observed planes use each training root's final-pose mapping; held-out planes use each
+central volume on the original native plane. Results are agreement with 2D
+reference, not ground-truth accuracy.
+"""
+from __future__ import annotations
+import argparse
+import json
+import re
+import shutil
+import tempfile
+from pathlib import Path
+import numpy as np
+from ismrm_v2.fit_first.contracts import sha256
+from ismrm_v2.sampling.sparse_profile_manifest import validate_sparse_profile_manifest
+from ismrm_v2.evaluation.evaluation import _metrics, PSNR_DATA_RANGES_MS, reproject_volume_to_native_plane
+from ismrm_v2.evaluation.final_cyj_reporting import _load_all_verified_native_cache_groups
+from ismrm_v2.evaluation.final_native_grid_metrics import native_ras_affine
+from ismrm_v2.evaluation.aha.cyj11_myocardial_roi_metrics import PRIMARY_ROI, _load_scmr_masks
+from ismrm_v2.evaluation.aha.paired_final_pose_lv_metrics import load_outer_filled_masks
+from ismrm_v2.evaluation.aha.common_native_all_stack_roi_metrics import (
+    ALL_ROIS, load_legacy_blood_pool_masks, stack_sax_masks_as_volume, project_sax_mask_volume,
+)
+from ismrm_v2.evaluation.v2_3_boundary_mechanism_metrics import mechanism_statistics
+from ismrm_v2.v2_3.hgnll import HGNLLConfig
+
+METHODS = ("torch_mse", "torch_hgnll10", "torch_hgnll10_detach")
+STACKS = ("sax", "2ch", "4ch")
+PARAMETERS = ("t1", "t2")
+SUPPORT = "R0 source_support AND finite(reference) AND all three method valid AND finite(all three predictions)"
+
+
+def common_support(reference, predictions, valid, roi):
+    if set(predictions) != set(METHODS) or set(valid) != set(METHODS):
+        raise ValueError("exactly three named methods are required")
+    shape = np.asarray(reference).shape
+    arrays = [roi] + list(predictions.values()) + list(valid.values())
+    if any(np.asarray(a).shape != shape for a in arrays):
+        raise ValueError("all native arrays must share shape")
+    support = np.asarray(roi, bool).copy() & np.isfinite(reference)
+    for name in METHODS:
+        support &= np.asarray(valid[name], bool) & np.isfinite(predictions[name])
+    return support
+
+
+def statistics(reference, predictions, support, parameter):
+    count = int(np.count_nonzero(support))
+    return {"support_voxels": count, "methods": {name: _metrics(reference, predictions[name], support, psnr_data_range=PSNR_DATA_RANGES_MS[parameter]) if count else None for name in METHODS}}
+
+
+def _record(path):
+    path = Path(path)
+    return {"path": str(path.resolve()), "sha256": sha256(path)}
+
+
+def _validate_roi_bundle_manifest(roi_bundle, subject):
+    manifest = json.loads((roi_bundle / "manifest.json").read_text())
+    if (manifest.get("schema"), manifest.get("status"), manifest.get("subject_id")) != ("exact_native_myocardium_bundle/v2", "PASS", subject):
+        raise ValueError("ROI bundle schema, status, or subject identity mismatch")
+    archive = roi_bundle / "sax_myocardium_masks.npz"
+    if not archive.is_file():
+        raise FileNotFoundError(archive)
+    candidates = []
+    outputs = manifest.get("outputs")
+    if isinstance(outputs, dict) and isinstance(outputs.get(archive.name), str) and outputs[archive.name]:
+        candidates.append(("current_writer", outputs[archive.name]))
+    migrated = manifest.get("sax_myocardium_masks")
+    if isinstance(migrated, dict) and isinstance(migrated.get("sha256"), str) and migrated["sha256"]:
+        candidates.append(("migrated_clean", migrated["sha256"]))
+    if not candidates:
+        raise ValueError("ROI bundle manifest lacks authoritative archive SHA")
+    if len({value for _, value in candidates}) != 1:
+        raise ValueError("ROI bundle manifest contains conflicting archive SHA declarations")
+    if candidates[0][1] != sha256(archive):
+        raise ValueError("ROI bundle archive SHA mismatch")
+    layout = "both_consistent" if len(candidates) == 2 else candidates[0][0]
+    historical_path = migrated.get("path") if isinstance(migrated, dict) else None
+    return archive, {"layout": layout, "historical_path": historical_path}
+
+
+def _clean(value):
+    if isinstance(value, dict): return {k: _clean(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)): return [_clean(v) for v in value]
+    if isinstance(value, (float, np.floating)) and not np.isfinite(value): return None
+    return value
+
+
+EXPECTED_ROUTES = {"torch_mse": "B1_R0", "torch_hgnll10": "B1_R0_HGNLL", "torch_hgnll10_detach": "B1_R0_HGNLL_DETACH"}
+
+
+def _resolve_run_log(root):
+    local, parent = root / "run.log", root.parent / "run.log"
+    if local.is_file() and parent.is_file():
+        if sha256(local) != sha256(parent):
+            raise ValueError(f"ambiguous deterministic backend logs: {local} and {parent}")
+        return local
+    return local if local.is_file() else parent
+
+
+def _backend_provenance(path, required):
+    if not path.is_file():
+        if required: raise ValueError(f"deterministic Torch backend log missing: {path}")
+        return {"status": "NOT_VERIFIABLE_FROM_ROOT"}
+    content = path.read_text(errors="replace")
+    checks = {"USE_TORCH": "True", "deterministic_algorithms": "True", "CUBLAS_WORKSPACE_CONFIG": ":4096:8"}
+    findings = {}
+    for key, value in checks.items():
+        matches = re.findall(r"(?m)\b" + re.escape(key) + r"\s*=\s*([^\s,;]+)", content)
+        findings[key] = bool(matches) and all(match == value for match in matches)
+    hashes = re.findall(r"(?m)\bPYTHONHASHSEED\s*=\s*([^\s,;]+)", content)
+    if hashes and any(x != "20260911" for x in hashes): findings["PYTHONHASHSEED"] = False
+    elif hashes: findings["PYTHONHASHSEED"] = True
+    passed = all(findings.values())
+    if required and not passed: raise ValueError(f"deterministic Torch provenance incomplete or contradictory: {path}")
+    return {"status": "PASS" if passed else "NOT_VERIFIABLE_FROM_ROOT", "backend": "vendored_torch_hashgrid" if passed else None, "checks": findings, "run_log": _record(path)}
+
+
+def _derived_groups(sparse):
+    result = {}
+    for stack in STACKS:
+        item = sparse.get("stacks", {}).get(stack)
+        if not isinstance(item, dict): raise ValueError(f"{stack}: missing sparse stack")
+        retained, heldout = item.get("retained_original_group_ids"), item.get("heldout_original_group_ids")
+        if not isinstance(retained, list) or not isinstance(heldout, list) or any(type(x) is not int for x in retained + heldout) or len(set(retained + heldout)) != len(retained + heldout):
+            raise ValueError(f"{stack}: invalid sparse group partition")
+        if "training_stack_present" in item and item["training_stack_present"] is not bool(retained): raise ValueError(f"{stack}: active stack mismatch")
+        records = item.get("derived_to_original_group_idx")
+        if retained:
+            if records is None and sparse.get("schema_version") == "phase4r_sparse_v1":
+                pairs = list(enumerate(retained))
+            elif isinstance(records, list):
+                pairs = sorted((r["derived_group_idx"], r["original_group_idx"]) for r in records)
+            else: raise ValueError(f"{stack}: missing derived group mapping")
+            if [x for x, _ in pairs] != list(range(len(retained))) or set(y for _, y in pairs) != set(retained): raise ValueError(f"{stack}: derived mapping mismatch")
+            result[stack] = {original: derived for derived, original in pairs}
+        else: result[stack] = {}
+    return result
+
+
+def _training_authority(name, root, sparse, sparse_path, group_mapping, strict):
+    paths = [root / "q002_route_manifest.json", root / "experiment_manifest.json"]
+    first, second = (json.loads(p.read_text()) for p in paths)
+    if first != second: raise ValueError(f"{name}: training manifests disagree")
+    m = first; route = m.get("route", {}); controls = m.get("controls", {})
+    if m.get("experiment_id") != EXPECTED_ROUTES[name] or route.get("experiment_id") != EXPECTED_ROUTES[name]: raise ValueError(f"{name}: experiment identity mismatch")
+    if (m.get("subject_id"), m.get("case_id"), m.get("profile_id")) != (sparse.get("subject"), sparse.get("case_id"), sparse.get("profile_id")) or not sparse.get("profile_id"):
+        raise ValueError(f"{name}: subject or sparse profile mismatch")
+    if m.get("sparse_manifest", {}).get("sha256") != sha256(sparse_path): raise ValueError(f"{name}: sparse manifest mismatch")
+    expected = {"stage_a_iterations": 2000, "stage_b_iterations": 4000, "anchor_batch_size": 640, "weights_per_anchor": 10, "training_psf_samples": 8, "seed": 20260911}
+    if any(k in m and m[k] != v for k, v in expected.items()): raise ValueError(f"{name}: contradictory training controls")
+    if any(controls.get(k) != v for k, v in expected.items()): raise ValueError(f"{name}: training controls mismatch")
+    if route.get("sampling", {}).get("anchor_batch_size") != 640 or route.get("sampling", {}).get("weights_per_anchor") != 10 or route.get("sampling", {}).get("shared_training_psf_samples") != 8: raise ValueError(f"{name}: sampling contract mismatch")
+    if ("stack_balance_enabled" in m and m["stack_balance_enabled"] is not True) or ("cross_view_reliability_enabled" in m and m["cross_view_reliability_enabled"] is not False): raise ValueError(f"{name}: contradictory weighting contract")
+    if route.get("stack_balance", {}).get("enabled") is not True or route.get("cross_view_reliability", {}).get("enabled") is not False: raise ValueError(f"{name}: weighting contract mismatch")
+    if name == "torch_mse":
+        if route.get("heteroscedastic", {}).get("enabled", False) is not False or m.get("loss", "MSE").upper() not in ("MSE", "MSE_ONLY"): raise ValueError("MSE route must not enable HGNLL")
+        identity = {"experiment_id": EXPECTED_ROUTES[name], "loss": "mse"}
+    else:
+        h = route.get("heteroscedastic", {})
+        expected_mode = ("per_weight", 10, False)
+        mode = (h.get("variance_parameterization", "per_weight"), h.get("variance_output_dim", 10), h.get("variance_shared_across_weights", False))
+        if h.get("enabled") is not True or m.get("loss") != "HGNLL" or mode != expected_mode or m.get("hgnll") != h: raise ValueError(f"{name}: HGNLL variance identity mismatch")
+        HGNLLConfig.from_mapping(h, required=True)
+        identity = {"experiment_id": EXPECTED_ROUTES[name], "loss": "hgnll", "variance_parameterization": mode[0], "variance_output_dim": mode[1], "variance_shared_across_weights": mode[2]}
+    checkpoint = root / "model.pt"
+    if m.get("q002_checkpoint_sha256") != sha256(checkpoint): raise ValueError(f"{name}: checkpoint SHA mismatch")
+    prepared = m.get("prepared_inputs_sha256")
+    if not isinstance(prepared, dict) or not prepared: raise ValueError(f"{name}: missing prepared hashes")
+    prepared_by_stack = {}
+    for path, digest in prepared.items():
+        stack = Path(path).parent.name
+        if stack not in STACKS or stack in prepared_by_stack or not isinstance(digest, str): raise ValueError(f"{name}: ambiguous prepared inputs")
+        prepared_by_stack[stack] = digest
+    active = {s for s in STACKS if group_mapping[s]}
+    if set(prepared_by_stack) != active: raise ValueError(f"{name}: prepared active stacks mismatch")
+    for stack in active:
+        declared = sparse["stacks"][stack].get("derived_observation", sparse["stacks"][stack].get("source_observation", {}))
+        if declared.get("sha256") != prepared_by_stack[stack]: raise ValueError(f"{name}: prepared input SHA mismatch for {stack}")
+    shared = {"subject_id": m["subject_id"], "case_id": m["case_id"], "profile_id": m["profile_id"], "sparse_manifest_sha256": sha256(sparse_path), "prepared_inputs_sha256": prepared_by_stack, "b6_model_sha256": m.get("b6_model_sha256"), "decoder_sha256": m.get("approved_decoder_sha256"), "protocol_sha256": m.get("protocol_sha256"), **expected, "stack_balance_enabled": True, "cross_view_reliability_enabled": False}
+    if any(not shared[k] for k in ("b6_model_sha256", "decoder_sha256", "protocol_sha256")): raise ValueError(f"{name}: missing scientific input hashes")
+    dep = m.get("dependency_sha256", {})
+    if any(dep.get(key) != shared[field] for key, field in (("B6_model", "b6_model_sha256"), ("frozen_decoder", "decoder_sha256"), ("protocol", "protocol_sha256"))): raise ValueError(f"{name}: inconsistent scientific input hashes")
+    mappings = {stack: root / "evaluation" / "mapping_central_no_psf" / f"t1_t2_native_plane_{stack}.npz" for stack in active}
+    for path in mappings.values():
+        if not path.is_file(): raise FileNotFoundError(path)
+    provenance = {"training_root": str(root.resolve()), "q002_route_manifest": _record(paths[0]), "experiment_manifest": _record(paths[1]), "checkpoint": _record(checkpoint), "t1_volume": _record(root / "T1_3D.nii.gz"), "t2_volume": _record(root / "T2_3D.nii.gz"), "observed_native_mapping": {k: _record(v) for k, v in mappings.items()}, "experiment_identity": identity, "backend_provenance": _backend_provenance(_resolve_run_log(root), strict)}
+    return provenance, shared, mappings
+
+
+def _observed_plane(path, group, shape):
+    with np.load(path, allow_pickle=False) as data:
+        required = ("group_idx", "weight_idx", "t1_ms", "t2_ms", "masks", "timing9_ms", "tr_ms", "vps")
+        if any(k not in data for k in required): raise ValueError(f"incomplete native mapping: {path}")
+        groups, weights = np.asarray(data["group_idx"]), np.asarray(data["weight_idx"])
+        if groups.ndim != 1 or weights.shape != groups.shape: raise ValueError("invalid mapping group/weight shape")
+        if np.asarray(data["timing9_ms"]).shape != (len(groups), 9) or any(np.asarray(data[key]).shape != (len(groups),) for key in ("tr_ms", "vps")): raise ValueError("invalid mapping acquisition metadata shape")
+        rows = np.flatnonzero(groups == group)
+        if len(rows) != 10 or sorted(weights[rows].tolist()) != list(range(10)): raise ValueError(f"{path}: group {group} must have weights 0..9")
+        masks = np.asarray(data["masks"])[rows].astype(bool)
+        if masks.shape != (10, *shape): raise ValueError("mapping plane shape mismatch")
+        canonical = int(np.flatnonzero(weights[rows] == 0)[0]); result = {}
+        for parameter in PARAMETERS:
+            values = np.asarray(data[parameter + "_ms"])[rows]
+            if values.shape != masks.shape: raise ValueError("mapping parameter shape mismatch")
+            if np.any(masks & ~np.isfinite(values)): raise ValueError("mapping contains nonfinite values inside mask")
+            common = masks.all(axis=0)
+            if not common.any(): raise ValueError("mapping has no common 10-weight support")
+            for row in range(10):
+                for other in range(row):
+                    overlap = masks[row] & masks[other]
+                    if overlap.any() and not np.allclose(values[row][overlap], values[other][overlap], rtol=1e-5, atol=1e-3):
+                        raise ValueError(f"{path}: inconsistent {parameter} maps across weights")
+            result[parameter] = (values[canonical].copy(), common.copy())
+        return result
+
+
+def _audit_shared_contracts(shared_contracts):
+    if any(shared_contracts[name] != shared_contracts[METHODS[0]] for name in METHODS[1:]):
+        raise ValueError("three-method scientific comparability contract mismatch")
+    return {"status": "PASS", "shared_contract": shared_contracts[METHODS[0]], "allowed_differences": ["experiment_id", "loss", "variance_parameterization", "checkpoint", "final_pose"]}
+
+
+def run(*, torch_mse_root, torch_hgnll10_root, torch_hgnll10_detach_root, r0_native_maps_root, sparse_manifest, roi_bundle, output, require_deterministic_torch_provenance=False):
+    import nibabel as nib
+    from ismrm_v2.evaluation.v2_3_h10_detach_visualization import render_plane, render_sax_reformats
+    roots = dict(zip(METHODS, map(Path, (torch_mse_root, torch_hgnll10_root, torch_hgnll10_detach_root))))
+    sparse_path = Path(sparse_manifest); sparse = validate_sparse_profile_manifest(sparse_path, strict=False); subject, case = sparse.get("subject"), sparse.get("case_id")
+    if sparse.get("status") != "ELIGIBLE" or not subject or not case: raise ValueError("eligible subject/case sparse manifest required")
+    output = Path(output).resolve()
+    if output.exists(): raise FileExistsError(output)
+    roi_bundle = Path(roi_bundle)
+    inputs = [*roots.values(), Path(r0_native_maps_root), roi_bundle]
+    if any(output.is_relative_to(p.resolve()) for p in inputs): raise ValueError("output must be outside input roots")
+    group_mapping = _derived_groups(sparse)
+    images, provenance, mappings, shared_contracts = {}, {}, {}, {}
+    for name in METHODS:
+        provenance[name], shared_contracts[name], mappings[name] = _training_authority(name, roots[name], sparse, sparse_path, group_mapping, require_deterministic_torch_provenance)
+        images[name] = {p: nib.load(str(roots[name] / f"{p.upper()}_3D.nii.gz")) for p in PARAMETERS}
+    comparability = _audit_shared_contracts(shared_contracts)
+    h10_detach_comparability = audit_h10_detach(roots["torch_hgnll10"], roots["torch_hgnll10_detach"])
+    variance_configs = []
+    for name in ("torch_hgnll10", "torch_hgnll10_detach"):
+        h = json.loads((roots[name] / "q002_route_manifest.json").read_text())["route"]["heteroscedastic"]
+        normalized = HGNLLConfig.from_mapping(h, required=True).as_dict()
+        for key in ("variance_detach_shared_latent",): normalized.pop(key)
+        variance_configs.append(normalized)
+    if variance_configs[0] != variance_configs[1]: raise ValueError("HGNLL variance policies differ beyond output parameterization")
+    caches = {s: _load_all_verified_native_cache_groups(r0_native_maps_root, sparse_path, s) for s in STACKS}
+    sax = caches["sax"]
+    sax_groups = np.asarray(sax["group_idx"], int)
+    sax_shape = tuple(map(int, sax["t1_ms"].shape[1:]))
+    archive_path, roi_provenance = _validate_roi_bundle_manifest(roi_bundle, subject)
+    myocardium = _load_scmr_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape)
+    outer = load_outer_filled_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape)
+    blood = load_legacy_blood_pool_masks(roi_bundle, expected_groups=sax_groups, expected_shape=sax_shape, outer_filled=outer)
+    sax_masks = {"lv_outer_filled": outer, "blood_pool": blood, **myocardium}
+    mask_volumes, mask_affine = stack_sax_masks_as_volume(sax, sax_masks)
+    roles = {}
+    for stack in STACKS:
+        retained = set(group_mapping[stack]); heldout = set(sparse["stacks"][stack]["heldout_original_group_ids"])
+        groups = set(map(int, caches[stack]["group_idx"]))
+        if retained | heldout != groups: raise ValueError(f"{stack}: sparse roles do not partition native groups")
+        roles.update({(stack, group): "observed" if group in retained else "heldout" for group in groups})
+    output.parent.mkdir(parents=True, exist_ok=True)
+    stage = Path(tempfile.mkdtemp(prefix="." + output.name + ".", dir=output.parent))
+    try:
+        rows, mechanism, figures = [], [], []
+        roi_by_index = {i: mask for i, mask in enumerate(myocardium["myocardium_full"])}
+        partitions = ("all", "observed", "heldout", "stack_sax", "stack_2ch", "stack_4ch", "heldout_2ch", "heldout_4ch")
+        pool = {p: {g: {domain: {n: [] for n in ("reference", *METHODS)} for domain in ("common_native", *ALL_ROIS)} for g in partitions} for p in PARAMETERS}
+        for stack in STACKS:
+            cache = caches[stack]
+            for i, group in enumerate(cache["group_idx"]):
+                group = int(group); role = roles[(stack, group)]; affine = native_ras_affine(cache["affine_lps_rc"][i])
+                shape = tuple(cache["t1_ms"][i].shape)
+                rois = {name: project_sax_mask_volume(volume, mask_affine, affine, shape) for name, volume in mask_volumes.items()}
+                observed = {name: _observed_plane(mappings[name][stack], group_mapping[stack][group], tuple(cache["t1_ms"][i].shape)) for name in METHODS} if role == "observed" else {}
+                for p in PARAMETERS:
+                    ref = np.asarray(cache[p + "_ms"][i], float); source = np.asarray(cache["source_support"][i], bool)
+                    pred, valid = {}, {}
+                    for name in METHODS:
+                        if role == "observed":
+                            pred[name], valid[name] = observed[name][p]
+                        else:
+                            image = images[name][p]
+                            pred[name], valid[name] = reproject_volume_to_native_plane(image.get_fdata(), image.affine, affine, ref.shape)
+                    common = common_support(ref, pred, valid, source)
+                    masks = {"common_native": common, **{name: common & roi for name, roi in rois.items()}}
+                    row = {"stack": stack, "group": group, "role": role, "parameter": p, "domains": {d: statistics(ref, pred, m, p) for d, m in masks.items()}}
+                    rows.append(row)
+                    for domain, mask in masks.items():
+                        if mask.any():
+                            plane_partitions = ["all", role, f"stack_{stack}"]
+                            if role == "heldout" and stack in ("2ch", "4ch"): plane_partitions.append(f"heldout_{stack}")
+                            for part in plane_partitions:
+                                pool[p][part][domain]["reference"].append(ref[mask])
+                                for n in METHODS: pool[p][part][domain][n].append(pred[n][mask])
+                    mechanism.append({"stack": stack, "group": group, "role": role, "parameter": p, **mechanism_statistics(ref, pred, common, rois[PRIMARY_ROI], rois["myocardium_full"])})
+                    crop = rois["lv_outer_filled"]
+                    if crop is not None and np.any(crop) and common.any():
+                        fig = render_plane(ref, pred, common, crop, p, stage / "figures" / stack / f"group{group:03d}_{p}.png", title=f"{subject} {case} {stack} {group} {p.upper()} ({role})")
+                        fig["path"] = str(Path(fig["path"]).relative_to(stage)); fig.update({"stack": stack, "group": group, "parameter": p}); figures.append(fig)
+        for figure in render_sax_reformats(caches["sax"], images, roi_by_index, stage / "figures" / "reformats"):
+            figure["path"] = str(Path(figure["path"]).relative_to(stage)); figures.append(figure)
+        aggregates = {}
+        for p in PARAMETERS:
+            aggregates[p] = {}
+            for part, domains in pool[p].items():
+                aggregates[p][part] = {}
+                for domain, values in domains.items():
+                    if values["reference"]:
+                        ref = np.concatenate(values["reference"]); predictions = {n: np.concatenate(values[n]) for n in METHODS}
+                        aggregates[p][part][domain] = statistics(ref, predictions, np.ones(ref.shape, bool), p)
+                    else: aggregates[p][part][domain] = {"support_voxels": 0, "methods": {n: None for n in METHODS}}
+        manifest = {
+            "schema": "v2_3_h10_detach_native/v1", "authority_mode": "q002_training_roots",
+            "comparability_audit": comparability, "h10_detach_comparability": h10_detach_comparability, "subject": subject, "case": case,
+            "primary_roi": PRIMARY_ROI, "support_equation": SUPPORT,
+            "roi_support_equation": "common_native AND nearest-neighbour projected ROI",
+            "methods": provenance, "sparse_manifest": _record(sparse_path),
+            "native_reference": {s: caches[s]["provenance"] for s in STACKS},
+            "roi_authority": {"mode": "exact_native_myocardium_bundle_v2", "bundle_root": str(roi_bundle.resolve()), "manifest": _record(roi_bundle / "manifest.json"), "archive": _record(archive_path), "archive_provenance": roi_provenance},
+            "roi_projection": {"source": "regular physical SAX mask volume", "method": "nearest-neighbour world-space projection", "source_functions": ["stack_sax_masks_as_volume", "project_sax_mask_volume"], "mask_affine_ras": mask_affine.tolist()},
+            "observed_mapping_policy": "per-group ten weight maps audited on overlapping mask pixels; valid support is intersection of ten masks; canonical weight 0",
+            "mapping_provenance_limit": "training-root mapping files have no independent checkpoint digest; files are identified by path and SHA256 but their creation from the checkpoint cannot be independently verified",
+            "geometry_policy": {"observed": "per-method final learned pose mapping_central_no_psf", "heldout": "central endpoint reprojected to original native plane"},
+            "crop_policy": "legacy _crop_bounds on projected lv_outer_filled + 3 pixels", "colorbar_policy": "legacy Lipari/Navia map LUTs and ranges; signed coolwarm with symmetric legacy residual magnitude ranges",
+            "figures": figures, "mechanism_ring": "three 3x3 dilations outside full myocardium intersected with three-way common native support",
+            "roi_note": "held-out LAX ROI is nearest-neighbour projection of immutable SAX mask volume; coverage depends on physical overlap",
+            "long_axis_note": "SAX centre-plane dense reformats use shared physical geometry; 2ch/4ch panels use matched native planes and projected cardiac masks",
+        }
+        for filename, data in (("per_plane_metrics.json", {"planes": rows}), ("aggregate_metrics.json", {"primary_roi": PRIMARY_ROI, "partitions": aggregates}), ("mechanism_metrics.json", {"planes": mechanism}), ("manifest.json", manifest)):
+            (stage / filename).write_text(json.dumps(_clean(data), indent=2, allow_nan=False) + "\n")
+        stage.rename(output)
+    except BaseException:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise
+    return output
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in ("torch-mse-root", "torch-hgnll10-root", "torch-hgnll10-detach-root", "r0-native-maps-root", "sparse-manifest", "roi-bundle", "output"):
+        parser.add_argument("--" + name, required=True)
+    parser.add_argument("--require-deterministic-torch-provenance", action="store_true")
+    print(run(**vars(parser.parse_args())))
+
+import torch
+
+def _hgnll_authority(root: str | Path, *, detach: bool) -> tuple[dict, dict]:
+    root = Path(root)
+    route_manifest = json.loads((root / "q002_route_manifest.json").read_text())
+    experiment = json.loads((root / "experiment_manifest.json").read_text())
+    if route_manifest != experiment:
+        raise ValueError("training manifests disagree")
+    m = route_manifest
+    route = m.get("route", {})
+    expected = "B1_R0_HGNLL_DETACH" if detach else "B1_R0_HGNLL"
+    if m.get("experiment_id") != expected or route.get("experiment_id") != expected or m.get("loss") != "HGNLL":
+        raise ValueError("HGNLL experiment identity mismatch")
+    if detach and (route.get("parent_experiment") != "B1_R0_HGNLL" or route.get("scientific_change") != "variance-head input is detached from shared latent" or route.get("variance_gradient_policy") != "variance_head_input_detached_from_shared_latent"):
+        raise ValueError("detach route provenance mismatch")
+    config = route.get("heteroscedastic", {})
+    if not isinstance(config, dict) or config != m.get("hgnll") or config.get("enabled") is not True or config.get("output") != "per_weight_log_variance" or config.get("weights_per_anchor") != 10:
+        raise ValueError("HGNLL per-weight variance semantics mismatch")
+    fields = {"variance_parameterization": "per_weight", "variance_output_dim": 10, "variance_shared_across_weights": False, "variance_detach_shared_latent": detach}
+    for key, expected_value in fields.items():
+        if (detach and key not in config) or config.get(key, expected_value if not detach else None) != expected_value:
+            raise ValueError(f"HGNLL {key} mismatch")
+    path = root / "model.pt"
+    if m.get("q002_checkpoint_sha256") != sha256(path):
+        raise ValueError("checkpoint SHA mismatch")
+    checkpoint = torch.load(path, map_location="cpu", weights_only=False)
+    state = checkpoint.get("model_state", {})
+    hidden_weight, hidden_bias = state.get("joint_variance_head.network.0.weight"), state.get("joint_variance_head.network.0.bias")
+    if hidden_weight is None or hidden_bias is None or tuple(hidden_weight.shape) != (32, 32) or tuple(hidden_bias.shape) != (32,):
+        raise ValueError("checkpoint variance head shape mismatch")
+    weight, bias = state.get("joint_variance_head.network.2.weight"), state.get("joint_variance_head.network.2.bias")
+    if weight is None or bias is None or tuple(weight.shape) != (10, 32) or tuple(bias.shape) != (10,):
+        raise ValueError("checkpoint variance head shape mismatch")
+    ck_config = checkpoint.get("hgnll_config")
+    if not isinstance(ck_config, dict) or (detach and ck_config.get("variance_detach_shared_latent") is not True) or (not detach and ck_config.get("variance_detach_shared_latent", False) is not False):
+        raise ValueError("checkpoint detach policy mismatch")
+    normalized = HGNLLConfig.from_mapping(config, required=True).as_dict()
+    checkpoint_normalized = HGNLLConfig.from_mapping(ck_config, required=True).as_dict()
+    if normalized != checkpoint_normalized:
+        raise ValueError("checkpoint and manifest HGNLL configuration mismatch")
+    return m, normalized
+
+
+def audit_h10_detach(h10_root: str | Path, detach_root: str | Path) -> dict:
+    h10, old = _hgnll_authority(h10_root, detach=False)
+    detached, new = _hgnll_authority(detach_root, detach=True)
+    if old.pop("variance_detach_shared_latent") is not False or new.pop("variance_detach_shared_latent") is not True or old != new:
+        raise ValueError("HGNLL policies differ beyond detach")
+    for key in ("subject_id", "case_id", "profile_id", "dependency_sha256", "prepared_inputs_sha256", "controls"):
+        if key not in h10 or h10[key] != detached.get(key):
+            raise ValueError(f"HGNLL scientific comparability mismatch: {key}")
+    for key in ("sha256", "generator_git_sha"):
+        if not h10.get("sparse_manifest", {}).get(key) or h10["sparse_manifest"][key] != detached.get("sparse_manifest", {}).get(key):
+            raise ValueError(f"HGNLL sparse provenance mismatch: {key}")
+    for key in ("stack_balance", "cross_view_reliability", "sampling"):
+        if h10["route"].get(key) != detached["route"].get(key):
+            raise ValueError(f"HGNLL route comparability mismatch: {key}")
+    return {"status": "PASS", "single_factor": "variance_detach_shared_latent: false -> true", "subject": h10["subject_id"], "case": h10["case_id"]}
+
+
+if __name__ == "__main__": main()
