@@ -27,9 +27,10 @@ STACKS = ('sax', '2ch', '4ch')
 PARAMETERS = ('t1', 't2')
 MODES = {
     'mse': {'mse_stack_off': 'B1_R0_STACK_OFF', 'mse_stack_equal': 'B1_R0', 'mse_stack_slice': 'B1_R0_STACK_SLICE'},
+    'hgnll_off': {'h10_equal': 'B1_R0_HGNLL', 'h10_off': 'B1_R0_HGNLL_STACK_OFF', 'detach_equal': 'B1_R0_HGNLL_DETACH', 'detach_off': 'B1_R0_HGNLL_DETACH_STACK_OFF'},
     'hgnll': {'h10_equal': 'B1_R0_HGNLL', 'h10_slice': 'B1_R0_HGNLL_STACK_SLICE', 'detach_equal': 'B1_R0_HGNLL_DETACH', 'detach_slice': 'B1_R0_HGNLL_DETACH_STACK_SLICE'},
 }
-LABELS = {'mse_stack_off': 'MSE + SB-OFF', 'mse_stack_equal': 'MSE + SB-EQUAL', 'mse_stack_slice': 'MSE + SB-SLICE', 'h10_equal': 'H10 + SB-EQUAL', 'h10_slice': 'H10 + SB-SLICE', 'detach_equal': 'Detach + SB-EQUAL', 'detach_slice': 'Detach + SB-SLICE'}
+LABELS = {'h10_off': 'H10 + SB-OFF', 'detach_off': 'Detach + SB-OFF', 'mse_stack_off': 'MSE + SB-OFF', 'mse_stack_equal': 'MSE + SB-EQUAL', 'mse_stack_slice': 'MSE + SB-SLICE', 'h10_equal': 'H10 + SB-EQUAL', 'h10_slice': 'H10 + SB-SLICE', 'detach_equal': 'Detach + SB-EQUAL', 'detach_slice': 'Detach + SB-SLICE'}
 PAIRS = {'h10_slice_vs_h10_equal': ('h10_equal', 'h10_slice'), 'detach_slice_vs_detach_equal': ('detach_equal', 'detach_slice'), 'detach_slice_vs_h10_slice': ('h10_slice', 'detach_slice')}
 
 
@@ -50,9 +51,12 @@ def statistics(reference, predictions, support, parameter):
     return {'support_voxels': count, 'methods': {name: _metrics(reference, value, support, psnr_data_range=PSNR_DATA_RANGES_MS[parameter]) if count else None for name, value in predictions.items()}}
 
 
-def paired_deltas(stat):
+OFF_PAIRS = {'h10_off_vs_h10_equal': ('h10_equal', 'h10_off'), 'detach_off_vs_detach_equal': ('detach_equal', 'detach_off'), 'detach_off_vs_h10_off': ('h10_off', 'detach_off')}
+
+
+def paired_deltas(stat, pairs=PAIRS):
     rows = {}
-    for name, (baseline, candidate) in PAIRS.items():
+    for name, (baseline, candidate) in pairs.items():
         a, b = stat['methods'].get(baseline), stat['methods'].get(candidate)
         if a is None or b is None:
             rows[name] = None
@@ -151,7 +155,7 @@ def run(*, mode, roots, r0_native_maps_root, sparse_manifest, roi_bundle, output
                         stat = statistics(ref, predictions, np.ones(ref.shape, bool), p)
                     else: stat = {'support_voxels': 0, 'methods': {n: None for n in roots}}
                     aggregates[p][part][domain] = stat
-                    if mode == 'hgnll': deltas.append({'parameter': p, 'partition': part, 'domain': domain, 'support_voxels': stat['support_voxels'], 'comparisons': paired_deltas(stat)})
+                    if mode in ('hgnll', 'hgnll_off'): deltas.append({'parameter': p, 'partition': part, 'domain': domain, 'support_voxels': stat['support_voxels'], 'comparisons': paired_deltas(stat, OFF_PAIRS if mode == 'hgnll_off' else PAIRS)})
         manifest = {'schema': 'v2_3_stack_policy_native/v1', 'mode': mode, 'subject': subject, 'case': case, 'primary_roi': PRIMARY_ROI, 'comparability_audit': comparison, 'verified_stack_policies': resolved_policy, 'sparse_manifest': _record(sparse_path), 'roi_authority': {'manifest': _record(roi_bundle / 'manifest.json'), 'archive': _record(archive), 'provenance': roi_provenance}, 'native_reference': {s: caches[s]['provenance'] for s in STACKS}, 'observed_mapping': {n: {s: _record(path) for s, path in paths.items()} for n, paths in mappings.items()}, 'mapping_provenance_limit': 'mapping files have no independent checkpoint digest', 'geometry_policy': {'observed': 'per-method final learned pose native mapping', 'heldout': 'central volume on original native plane'}, 'support': 'reference source support and finite reference and all method valid finite predictions', 'figures': figures}
         for filename, data in (('per_plane_metrics.json', {'planes': rows}), ('aggregate_metrics.json', {'primary_roi': PRIMARY_ROI, 'partitions': aggregates}), ('paired_deltas.json', {'positive_is_better': True, 'rows': deltas}), ('manifest.json', manifest)):
             (stage / filename).write_text(json.dumps(_clean(data), indent=2, allow_nan=False) + '\n')

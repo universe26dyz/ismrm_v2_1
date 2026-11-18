@@ -39,6 +39,12 @@ def test_comparability_and_fail_closed(tmp_path):
     authorities = {name: read_authority(root, sparse, sparse_path) for name, root in roots.items()}
     assert compare_authorities([authorities[x] for x in ('B1_R0', 'B1_R0_STACK_OFF', 'B1_R0_STACK_SLICE')])['status'] == 'PASS'
     assert compare_authorities([authorities[x] for x in ('B1_R0_HGNLL', 'B1_R0_HGNLL_STACK_SLICE', 'B1_R0_HGNLL_DETACH_STACK_SLICE')])['status'] == 'PASS'
+    for name in ('B1_R0_HGNLL_STACK_OFF', 'B1_R0_HGNLL_DETACH_STACK_OFF'):
+        assert authorities[name]['policy'] == 'off'
+        assert authorities[name]['kind'] == 'hgnll'
+    assert authorities['B1_R0_HGNLL_STACK_OFF']['detach'] is False
+    assert authorities['B1_R0_HGNLL_DETACH_STACK_OFF']['detach'] is True
+    assert compare_authorities([authorities[x] for x in ('B1_R0_HGNLL', 'B1_R0_HGNLL_STACK_OFF', 'B1_R0_HGNLL_DETACH', 'B1_R0_HGNLL_DETACH_STACK_OFF')])['status'] == 'PASS'
     altered = copy.deepcopy(authorities['B1_R0_STACK_SLICE']); altered['scientific']['controls']['seed'] = 0
     with pytest.raises(ValueError, match='scientific settings'): compare_authorities([authorities['B1_R0'], altered])
     path = roots['B1_R0_STACK_OFF'] / 'model.pt'

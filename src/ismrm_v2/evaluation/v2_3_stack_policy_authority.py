@@ -18,6 +18,8 @@ ROUTES = {
     'B1_R0_STACK_SLICE': ('mse', 'slice_proportional_total', False),
     'B1_R0_HGNLL': ('hgnll', 'equal_total_stack', False),
     'B1_R0_HGNLL_DETACH': ('hgnll', 'equal_total_stack', True),
+    'B1_R0_HGNLL_STACK_OFF': ('hgnll', 'off', False),
+    'B1_R0_HGNLL_DETACH_STACK_OFF': ('hgnll', 'off', True),
     'B1_R0_HGNLL_STACK_SLICE': ('hgnll', 'slice_proportional_total', False),
     'B1_R0_HGNLL_DETACH_STACK_SLICE': ('hgnll', 'slice_proportional_total', True),
 }

@@ -54,3 +54,12 @@ def test_native_pipeline_roles_and_common_support(tmp_path, monkeypatch, trainin
     assert data['observed_sax']['common_native']['support_voxels'] > 0
     assert data['heldout_2ch']['myocardium_core_1px']['support_voxels'] > 0
     assert data['heldout_4ch']['myocardium_core_1px']['support_voxels'] > 0
+
+
+def test_off_comparisons():
+    from ismrm_v2.evaluation.v2_3_stack_policy_native_metrics import MODES, OFF_PAIRS
+    assert set(MODES["hgnll_off"]) == {"h10_equal", "h10_off", "detach_equal", "detach_off"}
+    stat = {"methods": {name: {"rmse": value, "mae": value, "nrmse": value} for name, value in [("h10_equal", 10), ("h10_off", 8), ("detach_equal", 9), ("detach_off", 6)]}}
+    result = paired_deltas(stat, OFF_PAIRS)
+    assert result["h10_off_vs_h10_equal"]["rmse"] == pytest.approx(20)
+    assert result["detach_off_vs_h10_off"]["rmse"] == pytest.approx(25)

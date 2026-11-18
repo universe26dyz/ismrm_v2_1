@@ -92,6 +92,8 @@ def build_q002_route_config(
     variants = {
         "B1_R0_STACK_OFF": (B1_R0_EXPERIMENT_ID, "off"),
         "B1_R0_STACK_SLICE": (B1_R0_EXPERIMENT_ID, "slice_proportional_total"),
+        "B1_R0_HGNLL_STACK_OFF": (B1_R0_HGNLL_EXPERIMENT_ID, "off"),
+        "B1_R0_HGNLL_DETACH_STACK_OFF": (B1_R0_HGNLL_DETACH_EXPERIMENT_ID, "off"),
         "B1_R0_HGNLL_STACK_SLICE": (B1_R0_HGNLL_EXPERIMENT_ID, "slice_proportional_total"),
         "B1_R0_HGNLL_DETACH_STACK_SLICE": (B1_R0_HGNLL_DETACH_EXPERIMENT_ID, "slice_proportional_total"),
     }

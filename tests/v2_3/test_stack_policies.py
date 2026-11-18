@@ -27,6 +27,8 @@ def test_stack_policies_preserve_historical_joint_scale():
 @pytest.mark.parametrize("name,parent,policy", [
     ("B1_R0_STACK_OFF", "B1_R0", "off"),
     ("B1_R0_STACK_SLICE", "B1_R0", "slice_proportional_total"),
+    ("B1_R0_HGNLL_STACK_OFF", "B1_R0_HGNLL", "off"),
+    ("B1_R0_HGNLL_DETACH_STACK_OFF", "B1_R0_HGNLL_DETACH", "off"),
     ("B1_R0_HGNLL_STACK_SLICE", "B1_R0_HGNLL", "slice_proportional_total"),
     ("B1_R0_HGNLL_DETACH_STACK_SLICE", "B1_R0_HGNLL_DETACH", "slice_proportional_total"),
 ])
@@ -39,3 +41,13 @@ def test_routes_inherit_parent_science(name, parent, policy):
     assert child["route"]["cross_view_reliability"] == old["route"]["cross_view_reliability"]
     assert child["route"].get("heteroscedastic") == old["route"].get("heteroscedastic")
     assert old["route"]["stack_balance"] == {"enabled": True}
+
+
+def test_off_hgnll_detach_is_only_heteroscedastic_difference():
+    def route(name):
+        return build_q002_route_config({"training": {}, "decoder": {}}, cropped_prepared_root="cropped", experiment_id=name, anchor_batch_size=640)["route"]
+    h = dict(route("B1_R0_HGNLL_STACK_OFF")["heteroscedastic"])
+    d = dict(route("B1_R0_HGNLL_DETACH_STACK_OFF")["heteroscedastic"])
+    assert h.pop("variance_detach_shared_latent") is False
+    assert d.pop("variance_detach_shared_latent") is True
+    assert h == d
