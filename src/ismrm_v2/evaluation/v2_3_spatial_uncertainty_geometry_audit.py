@@ -164,7 +164,7 @@ def run(*, mse_root, h10_root, detach_root, prepared_root, r0_native_maps_root, 
         for name, root in roots.items():
             models[name], spaces[name], _ = _load_model(root / 'model.pt', prepared_paths, device, sparse_contract=sparse_contract)
             model, space = models[name], spaces[name]
-            axisangle = space.axisangle_train_to_physical(model.rigid_psf.axisangle.detach().cpu())
+            axisangle = space.axisangle_train_to_physical(model.rigid_psf.axisangle.detach())
             matrix = RigidTransform(axisangle, trans_first=True).matrix(trans_first=True).detach().cpu().numpy()
             declared = np.asarray(json.loads((root / 'final_rigid_poses.json').read_text())['matrix_physical'], float)
             if matrix.shape != (cursor, 3, 4) or declared.shape != matrix.shape or not np.allclose(matrix, declared, rtol=0, atol=1e-4): raise ValueError(f'{name}: exported final poses disagree with checkpoint')
@@ -173,7 +173,7 @@ def run(*, mse_root, h10_root, detach_root, prepared_root, r0_native_maps_root, 
     finally:
         nesvor_models.USE_TORCH = previous_backend
     if not torch.allclose(spaces[METHODS[1]].group_axisangle_dicom_physical, spaces[METHODS[2]].group_axisangle_dicom_physical, rtol=0, atol=1e-5): raise ValueError('original pose provenance disagrees between H10 and detach')
-    original = spaces[METHODS[1]].group_axisangle_dicom_physical
+    original = spaces[METHODS[1]].group_axisangle_dicom_physical.detach().cpu()
     physical = ax_transform_points(original[joint.group_idx], joint.xyz, trans_first=True).detach().cpu().numpy()
     supports = {stack: physical[joint.stack_idx.numpy() == idx] for stack, (_, idx) in offsets.items()}
     if not np.isfinite(physical).all(): raise ValueError('joint support contains nonfinite physical coordinates')
