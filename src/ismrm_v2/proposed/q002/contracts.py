@@ -89,6 +89,19 @@ def build_q002_route_config(
 ) -> dict[str, Any]:
     """Copy B6 configuration and attach metadata without mutating its controls."""
 
+    variants = {
+        "B1_R0_STACK_OFF": (B1_R0_EXPERIMENT_ID, "off"),
+        "B1_R0_STACK_SLICE": (B1_R0_EXPERIMENT_ID, "slice_proportional_total"),
+        "B1_R0_HGNLL_STACK_SLICE": (B1_R0_HGNLL_EXPERIMENT_ID, "slice_proportional_total"),
+        "B1_R0_HGNLL_DETACH_STACK_SLICE": (B1_R0_HGNLL_DETACH_EXPERIMENT_ID, "slice_proportional_total"),
+    }
+    if experiment_id in variants:
+        parent, policy = variants[experiment_id]
+        route = build_q002_route_config(resolved_config, cropped_prepared_root=cropped_prepared_root, reconstruction_checkpoint=reconstruction_checkpoint, experiment_id=parent, anchor_batch_size=anchor_batch_size)
+        balance = {"enabled": policy != "off", "policy": policy}
+        route["route"].update({"experiment_id": experiment_id, "parent_experiment": parent, "scientific_change": "stack policy only", "stack_balance": balance})
+        route["resolved_config"]["stack_balance"] = copy.deepcopy(balance)
+        return route
     if reconstruction_checkpoint is not None:
         raise ValueError("Q002 must start a fresh reconstruction; B6/Q001 warm-start is forbidden.")
     if not isinstance(resolved_config.get("training"), Mapping) or not isinstance(resolved_config.get("decoder"), Mapping):

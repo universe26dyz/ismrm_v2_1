@@ -6,6 +6,7 @@ import argparse
 import copy
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import torch
@@ -50,6 +51,9 @@ def sparse_profile_provenance(manifest: dict[str, object], inputs: list[Path]) -
     }
 
 
+STACK_POLICY_EXPERIMENT_IDS = ("B1_R0_STACK_OFF", "B1_R0_STACK_SLICE", "B1_R0_HGNLL_STACK_SLICE", "B1_R0_HGNLL_DETACH_STACK_SLICE")
+
+
 FORMAL_SPARSE_EXPERIMENT_IDS = (
     Q002S640_EXPERIMENT_ID,
     Q004S640_K1_EXPERIMENT_ID,
@@ -69,7 +73,7 @@ FORMAL_SPARSE_EXPERIMENT_IDS = (
 
 def validate_formal_sparse_reconstruction_dependencies(args: argparse.Namespace) -> dict[str, object] | None:
     """Validate immutable sparse inputs for every formal Q002/Q004/Q005/B-R route."""
-    if getattr(args, "experiment_id", None) not in FORMAL_SPARSE_EXPERIMENT_IDS:
+    if getattr(args, "experiment_id", None) not in FORMAL_SPARSE_EXPERIMENT_IDS + STACK_POLICY_EXPERIMENT_IDS:
         return None
     if not getattr(args, "sparse_manifest", None):
         raise ValueError("formal sparse execution requires an exact sparse manifest")
@@ -143,6 +147,10 @@ def run(args: argparse.Namespace) -> Path:
         raise ValueError("endpoint_policy must be 'legacy' or 'central_only'")
     if endpoint_policy == "central_only" and args.experiment_id != Q002S640_EXPERIMENT_ID:
         raise ValueError("central_only endpoint policy is only valid for the Q002S640/K8 route")
+    if args.experiment_id in STACK_POLICY_EXPERIMENT_IDS:
+        from nesvor.inr import models as nesvor_models
+        if not nesvor_models.USE_TORCH or not torch.are_deterministic_algorithms_enabled() or os.environ.get("CUBLAS_WORKSPACE_CONFIG") != ":4096:8":
+            raise ValueError("stack-policy routes require the deterministic Torch backend and CUBLAS_WORKSPACE_CONFIG=:4096:8")
     formal_profile = validate_formal_sparse_reconstruction_dependencies(args)
     sparse_manifest = getattr(args, "sparse_manifest", None)
     expected_sparse_generator_sha = getattr(args, "expected_sparse_generator_git_sha", None)
@@ -170,6 +178,12 @@ def run(args: argparse.Namespace) -> Path:
     training_psf_samples = int(route["route"]["sampling"]["shared_training_psf_samples"])
     resolved = route["resolved_config"]; resolved["training"] = dict(resolved["training"]); resolved["training"]["device"] = args.device
     scalar = QuantPointDataset(inputs, device=args.device); joint = JointAnchorDataset(inputs, scalar)
+    if args.experiment_id in STACK_POLICY_EXPERIMENT_IDS:
+        for path in inputs:
+            name = path.parent.name
+            groups = [g for g in joint.qc["groups"].values() if Path(g["source_path"]) == path]
+            if len(groups) != len(sparse_profile["stacks"][name]["retained_original_group_ids"]):
+                raise ValueError(f"retained group count disagrees with sparse manifest: {name}")
     result = train_q002_reconstruction(
         scalar,
         joint,
@@ -237,6 +251,8 @@ def run(args: argparse.Namespace) -> Path:
     protocol_path = Path(args.protocol)
     protocol_provenance = {"protocol_path": str(protocol_path), "protocol_sha256": _sha256(protocol_path)} if protocol_path.is_file() else {}
     common = {"experiment_id": args.experiment_id, "subject_id": args.subject_id, "route": route["route"], "reconstruction_git_sha": git_sha, "git_dirty": bool(__import__("subprocess").check_output(["git", "status", "--porcelain"], text=True).strip()), "B6_model_path": str(Path(args.b6_model)), "b6_model_sha256": _sha256(Path(args.b6_model)), "decoder_relocation":{"b6_resolved_config_path":source_decoder_path,"runtime_decoder_path":str(Path(args.signal_simulator)),"approved_decoder_sha256":_sha256(Path(args.signal_simulator)),"scientific_config_changed":False}, "approved_decoder_path": str(Path(args.signal_simulator)), "approved_decoder_sha256":_sha256(Path(args.signal_simulator)), "dependency_sha256": {"B6_model": _sha256(Path(args.b6_model)), "frozen_decoder": _sha256(Path(args.signal_simulator)), **({"protocol": _sha256(protocol_path)} if protocol_path.is_file() else {})}, **protocol_provenance, "prepared_inputs_sha256": {str(path): _sha256(path) for path in inputs}, "joint_dataset_qc": joint.qc, "controls": result["controls"], "intensity_normalization": result["intensity_normalization"], "stack_weights": result["stack_weights"], "fixed_monitor": {"seed": result["fixed_monitor"]["seed"], "anchor_identity_sha256": result["fixed_monitor"]["anchor_identity_sha256"]}, "q002_checkpoint_sha256": _sha256(output / "model.pt"), "psf128_contract": {"resolution_mm": 1.0, "factor": 1.0, "samples": 128, "seed": 20260911}}
+    if args.experiment_id in STACK_POLICY_EXPERIMENT_IDS:
+        common.update(result["stack_policy_qc"])
     if result.get("reliability_cache") is not None:
         common["cross_view_reliability"] = result["reliability_cache"].manifest()
     if sparse_profile is not None:
@@ -250,7 +266,7 @@ def run(args: argparse.Namespace) -> Path:
         common.update({"parent_experiment": Q002S640_EXPERIMENT_ID, "scientific_change": "training_psf_samples_8_to_central_1_only", "loss": "MSE_only", "fingerprint_cosine_enabled": False, "anchor_batch_size": 640, "weights_per_anchor": 10, "signal_residual_count": 6400, "training_psf_samples": 1, "training_psf_semantics": "central_local_coordinate_no_gaussian_draw", "data_psf_inr_location_count": 640, "stage_a_iterations": 2000, "stage_b_iterations": 4000, "seed": 20260911, "regularization_candidate_count": 640, "regularization_effective_point_count": 256, "regularization_sampling_source": "B6 scalar cropped support", "regularization_application_count_per_optimizer_step": 1, "checkpoint_path": "model.pt", "checkpoint_sha256": common["q002_checkpoint_sha256"], "k8_posthoc_signal_contract": {"n_samples": 8, "seed": 20260911}, "k1_central_signal_contract": {"n_samples": 1, "semantics": "central_local_coordinate_no_gaussian_draw"}})
     if args.experiment_id == Q005S640_K4_EXPERIMENT_ID:
         common.update({"parent_experiment": Q002S640_EXPERIMENT_ID, "scientific_change": "training_psf_samples_8_to_4_only", "loss": "MSE_only", "fingerprint_cosine_enabled": False, "anchor_batch_size": 640, "weights_per_anchor": 10, "signal_residual_count": 6400, "training_psf_samples": 4, "data_psf_inr_location_count": 2560, "psf_forward_chunk_size": 4, "stage_a_iterations": 2000, "stage_b_iterations": 4000, "seed": 20260911, "regularization_candidate_count": 640, "regularization_effective_point_count": 256, "regularization_sampling_source": "B6 scalar cropped support", "regularization_application_count_per_optimizer_step": 1, "endpoint_semantics": route["route"]["endpoint_semantics"]})
-    if args.experiment_id in (B1_R0_HGNLL_DETACH_EXPERIMENT_ID, B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID, B1_R0_HGNLL_EXPERIMENT_ID, B1_R1_HGNLL_EXPERIMENT_ID, B1_R0_HGNLL_10K_EXPERIMENT_ID):
+    if args.experiment_id in (B1_R0_HGNLL_DETACH_EXPERIMENT_ID, B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID, B1_R0_HGNLL_EXPERIMENT_ID, B1_R1_HGNLL_EXPERIMENT_ID, B1_R0_HGNLL_10K_EXPERIMENT_ID, "B1_R0_HGNLL_STACK_SLICE", "B1_R0_HGNLL_DETACH_STACK_SLICE"):
         common.update({"parent_experiment": route["route"]["parent_experiment"], "scientific_change": route["route"]["scientific_change"], "loss": "HGNLL", "hgnll": route["route"]["heteroscedastic"], "cross_view_reliability_enabled": bool(route["route"]["cross_view_reliability"]["enabled"]), "anchor_batch_size": 640, "weights_per_anchor": 10, "training_psf_samples": 8, "stage_a_iterations": 2000, "stage_b_iterations": 4000, "seed": 20260911, "stack_balance_enabled": True})
     if args.experiment_id == B1_R0_HGNLL_10K_EXPERIMENT_ID:
         common.update({"role": "convergence_ablation", "optimization_change": route["route"]["optimization_change"], "diagnostic_changes": route["route"]["diagnostic_changes"], "stage_b_extension_iterations": 4000, "checkpoint_iterations": [6000, 8000, 10000], "extension_optimizer_reset": False, "extension_scheduler_reset": False, "new_extension_milestones": "none", "monitor_anchors_fixed": True, "monitor_psf_fixed": True, "monitor_psf_seed": 20260911, "per_weight_variance_logging": True, "checkpoint_6000_path": "checkpoints/model_iter_6000.pt", "checkpoint_8000_path": "checkpoints/model_iter_8000.pt", "final_checkpoint_path": "model.pt", "endpoint_paths": {str(iteration): f"evaluation/checkpoint_{iteration}/volume" for iteration in (6000, 8000, 10000)}, "endpoint_semantics": "diagnostic central quantitative volumes; not a new formal reconstruction method"})
@@ -292,7 +308,7 @@ These are mechanistic interpretations, not population-level claims.
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cropped-prepared-root", required=True); parser.add_argument("--subject-id", default="CYJ"); parser.add_argument("--sparse-manifest"); parser.add_argument("--expected-sparse-generator-git-sha"); parser.add_argument("--expected-sparse-manifest-sha256"); parser.add_argument("--b6-model", required=True); parser.add_argument("--expected-b6-model-sha256"); parser.add_argument("--signal-simulator", required=True); parser.add_argument("--expected-decoder-sha256"); parser.add_argument("--protocol", default="mlp/configs/protocol_scmr_v5_10_100.yaml"); parser.add_argument("--expected-protocol-sha256"); parser.add_argument("--output", required=True); parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--experiment-id", choices=(Q002_EXPERIMENT_ID, Q002S640_EXPERIMENT_ID, Q002S640_K256_EXPERIMENT_ID, Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID, Q004S640_K1_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, B0_R0_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID, B1_R1_NL1_EXPERIMENT_ID, B1_R0_HGNLL_DETACH_EXPERIMENT_ID, B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID, B1_R0_HGNLL_EXPERIMENT_ID, B1_R1_HGNLL_EXPERIMENT_ID, B1_R0_HGNLL_10K_EXPERIMENT_ID), default=Q002_EXPERIMENT_ID)
+    parser.add_argument("--experiment-id", choices=(Q002_EXPERIMENT_ID, Q002S640_EXPERIMENT_ID, Q002S640_K256_EXPERIMENT_ID, Q003S640_EXPERIMENT_ID, Q003S640_10K_EXPERIMENT_ID, Q004S640_K1_EXPERIMENT_ID, Q005S640_K4_EXPERIMENT_ID, B0_R0_EXPERIMENT_ID, B1_R0_EXPERIMENT_ID, B0_R1_EXPERIMENT_ID, B1_R1_EXPERIMENT_ID, B1_R1_NL1_EXPERIMENT_ID, B1_R0_HGNLL_DETACH_EXPERIMENT_ID, B1_R0_HGNLL_ANCHORVAR1_EXPERIMENT_ID, B1_R0_HGNLL_EXPERIMENT_ID, B1_R1_HGNLL_EXPERIMENT_ID, B1_R0_HGNLL_10K_EXPERIMENT_ID) + STACK_POLICY_EXPERIMENT_IDS, default=Q002_EXPERIMENT_ID)
     parser.add_argument("--anchor-batch-size", type=int, default=64)
     parser.add_argument("--endpoint-policy", choices=("legacy", "central_only"), default="legacy")
     return parser

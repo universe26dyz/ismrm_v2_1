@@ -30,6 +30,7 @@ from ismrm_v2.v2_2.stage_b_reliability import (
     stage_b_progress,
 )
 from ismrm_v2.v2_3.hgnll import HGNLLConfig, hgnll_objective
+from ismrm_v2.proposed.q002.stack_policy import resolve_stack_policy
 
 
 def q002_training_controls(training: Mapping[str, Any], *, anchor_batch_size: int = 64, training_psf_samples: int = 8) -> dict[str, int]:
@@ -287,6 +288,9 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
     training, loss_cfg = _require(resolved, "training"), _require(resolved, "loss")
     stack_balance_cfg = stack_balance if stack_balance is not None else resolved.get("stack_balance", {"enabled": True})
     stack_balance_enabled = bool(dict(stack_balance_cfg).get("enabled", True))
+    resolved_weights, stack_policy_qc = resolve_stack_policy(scalar_dataset, joint_dataset, dict(stack_balance_cfg))
+    if stack_balance_enabled or "policy" in stack_balance_cfg:
+        joint_dataset.stack_weights = resolved_weights
     reliability_cfg = cross_view_reliability if cross_view_reliability is not None else resolved.get("cross_view_reliability")
     reliability_config = ReliabilityConfig.from_mapping(reliability_cfg)
     hgnll_config = HGNLLConfig.from_mapping(resolved.get("heteroscedastic"))
@@ -353,7 +357,8 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
     monitor_psf_seed = int(dict(continuation)["monitor_psf_seed"]) if continuation_enabled and "monitor_psf_seed" in dict(continuation or {}) else None
     monitor = joint_dataset.fixed_monitor(seed=controls["seed"], samples_per_stack=int(training.get("monitor_samples_per_weight_per_stack", 1)))
     (output / "fixed_monitor.json").write_text(json.dumps({"seed": monitor["seed"], "samples_per_stack": monitor["samples_per_stack"], "anchor_identity_sha256": monitor["anchor_identity_sha256"], "monitor_psf_seed": monitor_psf_seed, "monitor_anchors_fixed": True, "monitor_psf_fixed": monitor_psf_seed is not None}, indent=2) + "\n")
-    resolved["stack_balance"] = {"enabled": stack_balance_enabled}
+    resolved["stack_balance"] = {"enabled": stack_balance_enabled, "policy": stack_policy_qc["stack_balance_policy"]}
+    resolved["stack_policy_qc"] = stack_policy_qc
     resolved["cross_view_reliability"] = reliability_config.as_dict()
     if hgnll_enabled:
         resolved["heteroscedastic"] = hgnll_config.as_dict()
@@ -540,4 +545,4 @@ def train_q002_reconstruction(scalar_dataset: Any, joint_dataset: Any, config: M
     if stack_initialization is not None:
         (output / "stack_initialization_poses.json").write_text(json.dumps({"coordinate_convention": "physical RAS mm; trans_first=true", "stacks": list(stack_initialization.stack_pose_records)}, indent=2) + "\n")
     (output / "timing_profile.csv").write_text("section,milliseconds\noptimization_total,{:.6f}\n".format((time.perf_counter() - started) * 1000.0))
-    return {"model": model, "training_space": space, "protocol": protocol, "decoder_metadata": decoder_metadata, "intensity_normalization": normalization, "controls": controls, "stack_weights": joint_dataset.stack_weights, "output_dir": output, "stack_initialization": stack_initialization, "fixed_monitor": monitor, "resolved_config": resolved, "primary_checkpoint": primary_checkpoint, "checkpoint_paths": checkpoint_paths, "global_iteration": global_iteration, "continuation_plan": continuation_plan, "reliability_cache": reliability_cache}
+    return {"model": model, "training_space": space, "protocol": protocol, "decoder_metadata": decoder_metadata, "intensity_normalization": normalization, "controls": controls, "stack_weights": joint_dataset.stack_weights, "stack_policy_qc": stack_policy_qc, "output_dir": output, "stack_initialization": stack_initialization, "fixed_monitor": monitor, "resolved_config": resolved, "primary_checkpoint": primary_checkpoint, "checkpoint_paths": checkpoint_paths, "global_iteration": global_iteration, "continuation_plan": continuation_plan, "reliability_cache": reliability_cache}
