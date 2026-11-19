@@ -114,3 +114,20 @@ def test_spatial_pipeline_stratifies_rois_and_writes_outputs(tmp_path, monkeypat
     assert {'torch_hgnll10', 'torch_hgnll10_detach'} == {r['method'] for r in corr}
     assert {'observed', 'heldout'} == {r['role'] for r in corr}
     assert (out / 'maps' / 'sax' / 'group000.npz').is_file()
+
+
+def test_training_space_roundoff_is_bounded():
+    from ismrm_v2.evaluation.direct_native_endpoint_audit import _validate_rebuilt_training_space
+    from types import SimpleNamespace
+    keys = ("center_ras_mm", "spatial_scaling", "physical_bbox_ras_mm", "bbox_train", "group_resolution_xyz_mm", "group_axisangle_init_physical", "group_axisangle_init_train")
+    saved = {key: torch.tensor([1.0]) for key in keys}
+    current = {key: value.clone() for key, value in saved.items()}
+    rebuilt = SimpleNamespace(state_dict=lambda: current)
+    current["center_ras_mm"] += 2e-5
+    with pytest.raises(ValueError): _validate_rebuilt_training_space(rebuilt, saved, torch)
+    _validate_rebuilt_training_space(rebuilt, saved, torch, geometry_roundoff_atol=3.2e-5)
+    current["center_ras_mm"] += 1e-3
+    with pytest.raises(ValueError): _validate_rebuilt_training_space(rebuilt, saved, torch, geometry_roundoff_atol=3.2e-5)
+    current["center_ras_mm"] = saved["center_ras_mm"].clone()
+    current["group_axisangle_init_physical"] += 2e-5
+    with pytest.raises(ValueError): _validate_rebuilt_training_space(rebuilt, saved, torch, geometry_roundoff_atol=3.2e-5)

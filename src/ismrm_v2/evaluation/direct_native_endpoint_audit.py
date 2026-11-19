@@ -235,7 +235,7 @@ def _validate_checkpoint_model_shapes(model: Any, checkpoint_state: Any) -> None
         raise ValueError(f"checkpoint model parameter shape mismatch before strict load ({detail})")
 
 
-def _validate_rebuilt_training_space(rebuilt: Any, saved: Any, torch_module: Any) -> None:
+def _validate_rebuilt_training_space(rebuilt: Any, saved: Any, torch_module: Any, *, geometry_roundoff_atol: float = 1e-6) -> None:
     """Require the rebuilt bbox/geometry to match the checkpoint coordinate contract."""
     if not isinstance(saved, Mapping):
         raise ValueError("checkpoint training_space must be a mapping")
@@ -248,14 +248,15 @@ def _validate_rebuilt_training_space(rebuilt: Any, saved: Any, torch_module: Any
     for key in keys:
         expected = torch_module.as_tensor(saved[key]).detach().cpu()
         actual = torch_module.as_tensor(current[key]).detach().cpu()
-        equal = expected.shape == actual.shape and torch_module.allclose(expected, actual, rtol=0, atol=1e-6)
+        atol = geometry_roundoff_atol if key in {"center_ras_mm", "physical_bbox_ras_mm"} else 1e-6
+        equal = expected.shape == actual.shape and torch_module.allclose(expected, actual, rtol=0, atol=atol)
         if not equal:
             kind = "bounding-box" if key in {"physical_bbox_ras_mm", "bbox_train"} else "geometry"
             raise ValueError(f"checkpoint/rebuilt training-space {kind} mismatch for {key}; prepared inputs or initial pose differ")
 
 
 def _load_model(checkpoint: Path, prepared_paths: list[Path], device_text: str,
-                *, sparse_contract: Mapping[str, Any] | None = None) -> tuple[Any, Any, Any]:
+                *, sparse_contract: Mapping[str, Any] | None = None, geometry_roundoff_atol: float = 1e-6) -> tuple[Any, Any, Any]:
     import torch
     from ismrm_v2.proposed.mlp_trainer import build_mlp_training_model
     from ismrm_v2.proposed.reconstruction.orchestration import load_checkpoint
@@ -276,7 +277,7 @@ def _load_model(checkpoint: Path, prepared_paths: list[Path], device_text: str,
     initial_pose = _checkpoint_initial_pose(payload, torch, device)
     model, rebuilt_space, _, _ = build_mlp_training_model(
         dataset, config, protocol, device, initial_group_axisangle_physical=initial_pose)
-    _validate_rebuilt_training_space(rebuilt_space, payload.get("training_space"), torch)
+    _validate_rebuilt_training_space(rebuilt_space, payload.get("training_space"), torch, geometry_roundoff_atol=geometry_roundoff_atol)
     _validate_checkpoint_model_shapes(model, payload.get("model_state"))
     load_checkpoint(checkpoint, model, device)
     model.eval()

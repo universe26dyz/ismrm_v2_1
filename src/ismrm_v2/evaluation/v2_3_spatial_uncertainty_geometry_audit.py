@@ -33,6 +33,8 @@ from nesvor.transform import RigidTransform, ax_transform_points
 STACKS = ('sax', '2ch', '4ch')
 METHODS = ('torch_mse', 'torch_hgnll10', 'torch_hgnll10_detach')
 THRESHOLDS = (1, 2, 3, 5)
+# Bounded float32 transform roundoff in physical mm; all other identity checks remain strict.
+GEOMETRY_ROUNDOFF_ATOL_MM = 3.2e-5
 
 
 def pose_difference(first, second):
@@ -162,7 +164,7 @@ def run(*, mse_root, h10_root, detach_root, prepared_root, r0_native_maps_root, 
     nesvor_models.USE_TORCH = True
     try:
         for name, root in roots.items():
-            models[name], spaces[name], _ = _load_model(root / 'model.pt', prepared_paths, device, sparse_contract=sparse_contract)
+            models[name], spaces[name], _ = _load_model(root / 'model.pt', prepared_paths, device, sparse_contract=sparse_contract, geometry_roundoff_atol=GEOMETRY_ROUNDOFF_ATOL_MM)
             model, space = models[name], spaces[name]
             axisangle = space.axisangle_train_to_physical(model.rigid_psf.axisangle.detach())
             matrix = RigidTransform(axisangle, trans_first=True).matrix(trans_first=True).detach().cpu().numpy()
@@ -282,7 +284,7 @@ def run(*, mse_root, h10_root, detach_root, prepared_root, r0_native_maps_root, 
                 pose_change_rows.append({'subject': subject, 'stack': stack, 'role': role, 'parameter': parameter, 'roi': region, 'relationship': metric, **correlations([r['mean_delta_abs_error'] for r in selected], [r[metric] for r in selected])})
         _write_csv(stage / 'error_change_pose_correlations.csv', pose_change_rows, ['subject', 'stack', 'role', 'parameter', 'roi', 'relationship', 'n', 'pearson', 'spearman', 'status'])
         for item in map_records: item['path'] = str(Path(item['path']).relative_to(stage))
-        manifest = {'schema': 'v2_3_spatial_uncertainty_geometry_audit/v1', 'subject': subject, 'case_id': case, 'profile_id': sparse['profile_id'], 'comparability': comparison, 'verified_stack_policies': verified_policies, 'h10_detach_comparability': detach_comparison, 'sparse_manifest': _record(sparse_path), 'prepared_inputs': [_record(p) for p in prepared_paths], 'final_pose_files': {name: _record(root / 'final_rigid_poses.json') for name, root in roots.items()}, 'models': authority, 'roi_archive': _record(archive), 'roi_provenance': roi_provenance, 'pose_policy': 'same final central quantitative NIfTI sampled at final learned grid and native original plane; heldout uses original pose', 'pose_translation_semantics': 'relative rigid transform translation; center displacement also reported', 'sigma_policy': 'pointwise trained bounded variance head, square root, no PSF aggregation; checkpoint rebuilt with vendored Torch backend', 'coverage_policy': 'nearest retained joint anchor per view in original DICOM physical RAS geometry; supporting-view counts exclude target view', 'correlations': 'within subject/parameter/stack/group/role/method/ROI; diagnostic association, not causal proof', 'change_sign': 'abs(detach-reference) - abs(h10-reference); negative improves', 'edge_abnormality_question': 'localized myocardial boundary phenomenon', 'sax_fidelity_question': 'agreement between observed SAX and native 2D SAX reference', 'figures': figures, 'maps': map_records}
+        manifest = {'schema': 'v2_3_spatial_uncertainty_geometry_audit/v1', 'subject': subject, 'case_id': case, 'profile_id': sparse['profile_id'], 'comparability': comparison, 'verified_stack_policies': verified_policies, 'h10_detach_comparability': detach_comparison, 'sparse_manifest': _record(sparse_path), 'prepared_inputs': [_record(p) for p in prepared_paths], 'final_pose_files': {name: _record(root / 'final_rigid_poses.json') for name, root in roots.items()}, 'models': authority, 'roi_archive': _record(archive), 'roi_provenance': roi_provenance, 'geometry_roundoff_atol_mm': GEOMETRY_ROUNDOFF_ATOL_MM, 'pose_policy': 'same final central quantitative NIfTI sampled at final learned grid and native original plane; heldout uses original pose', 'pose_translation_semantics': 'relative rigid transform translation; center displacement also reported', 'sigma_policy': 'pointwise trained bounded variance head, square root, no PSF aggregation; checkpoint rebuilt with vendored Torch backend', 'coverage_policy': 'nearest retained joint anchor per view in original DICOM physical RAS geometry; supporting-view counts exclude target view', 'correlations': 'within subject/parameter/stack/group/role/method/ROI; diagnostic association, not causal proof', 'change_sign': 'abs(detach-reference) - abs(h10-reference); negative improves', 'edge_abnormality_question': 'localized myocardial boundary phenomenon', 'sax_fidelity_question': 'agreement between observed SAX and native 2D SAX reference', 'figures': figures, 'maps': map_records}
         (stage / 'manifest.json').write_text(json.dumps(manifest, indent=2, allow_nan=False) + '\n'); stage.rename(output)
     except BaseException:
         shutil.rmtree(stage, ignore_errors=True); raise
